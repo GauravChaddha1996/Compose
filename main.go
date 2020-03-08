@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compose/user"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -11,6 +12,7 @@ import (
 func main() {
 	db := _openDB()
 	defer db.Close()
+	_initPackages(db)
 	_startServer()
 }
 
@@ -26,6 +28,10 @@ func _openDB() *gorm.DB {
 	}
 	log.Print("Database connection established")
 	return db
+}
+
+func _initPackages(db *gorm.DB) {
+	user.Init(db)
 }
 
 func _startServer() {
@@ -45,6 +51,7 @@ func _getMainRouter() *mux.Router {
 
 func _addApiRoutes(router *mux.Router) {
 	router.HandleFunc("/", home)
+	user.AddApiRoutes(router)
 }
 
 func home(writer http.ResponseWriter, _ *http.Request) {
