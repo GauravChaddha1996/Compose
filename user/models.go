@@ -5,12 +5,28 @@ import (
 )
 
 type User struct {
-	UserId      string `gorm:"PRIMARY_KEY;NOT NULL"`
-	Email       string `gorm:"NOT NULL;UNIQUE"`
-	Name        string `gorm:"NOT NULL"`
-	IsActive    int    `gorm:"NOT NULL"`
+	UserId      string
+	Email       string
+	Name        string
+	IsActive    int
 	Description string
 	PhotoUrl    string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+}
+
+type Password struct {
+	UserId       string
+	PasswordHash string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time
+}
+
+type AccessToken struct {
+	UserId      string
+	AccessToken string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   *time.Time

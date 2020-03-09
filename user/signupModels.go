@@ -3,28 +3,33 @@ package user
 import "compose/commons"
 
 const (
-	SIGNUP_ERROR_SECURITY_MESSAGE = "Signup request not secure."
-	SIGNUP_ERROR_PARSE_MESSAGE    = "Signup request cannot be parsed."
+	// todo convert this all to enums
+	ERROR_PARSE_MESSAGE = "Signup request cannot be parsed."
 
-	SIGNUP_ERROR_VALIDITY_NAME_MESSAGE  = "Signup request not valid. Name cannot be empty."
-	SIGNUP_ERROR_VALIDITY_EMAIL_MESSAGE = "Signup request not valid. Email isn't valid."
+	ERROR_VALIDITY_NAME_MESSAGE     = "Signup request not valid. Name cannot be empty."
+	ERROR_VALIDITY_EMAIL_MESSAGE    = "Signup request not valid. Email isn't valid."
+	ERROR_VALIDITY_PASSWORD_MESSAGE = "Signup request not valid. Password isn't valid."
 
-	SIGNUP_REQUEST_MODEL_NAME     = "name"
-	SIGNUP_REQUEST_MODEL_EMAIL    = "email"
-	SIGNUP_REQUEST_MODEL_PASSWORD = "password"
+	REQUEST_MODEL_NAME     = "name"
+	REQUEST_MODEL_EMAIL    = "email"
+	REQUEST_MODEL_PASSWORD = "password"
 
-	SIGNUP_ERROR_USER_EMAIL_ALREADY_PRESENT      = "Signup request error: Email already present."
-	SIGNUP_ERROR_USDERID_GENERATION_FAILURE      = "Signup request error: User id cannot be generated"
-	SIGNUP_ERROR_USER_DB_SAVE_FAILURE      = "Signup request error: User cannot be saved"
-	SIGNUP_ERROR_ACCESS_TOKEN_GENERATION_FAILURE = "Signup request error: Access token cannot be generated"
+	ERROR_USER_EMAIL_ALREADY_PRESENT      = "Signup request error: Email already present."
+	ERROR_USDERID_GENERATION_FAILURE      = "Signup request error: User id cannot be generated"
+	ERROR_USER_DB_SAVE_FAILURE            = "Signup request error: User cannot be saved"
+	ERROR_USER_PASSWORD_SAVE_FAILURE      = "Signup request error: Password cannot be saved"
+	ERROR_ACCESS_TOKEN_GENERATION_FAILURE = "Signup request error: Access token cannot be generated"
+	ERROR_ACCESS_TOKEN_SAVE_FAILURE       = "Signup request error: Access token cannot be saved"
 )
 
-type UserSignupRequestModel struct {
-	Email string
-	Name  string
+type SignupRequestModel struct {
+	Email    string
+	Name     string
+	Password string
 }
 
-type UserSignupResponseModel struct {
+// todo add rules here for null
+type SignupResponseModel struct {
 	Status      commons.ResponseStatus `json:"Status"`
 	Message     string                 `json:"Message"`
 	AccessToken string                 `json:"AccessToken"`

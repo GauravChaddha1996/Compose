@@ -9,7 +9,6 @@ var Db *gorm.DB
 
 func Init(db *gorm.DB) {
 	Db = db
-	Db.AutoMigrate(User{})
 }
 
 func AddApiRoutes(router *mux.Router) {

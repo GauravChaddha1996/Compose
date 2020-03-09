@@ -8,16 +8,9 @@ import (
 )
 
 func SignupHandler(writer http.ResponseWriter, request *http.Request) {
-
-	isSecure, message := IsSignupRequestSecure(request)
-	if !isSecure {
-		_writeFailedResponse(message, writer)
-		return
-	}
-
 	requestModel := getUserSignupRequest(request)
 	if requestModel == nil {
-		_writeFailedResponse(SIGNUP_ERROR_PARSE_MESSAGE, writer)
+		_writeFailedResponse(ERROR_PARSE_MESSAGE, writer)
 		return
 	}
 
@@ -34,32 +27,34 @@ func SignupHandler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	response := UserSignupResponseModel{
+	response := SignupResponseModel{
 		Status:      commons.RESPONSE_STATUS_SUCCESS,
 		AccessToken: accessToken,
 	}
+	// todo find better way for marshalling
 	jsonResponse, _ := json.Marshal(response)
 	_, _ = writer.Write(jsonResponse)
 
 }
 
-func getUserSignupRequest(r *http.Request) *UserSignupRequestModel {
-	err := r.ParseMultipartForm(32 << 20)
+func getUserSignupRequest(r *http.Request) *SignupRequestModel {
+	err := r.ParseMultipartForm(1024)
 	if err != nil {
 		log.Print(err)
 		return nil
 	}
 	//todo learn how to use enum in golang
-	return &UserSignupRequestModel{
-		Email: r.FormValue(SIGNUP_REQUEST_MODEL_EMAIL),
-		Name:  r.FormValue(SIGNUP_REQUEST_MODEL_NAME),
+	return &SignupRequestModel{
+		Email:    r.FormValue(REQUEST_MODEL_EMAIL),
+		Name:     r.FormValue(REQUEST_MODEL_NAME),
+		Password: r.FormValue(REQUEST_MODEL_PASSWORD),
 	}
 }
 
 func _writeFailedResponse(message string, writer http.ResponseWriter) {
 	// todo check how to do message ==nil then message default = "something went wrong"
 	// todo better error reporting and handling
-	failedResponse := UserSignupResponseModel{
+	failedResponse := SignupResponseModel{
 		Status:  commons.RESPONSE_STATUS_FAILED,
 		Message: message,
 	}
