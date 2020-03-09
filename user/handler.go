@@ -11,6 +11,6 @@ func Init(db *gorm.DB) {
 	Db = db
 }
 
-func AddApiRoutes(router *mux.Router) {
-	router.HandleFunc("/user/signup", SignupHandler)
+func AddSubRoutes(subRouter *mux.Router)  {
+	subRouter.HandleFunc("/signup", SignupHandler)
 }

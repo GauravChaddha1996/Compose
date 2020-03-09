@@ -68,7 +68,7 @@ func _getMainRouter() *mux.Router {
 
 func _addApiRoutes(router *mux.Router) {
 	router.HandleFunc("/", home)
-	user.AddApiRoutes(router)
+	user.AddSubRoutes(router.PathPrefix("/user").Subrouter())
 }
 
 func home(writer http.ResponseWriter, _ *http.Request) {
