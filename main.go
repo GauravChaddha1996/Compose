@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compose/commons"
 	"compose/user"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -11,14 +12,17 @@ import (
 )
 
 func main() {
-	_loadConfig()
-	db := _openDB()
+	println("")
+	log.Println("Starting project compose")
+	loadConfig()
+	db := openDB()
 	defer db.Close()
-	_initPackages(db)
-	_startServer()
+	initPackages(db)
+	startServer()
 }
 
-func _loadConfig() {
+func loadConfig() {
+	log.Println("Loading config")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(".")
@@ -27,9 +31,10 @@ func _loadConfig() {
 	if err != nil {
 		panic(err)
 	}
+	log.Println("Config loaded")
 }
 
-func _openDB() *gorm.DB {
+func openDB() *gorm.DB {
 	log.Print("Starting database connection")
 	dbName := viper.GetString("db.name")
 	dbParams := viper.GetString("db.params")
@@ -46,27 +51,33 @@ func _openDB() *gorm.DB {
 	return db
 }
 
-func _initPackages(db *gorm.DB) {
+func initPackages(db *gorm.DB) {
 	user.Init(db)
 }
 
-func _startServer() {
-	log.Print("Starting server at http://localhost:8000")
+func startServer() {
+	log.Println("Starting server at http://localhost:8000")
+	println("")
 	serverPort := ":" + viper.GetString("server.port")
-	err := http.ListenAndServe(serverPort, _getMainRouter())
+	err := http.ListenAndServe(serverPort, getMainRouter())
 	if err != nil {
 		log.Print("Error starting server. Returning")
 		panic(err)
 	}
 }
 
-func _getMainRouter() *mux.Router {
+func getMainRouter() *mux.Router {
 	router := mux.NewRouter()
-	_addApiRoutes(router)
+	addMiddlewares(router)
+	addApiRoutes(router)
 	return router
 }
 
-func _addApiRoutes(router *mux.Router) {
+func addMiddlewares(router *mux.Router) {
+	router.Use(commons.RequestLoggingMiddleware)
+}
+
+func addApiRoutes(router *mux.Router) {
 	router.HandleFunc("/", home)
 	user.AddSubRoutes(router.PathPrefix("/user").Subrouter())
 }

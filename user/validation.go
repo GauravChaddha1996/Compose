@@ -6,6 +6,7 @@ import (
 )
 
 // todo use validation library and or improve this code
+// todo retturn nil message here somehow
 func IsUserSignupRequestValid(requestModel *SignupRequestModel) (bool, string) {
 	isValid := true
 	message := ""
