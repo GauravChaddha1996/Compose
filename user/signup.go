@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/raja/argon2pw"
 	uuid "github.com/satori/go.uuid"
 	"log"
 	"time"
@@ -39,9 +40,15 @@ func signup(requestModel *SignupRequestModel) (string, string) {
 		return "", ERROR_USER_DB_SAVE_FAILURE
 	}
 
+	passwordHash, err := argon2pw.GenerateSaltedHash(requestModel.Password)
+	if err != nil {
+		log.Print(err)
+		transaction.Rollback()
+		return "", ERROR_USER_PASSWORD_GENERATION_FAILURE
+	}
 	passwordEntry := Password{
 		UserId:       u.UserId,
-		PasswordHash: requestModel.Password,
+		PasswordHash: passwordHash,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}

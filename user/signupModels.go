@@ -17,6 +17,7 @@ const (
 	ERROR_USER_EMAIL_ALREADY_PRESENT      = "Signup request error: Email already present."
 	ERROR_USDERID_GENERATION_FAILURE      = "Signup request error: User id cannot be generated"
 	ERROR_USER_DB_SAVE_FAILURE            = "Signup request error: User cannot be saved"
+	ERROR_USER_PASSWORD_GENERATION_FAILURE      = "Signup request error: Password cannot be generated"
 	ERROR_USER_PASSWORD_SAVE_FAILURE      = "Signup request error: Password cannot be saved"
 	ERROR_ACCESS_TOKEN_GENERATION_FAILURE = "Signup request error: Access token cannot be generated"
 	ERROR_ACCESS_TOKEN_SAVE_FAILURE       = "Signup request error: Access token cannot be saved"
