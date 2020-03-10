@@ -1,23 +1,20 @@
 package user
 
 import (
-	"regexp"
+	"github.com/asaskevich/govalidator"
 	"unicode"
 )
-
-var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // todo use validation library and or improve this code
 func IsUserSignupRequestValid(requestModel *SignupRequestModel) (bool, string) {
 	isValid := true
 	message := ""
 
-	if len(requestModel.Name) == 0 {
+	if govalidator.StringLength(requestModel.Name, "1", "255") == false {
 		isValid = false
 		message = ERROR_VALIDITY_NAME_MESSAGE
 	}
-
-	if isValid && emailRegex.MatchString(requestModel.Email) == false {
+	if isValid && govalidator.IsEmail(requestModel.Email) == false {
 		isValid = false
 		message = ERROR_VALIDITY_EMAIL_MESSAGE
 	}
