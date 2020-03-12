@@ -13,7 +13,6 @@ func signup(requestModel *RequestModel) (string, error) {
 	db := userCommons.GetDB()
 	transaction := db.Begin()
 
-	// todo think of ways to break this function and use context maybe for objects and error
 	var user userCommons.User
 
 	// Email query

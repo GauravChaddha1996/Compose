@@ -13,7 +13,6 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	// todo check how to to send back null access token
 	accessToken, err := signup(requestModel)
 	if commons.InError(err) {
 		_writeFailedResponse(err, writer)
@@ -21,11 +20,10 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	response := ResponseModel{
-		Status:      commons.RESPONSE_STATUS_SUCCESS,
+		Status:      commons.NewResponseStatus().SUCCESS,
 		AccessToken: accessToken,
 	}
 
-	// todo find better way for marshalling
 	jsonResponse, err := json.Marshal(response)
 	commons.PanicIfError(err)
 	_, err = writer.Write(jsonResponse)
@@ -33,9 +31,8 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func _writeFailedResponse(err error, writer http.ResponseWriter) {
-	// todo better error reporting and handling
 	failedResponse := ResponseModel{
-		Status:  commons.RESPONSE_STATUS_FAILED,
+		Status:  commons.NewResponseStatus().FAILED,
 		Message: err.Error(),
 	}
 	failedResponseJson, err := json.Marshal(failedResponse)

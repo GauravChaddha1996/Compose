@@ -21,7 +21,6 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 
-	//todo learn how to use enum in golang
 	model := RequestModel{
 		Email:    r.FormValue("email"),
 		Name:     r.FormValue("name"),
@@ -69,9 +68,8 @@ func (requestModel RequestModel) isInvalid() error {
 	return nil
 }
 
-// todo add rules here for null
 type ResponseModel struct {
-	Status      commons.ResponseStatus `json:"Status"`
-	Message     string                 `json:"Message"`
-	AccessToken string                 `json:"AccessToken"`
+	Status      commons.ResponseStatus `json:"status,omitempty"`
+	Message     string                 `json:"message,omitempty"`
+	AccessToken string                 `json:"access_token,omitempty"`
 }

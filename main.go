@@ -28,9 +28,7 @@ func loadConfig() {
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
+	commons.PanicIfError(err)
 	log.Println("Config loaded")
 }
 
@@ -43,10 +41,7 @@ func openDB() *gorm.DB {
 	dbImplementation := viper.GetString("db.implementation")
 	dbArgs := dbConnectionConfig + "/" + dbName + "?" + dbParams
 	db, err := gorm.Open(dbImplementation, dbArgs)
-	if err != nil {
-		log.Print("Cannot open db")
-		panic(err)
-	}
+	commons.PanicIfError(err)
 	log.Print("Database connection established")
 	return db
 }
@@ -60,10 +55,7 @@ func startServer() {
 	println("")
 	serverPort := ":" + viper.GetString("server.port")
 	err := http.ListenAndServe(serverPort, getMainRouter())
-	if err != nil {
-		log.Print("Error starting server. Returning")
-		panic(err)
-	}
+	commons.PanicIfError(err)
 }
 
 func getMainRouter() *mux.Router {
