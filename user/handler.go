@@ -1,16 +1,16 @@
 package user
 
 import (
+	"compose/user/signup"
+	"compose/user/userCommons"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 )
 
-var Db *gorm.DB
-
 func Init(db *gorm.DB) {
-	Db = db
+	userCommons.SetDB(db)
 }
 
-func AddSubRoutes(subRouter *mux.Router)  {
-	subRouter.HandleFunc("/signup", SignupHandler)
+func AddSubRoutes(subRouter *mux.Router) {
+	subRouter.HandleFunc("/signup", signup.Handler)
 }

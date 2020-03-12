@@ -1,8 +1,6 @@
-package user
+package userCommons
 
-import (
-	"time"
-)
+import "time"
 
 type User struct {
 	UserId      string
