@@ -17,11 +17,6 @@ func login(model *RequestModel) (string, error) {
 		return "", errors.New("Email doesn't exist")
 	}
 
-	// Deny login if account is inactive
-	if user.IsActive == 0 {
-		return "", errors.New("User is inactive")
-	}
-
 	// Match password
 	var passwordEntry userCommons.Password
 	passwordEntryResult := db.Where("user_id = ?", user.UserId).Find(&passwordEntry)

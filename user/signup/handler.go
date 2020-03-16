@@ -9,13 +9,13 @@ import (
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
 	if commons.InError(err) {
-		_writeFailedResponse(err, writer)
+		writeFailedResponse(err, writer)
 		return
 	}
 
 	accessToken, err := signup(requestModel)
 	if commons.InError(err) {
-		_writeFailedResponse(err, writer)
+		writeFailedResponse(err, writer)
 		return
 	}
 
@@ -30,7 +30,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	commons.PanicIfError(err)
 }
 
-func _writeFailedResponse(err error, writer http.ResponseWriter) {
+func writeFailedResponse(err error, writer http.ResponseWriter) {
 	failedResponse := ResponseModel{
 		Status:  commons.NewResponseStatus().FAILED,
 		Message: err.Error(),

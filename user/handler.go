@@ -1,6 +1,7 @@
 package user
 
 import (
+	"compose/user/delete"
 	"compose/user/login"
 	"compose/user/signup"
 	"compose/user/userCommons"
@@ -15,4 +16,5 @@ func Init(db *gorm.DB) {
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/signup", signup.Handler)
 	subRouter.HandleFunc("/login", login.Handler)
+	subRouter.HandleFunc("/delete", delete.Handler)
 }

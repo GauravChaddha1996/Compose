@@ -6,7 +6,6 @@ type User struct {
 	UserId      string
 	Email       string
 	Name        string
-	IsActive    int
 	Description string
 	PhotoUrl    string
 	CreatedAt   time.Time

@@ -35,7 +35,6 @@ func signup(requestModel *RequestModel) (string, error) {
 		UserId:    userId.String(),
 		Email:     requestModel.Email,
 		Name:      requestModel.Name,
-		IsActive:  1,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
