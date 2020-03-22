@@ -1,6 +1,10 @@
 package commons
 
-import "net/http"
+import (
+	"net/http"
+)
+
+const CommonModelKey = "common_model"
 
 type ResponseStatus string
 
@@ -16,13 +20,16 @@ func NewResponseStatus() ResponseStatusWrapper {
 	}
 }
 
-type CommonHeaders struct {
+type CommonModel struct {
 	AccessToken string
+	UserId      string
+	UserEmail   string
 }
 
-func GetCommonHeaders(r *http.Request) *CommonHeaders {
+func GetCommonModel(r *http.Request) *CommonModel {
 	headers := r.Header
-	return &CommonHeaders{
-		AccessToken: headers.Get("access_token"),
+	accessToken := headers.Get("access_token")
+	return &CommonModel{
+		AccessToken: accessToken,
 	}
 }

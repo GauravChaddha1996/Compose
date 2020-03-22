@@ -2,7 +2,6 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/user/userCommons"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -17,7 +16,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 	err = securityClearance(requestModel, request)
 	if commons.InError(err) {
-		writer.WriteHeader(403)
+		writer.WriteHeader(http.StatusForbidden)
 		writeFailedResponse(err, writer)
 		return
 	}
@@ -41,19 +40,9 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func securityClearance(model *RequestModel, request *http.Request) error {
-	var user userCommons.User
-	db := userCommons.GetDB()
-	emailQueryResult := db.Where("email = ?", model.email).Find(&user)
-	if emailQueryResult.RecordNotFound() {
-		return errors.New("User doesn't exist")
-	}
-	var accessTokenEntry userCommons.AccessToken
-	accessTokenQuery := db.Where("user_id = ?", user.UserId).Find(&accessTokenEntry)
-	if commons.InError(accessTokenQuery.Error) {
-		return errors.New("Can't query access token")
-	}
-	if commons.GetCommonHeaders(request).AccessToken != accessTokenEntry.AccessToken {
-		return errors.New("Access token doesn't match")
+	commonsModel := request.Context().Value(commons.CommonModelKey).(commons.CommonModel)
+	if commonsModel.UserEmail != model.email {
+		return errors.New("Email id doesn't match")
 	}
 	return nil
 }

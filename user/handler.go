@@ -7,6 +7,7 @@ import (
 	"compose/user/userCommons"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"net/http"
 )
 
 func Init(db *gorm.DB) {
@@ -14,7 +15,8 @@ func Init(db *gorm.DB) {
 }
 
 func AddSubRoutes(subRouter *mux.Router) {
-	subRouter.HandleFunc("/signup", signup.Handler)
-	subRouter.HandleFunc("/login", login.Handler)
-	subRouter.HandleFunc("/delete", delete.Handler)
+	subRouter.HandleFunc("/signup", signup.Handler).Methods(http.MethodPost)
+	subRouter.HandleFunc("/login", login.Handler).Methods(http.MethodPost)
+	//subRouter.HandleFunc("/{userId}", view.Handler).Methods(http.MethodGet)
+	subRouter.HandleFunc("/delete", delete.Handler).Methods(http.MethodPost)
 }
