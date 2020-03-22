@@ -46,7 +46,7 @@ func RequestLoggingMiddleware(next http.Handler) http.Handler {
 			}
 		}
 		if r.Method == http.MethodPost {
-			_ = r.ParseMultipartForm(0)
+			_ = r.ParseMultipartForm(1024)
 			form := r.Form
 			if len(form) > 0 {
 				log.Println("----------------------POST BODY PARAMS---------------------")
