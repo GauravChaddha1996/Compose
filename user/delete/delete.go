@@ -6,9 +6,10 @@ import (
 	"errors"
 )
 
-func delete(model *RequestModel) error {
+func deleteUser(model *RequestModel) error {
 	db := userCommons.GetDB()
-	userDeletionResult := db.Unscoped().Delete(&model.user)
+	var user userCommons.User
+	userDeletionResult := db.Where("email = ?", model.email).Unscoped().Delete(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return errors.New("Deletion of user failed")
 	}

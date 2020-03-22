@@ -1,6 +1,7 @@
 package commons
 
 import (
+	"compose/user/userCommons"
 	"net/http"
 )
 
@@ -27,9 +28,35 @@ type CommonModel struct {
 }
 
 func GetCommonModel(r *http.Request) *CommonModel {
+	return r.Context().Value(CommonModelKey).(*CommonModel)
+}
+
+func makeCommonModel(r *http.Request) *CommonModel {
 	headers := r.Header
 	accessToken := headers.Get("access_token")
+	userId := getUserId(accessToken)
+	userEmail := getUserEmail(userId)
 	return &CommonModel{
 		AccessToken: accessToken,
+		UserId:      userId,
+		UserEmail:   userEmail,
 	}
+}
+
+func getUserId(accessToken string) string {
+	var accessTokenEntry userCommons.AccessToken
+	accessTokenQuery := GetDB().Where("access_token = ?", accessToken).Find(&accessTokenEntry)
+	if InError(accessTokenQuery.Error) {
+		return ""
+	}
+	return accessTokenEntry.UserId
+}
+
+func getUserEmail(userId string) string {
+	var user userCommons.User
+	userQuery := GetDB().Where("user_id = ?", userId).Find(&user)
+	if InError(userQuery.Error) {
+		return ""
+	}
+	return user.Email
 }

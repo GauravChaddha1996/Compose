@@ -10,7 +10,6 @@ type User struct {
 	PhotoUrl    string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   *time.Time
 }
 
 type Password struct {
@@ -18,7 +17,6 @@ type Password struct {
 	PasswordHash string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	DeletedAt    *time.Time
 }
 
 type AccessToken struct {
@@ -26,5 +24,4 @@ type AccessToken struct {
 	AccessToken string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   *time.Time
 }

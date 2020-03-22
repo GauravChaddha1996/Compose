@@ -47,6 +47,7 @@ func openDB() *gorm.DB {
 }
 
 func initPackages(db *gorm.DB) {
+	commons.Init(db)
 	user.Init(db)
 }
 

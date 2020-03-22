@@ -21,7 +21,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = delete(requestModel)
+	err = deleteUser(requestModel)
 	if commons.InError(err) {
 		writeFailedResponse(err, writer)
 		return
@@ -34,13 +34,14 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 	jsonResponse, err := json.Marshal(response)
 	commons.PanicIfError(err)
+	writer.Header().Set("Content-Type", "application/json")
 	_, err = writer.Write(jsonResponse)
 	commons.PanicIfError(err)
 
 }
 
 func securityClearance(model *RequestModel, request *http.Request) error {
-	commonsModel := request.Context().Value(commons.CommonModelKey).(commons.CommonModel)
+	commonsModel := commons.GetCommonModel(request)
 	if commonsModel.UserEmail != model.email {
 		return errors.New("Email id doesn't match")
 	}
@@ -54,6 +55,7 @@ func writeFailedResponse(err error, writer http.ResponseWriter) {
 	}
 	failedResponseJson, err := json.Marshal(failedResponse)
 	commons.PanicIfError(err)
+	writer.Header().Set("Content-Type", "application/json")
 	_, err = writer.Write(failedResponseJson)
 	commons.PanicIfError(err)
 }

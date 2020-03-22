@@ -1,27 +1,35 @@
-package signup
+package userDetails
 
 import (
 	"compose/commons"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
 	if commons.InError(err) {
-		writeFailedResponse(err, writer)
+		_writeFailedResponse(err, writer)
 		return
 	}
 
-	accessToken, err := signup(requestModel)
+	user, err := getUserDetails(requestModel)
 	if commons.InError(err) {
-		writeFailedResponse(err, writer)
+		_writeFailedResponse(err, writer)
 		return
 	}
 
+	createdAtTime := user.CreatedAt
 	response := ResponseModel{
 		Status:      commons.NewResponseStatus().SUCCESS,
-		AccessToken: accessToken,
+		Email:       user.Email,
+		Name:        user.Name,
+		Description: user.Description,
+		PhotoUrl:    user.PhotoUrl,
+		MemberSince: fmt.Sprint("Member since: ", createdAtTime.Month(), createdAtTime.Year()),
+		// Only make editable if details requested of userId = user requesting the details
+		Editable: user.UserId == commons.GetCommonModel(request).UserId,
 	}
 
 	jsonResponse, err := json.Marshal(response)
@@ -29,9 +37,10 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	_, err = writer.Write(jsonResponse)
 	commons.PanicIfError(err)
+
 }
 
-func writeFailedResponse(err error, writer http.ResponseWriter) {
+func _writeFailedResponse(err error, writer http.ResponseWriter) {
 	failedResponse := ResponseModel{
 		Status:  commons.NewResponseStatus().FAILED,
 		Message: err.Error(),

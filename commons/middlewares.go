@@ -8,6 +8,26 @@ import (
 	"strings"
 )
 
+var securityMiddlewarePathConfigMap = make(map[string]*SecurityMiddlewarePathConfig)
+
+type SecurityMiddlewarePathConfig struct {
+	CheckAccessToken bool
+	CheckUserId      bool
+	CheckUserEmail   bool
+}
+
+func getDefaultSecurityMiddlewarePathConfig() *SecurityMiddlewarePathConfig {
+	return &SecurityMiddlewarePathConfig{
+		CheckAccessToken: true,
+		CheckUserId:      true,
+		CheckUserEmail:   true,
+	}
+}
+
+func AddSecurityMiddlewarePathConfig(path string, config *SecurityMiddlewarePathConfig) {
+	securityMiddlewarePathConfigMap[path] = config
+}
+
 func RequestLoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("----------------------REQUEST RECEIVED-------------------------")
@@ -45,7 +65,7 @@ func RequestLoggingMiddleware(next http.Handler) http.Handler {
 
 func ExtractCommonModelMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		commonHeaders := GetCommonModel(r)
+		commonHeaders := makeCommonModel(r)
 		parentContext := r.Context()
 		newContext := context.WithValue(parentContext, CommonModelKey, commonHeaders)
 		next.ServeHTTP(w, r.WithContext(newContext))
@@ -54,11 +74,12 @@ func ExtractCommonModelMiddleware(next http.Handler) http.Handler {
 
 func GeneralSecurityMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		commonModel := r.Context().Value(CommonModelKey).(CommonModel)
-		securityError := ensureSecurity(&commonModel)
+		commonModel := r.Context().Value(CommonModelKey).(*CommonModel)
+		securityError := ensureSecurity(commonModel, securityMiddlewarePathConfigMap[r.URL.Path])
 		if securityError != nil {
 			w.WriteHeader(http.StatusForbidden)
-			_, err := w.Write([]byte("{\"message\":\"" + securityError.Error() + "}"))
+			w.Header().Set("Content-Type", "application/json")
+			_, err := w.Write([]byte("{\"message\":\"User id associated isn't known\"}"))
 			PanicIfError(err)
 		} else {
 			next.ServeHTTP(w, r)
@@ -66,14 +87,17 @@ func GeneralSecurityMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func ensureSecurity(commonHeaders *CommonModel) error {
-	if len(commonHeaders.AccessToken) == 0 {
+func ensureSecurity(commonHeaders *CommonModel, config *SecurityMiddlewarePathConfig) error {
+	if config == nil {
+		config = getDefaultSecurityMiddlewarePathConfig()
+	}
+	if config.CheckAccessToken && len(commonHeaders.AccessToken) == 0 {
 		return errors.New("Access token isn't present")
 	}
-	if len(commonHeaders.UserId) == 0 {
+	if config.CheckUserId && len(commonHeaders.UserId) == 0 {
 		return errors.New("User id associated isn't known")
 	}
-	if len(commonHeaders.UserEmail) == 0 {
+	if config.CheckUserEmail && len(commonHeaders.UserEmail) == 0 {
 		return errors.New("User email associated isn't known")
 	}
 	return nil
