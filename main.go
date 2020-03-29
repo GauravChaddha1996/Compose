@@ -70,6 +70,8 @@ func addMiddlewares(router *mux.Router) {
 	router.Use(commons.RequestLoggingMiddleware)
 	router.Use(commons.ExtractCommonModelMiddleware)
 	router.Use(commons.GeneralSecurityMiddleware)
+	router.Use(commons.CommonResponseHeadersMiddleware)
+	router.Use(commons.ResponseLoggingMiddleware)
 }
 
 func addApiRoutes(router *mux.Router) {

@@ -26,7 +26,6 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 	jsonResponse, err := json.Marshal(response)
 	commons.PanicIfError(err)
-	writer.Header().Set("Content-Type", "application/json")
 	_, err = writer.Write(jsonResponse)
 	commons.PanicIfError(err)
 }
@@ -38,7 +37,6 @@ func writeFailedResponse(err error, writer http.ResponseWriter) {
 	}
 	failedResponseJson, err := json.Marshal(failedResponse)
 	commons.PanicIfError(err)
-	writer.Header().Set("Content-Type", "application/json")
 	_, err = writer.Write(failedResponseJson)
 	commons.PanicIfError(err)
 }
