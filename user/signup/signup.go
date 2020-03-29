@@ -2,6 +2,7 @@ package signup
 
 import (
 	"compose/commons"
+	"compose/user/daos"
 	"compose/user/userCommons"
 	"errors"
 	"github.com/raja/argon2pw"
@@ -12,13 +13,14 @@ import (
 func signup(requestModel *RequestModel) (string, error) {
 	db := userCommons.GetDB()
 	transaction := db.Begin()
-
-	var user userCommons.User
+	userDao := daos.GetUserDaoUnderTransation(transaction)
+	passwordDao := daos.GetPasswordDaoUnderTransaction(transaction)
+	accessTokenDao := daos.GetAccessTokenDaoUnderTransaction(transaction)
 
 	// Email query
 
-	emailQueryResult := transaction.Where("email = ?", requestModel.Email).Find(&user)
-	if emailQueryResult.RecordNotFound() == false {
+	_, err := userDao.FindUserViaEmail(requestModel.Email)
+	if commons.InError(err) == false {
 		transaction.Rollback()
 		return "", errors.New("Email already present")
 	}
@@ -31,15 +33,15 @@ func signup(requestModel *RequestModel) (string, error) {
 		return "", errors.New("UUID can't be generated")
 	}
 
-	user = userCommons.User{
+	user := userCommons.User{
 		UserId:    userId.String(),
 		Email:     requestModel.Email,
 		Name:      requestModel.Name,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	createUserResult := transaction.Create(user)
-	if createUserResult.Error != nil {
+	err = userDao.CreateUser(user)
+	if commons.InError(err) {
 		transaction.Rollback()
 		return "", errors.New("User can't be created")
 	}
@@ -58,8 +60,8 @@ func signup(requestModel *RequestModel) (string, error) {
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
-	savePasswordResult := transaction.Save(passwordEntry)
-	if commons.InError(savePasswordResult.Error) {
+	err = passwordDao.CreatePasswordEntry(passwordEntry)
+	if commons.InError(err) {
 		transaction.Rollback()
 		return "", errors.New("Password can't be saved")
 	}
@@ -77,8 +79,8 @@ func signup(requestModel *RequestModel) (string, error) {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	saveAccessTokenResult := transaction.Save(accessTokenEntry)
-	if commons.InError(saveAccessTokenResult.Error) {
+	err = accessTokenDao.CreateAccessTokenEntry(accessTokenEntry)
+	if commons.InError(err) {
 		transaction.Rollback()
 		return "", errors.New("Access token can't be saved")
 	}

@@ -2,36 +2,35 @@ package login
 
 import (
 	"compose/commons"
-	"compose/user/userCommons"
+	"compose/user/daos"
 	"errors"
 	"github.com/raja/argon2pw"
 )
 
 func login(model *RequestModel) (string, error) {
-	db := userCommons.GetDB()
+	userDao := daos.GetUserDao()
+	passwordDao := daos.GetPasswordDao()
+	accessTokenDao := daos.GetAccessTokenDao()
 
 	// Check if email exists
-	var user userCommons.User
-	emailQueryResult := db.Where("email = ?", model.email).Find(&user)
-	if emailQueryResult.RecordNotFound() {
+	user, err := userDao.FindUserViaEmail(model.email)
+	if commons.InError(err) {
 		return "", errors.New("Email doesn't exist")
 	}
 
 	// Match password
-	var passwordEntry userCommons.Password
-	passwordEntryResult := db.Where("user_id = ?", user.UserId).Find(&passwordEntry)
-	if passwordEntryResult.RecordNotFound() {
+	passwordEntry, err := passwordDao.FindPasswordEntryViaUserId(user.UserId)
+	if commons.InError(err) {
 		return "", errors.New("Password entry not found ")
 	}
 
-	_, err := argon2pw.CompareHashWithPassword(passwordEntry.PasswordHash, model.password)
+	_, err = argon2pw.CompareHashWithPassword(passwordEntry.PasswordHash, model.password)
 	if commons.InError(err) {
 		return "", errors.New("Password matching operation failure")
 	}
 
-	var accessTokenEntry userCommons.AccessToken
-	accessTokenResult := db.Where("user_id = ?", user.UserId).Find(&accessTokenEntry)
-	if accessTokenResult.RecordNotFound() {
+	accessTokenEntry, err := accessTokenDao.FindAccessTokenEntryViaUserId(user.UserId)
+	if commons.InError(err) {
 		return "", errors.New("Access token not found")
 	}
 

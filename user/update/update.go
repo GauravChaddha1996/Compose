@@ -2,31 +2,33 @@ package update
 
 import (
 	"compose/commons"
-	"compose/user/userCommons"
+	dao2 "compose/user/daos"
 	"errors"
 )
 
 func update(requestModel *RequestModel) error {
-	db := userCommons.GetDB()
-	var user userCommons.User
-	userQuery := db.Where("user_id = ?", requestModel.UserId).Find(&user)
-	if commons.InError(userQuery.Error) {
+	dao := dao2.GetUserDao()
+
+	user, err := dao.FindUserViaId(requestModel.UserId)
+	if commons.InError(err) {
 		return errors.New("User query failed")
 	}
-	var userUpdateMap = make(map[string]interface{})
+
+	var changesMap = make(map[string]interface{})
 	if requestModel.NewUserId != "" {
-		userUpdateMap["user_id"] = requestModel.NewUserId
+		changesMap["user_id"] = requestModel.NewUserId
 	}
 	if requestModel.Email != "" {
-		userUpdateMap["email"] = requestModel.Email
+		changesMap["email"] = requestModel.Email
 	}
 	if requestModel.Name != "" {
-		userUpdateMap["name"] = requestModel.Name
+		changesMap["name"] = requestModel.Name
 	}
-	userUpdateMap["description"] = requestModel.Description
-	userUpdateMap["photo_url"] = requestModel.PhotoUrl
-	userUpdateQuery := db.Model(&user).Updates(userUpdateMap)
-	if userUpdateQuery.Error != nil {
+	changesMap["description"] = requestModel.Description
+	changesMap["photo_url"] = requestModel.PhotoUrl
+
+	err = dao.UpdateUser(changesMap, user)
+	if commons.InError(err) {
 		return errors.New("User update query failed")
 	}
 	return nil
