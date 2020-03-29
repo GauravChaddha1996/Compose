@@ -40,8 +40,9 @@ func (dao Dao) FindUserViaId(userId string) (*userCommons.User, error) {
 	return &user, nil
 }
 
-func (dao Dao) UpdateUser(changeMap map[string]interface{}, user *userCommons.User) error {
-	return dao.db.Model(&user).Updates(changeMap).Error
+func (dao Dao) UpdateUser(changeMap map[string]interface{}, userId string) error {
+	var user userCommons.User
+	return dao.db.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error
 }
 
 func (dao Dao) DeleteUser(email string) error {
