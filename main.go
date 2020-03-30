@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compose/article"
 	"compose/commons"
 	"compose/user"
 	"github.com/gorilla/mux"
@@ -49,6 +50,7 @@ func openDB() *gorm.DB {
 func initPackages(db *gorm.DB) {
 	commons.Init(db)
 	user.Init(db)
+	article.Init(db)
 }
 
 func startServer() {
@@ -77,6 +79,7 @@ func addMiddlewares(router *mux.Router) {
 func addApiRoutes(router *mux.Router) {
 	router.HandleFunc("/", home)
 	user.AddSubRoutes(router.PathPrefix("/user").Subrouter())
+	article.AddSubRoutes(router.PathPrefix("/article").Subrouter())
 }
 
 func home(writer http.ResponseWriter, _ *http.Request) {

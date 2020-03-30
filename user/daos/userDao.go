@@ -10,7 +10,7 @@ func GetUserDao() *Dao {
 	return &Dao{userCommons.GetDB()}
 }
 
-func GetUserDaoUnderTransation(db *gorm.DB) *Dao {
+func GetUserDaoUnderTransaction(db *gorm.DB) *Dao {
 	return &Dao{db}
 }
 

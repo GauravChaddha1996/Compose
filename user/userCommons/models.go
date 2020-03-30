@@ -1,15 +1,18 @@
 package userCommons
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
-	UserId      string
-	Email       string
-	Name        string
-	Description string
-	PhotoUrl    string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	UserId       string
+	Email        string
+	Name         string
+	Description  string
+	PhotoUrl     string
+	ArticleCount uint64
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type Password struct {
