@@ -4,20 +4,45 @@ import (
 	"compose/commons"
 	"compose/user/daos"
 	"compose/user/userCommons"
+	"errors"
 )
 
-type ServiceContractImpl struct{}
-
-func GetServiceContractImpl() ServiceContractImpl {
-	return ServiceContractImpl{}
+type ServiceContractImpl struct {
+	dao *daos.UserDao
 }
 
-func (ServiceContractImpl) GetUser(userId string) (*userCommons.User, error) {
+func GetServiceContractImpl() ServiceContractImpl {
+	return ServiceContractImpl{
+		dao: daos.GetUserDao(),
+	}
+}
+
+func (impl ServiceContractImpl) GetUser(userId string) (*userCommons.User, error) {
 	// Convert this into a handler call
-	dao := daos.GetUserDao()
-	user, err := dao.FindUserViaId(userId)
+	user, err := impl.dao.FindUserViaId(userId)
 	if commons.InError(err) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (impl ServiceContractImpl) ChangeArticleCount(userId string, change bool) error {
+	user, err := impl.dao.FindUserViaId(userId)
+	if commons.InError(err) {
+		return errors.New("Can't find any such user")
+	}
+	if change {
+		user.ArticleCount += 1
+	} else {
+		user.ArticleCount -= 1
+	}
+
+	var changeMap = make(map[string]interface{})
+	changeMap["article_count"] = user.ArticleCount
+
+	err = impl.dao.UpdateUser(changeMap, userId)
+	if commons.InError(err) {
+		return errors.New("User article count can't be updated")
+	}
+	return nil
 }

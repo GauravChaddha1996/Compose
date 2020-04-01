@@ -6,23 +6,23 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func GetUserDao() *Dao {
-	return &Dao{userCommons.Database}
+func GetUserDao() *UserDao {
+	return &UserDao{userCommons.Database}
 }
 
-func GetUserDaoUnderTransaction(db *gorm.DB) *Dao {
-	return &Dao{db}
+func GetUserDaoUnderTransaction(db *gorm.DB) *UserDao {
+	return &UserDao{db}
 }
 
-type Dao struct {
+type UserDao struct {
 	db *gorm.DB
 }
 
-func (dao Dao) CreateUser(user userCommons.User) error {
+func (dao UserDao) CreateUser(user userCommons.User) error {
 	return dao.db.Create(user).Error
 }
 
-func (dao Dao) FindUserViaEmail(email string) (*userCommons.User, error) {
+func (dao UserDao) FindUserViaEmail(email string) (*userCommons.User, error) {
 	var user userCommons.User
 	userDeletionResult := dao.db.Where("email = ?", email).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
@@ -31,7 +31,7 @@ func (dao Dao) FindUserViaEmail(email string) (*userCommons.User, error) {
 	return &user, nil
 }
 
-func (dao Dao) FindUserViaId(userId string) (*userCommons.User, error) {
+func (dao UserDao) FindUserViaId(userId string) (*userCommons.User, error) {
 	var user userCommons.User
 	userDeletionResult := dao.db.Where("user_id = ?", userId).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
@@ -40,12 +40,12 @@ func (dao Dao) FindUserViaId(userId string) (*userCommons.User, error) {
 	return &user, nil
 }
 
-func (dao Dao) UpdateUser(changeMap map[string]interface{}, userId string) error {
+func (dao UserDao) UpdateUser(changeMap map[string]interface{}, userId string) error {
 	var user userCommons.User
 	return dao.db.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error
 }
 
-func (dao Dao) DeleteUser(email string) error {
+func (dao UserDao) DeleteUser(email string) error {
 	var user userCommons.User
 	return dao.db.Where("email = ?", email).Unscoped().Delete(&user).Error
 }

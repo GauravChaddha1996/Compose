@@ -17,6 +17,12 @@ func deleteArticle(article *articleCommons.Article) error {
 		tx.Rollback()
 		return errors.New("Cannot delete associated markdown")
 	}
+
+	err = articleCommons.UserServiceContract.ChangeArticleCount(article.UserId, false) // change = false to decrease
+	if commons.InError(err) {
+		tx.Rollback()
+		return errors.New("User article count can't be decreased")
+	}
 	tx.Commit()
 	return nil
 }

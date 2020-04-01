@@ -22,12 +22,13 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 	createdAtTime := user.CreatedAt
 	response := ResponseModel{
-		Status:      commons.NewResponseStatus().SUCCESS,
-		Email:       user.Email,
-		Name:        user.Name,
-		Description: user.Description,
-		PhotoUrl:    user.PhotoUrl,
-		MemberSince: fmt.Sprint("Member since: ", createdAtTime.Day(), createdAtTime.Month(), createdAtTime.Year()),
+		Status:       commons.NewResponseStatus().SUCCESS,
+		Email:        user.Email,
+		Name:         user.Name,
+		Description:  user.Description,
+		PhotoUrl:     user.PhotoUrl,
+		ArticleCount: user.ArticleCount,
+		MemberSince:  fmt.Sprint("Member since: ", createdAtTime.Day(), createdAtTime.Month(), createdAtTime.Year()),
 		// Only make editable if details requested of userId = user requesting the details
 		Editable: user.UserId == commons.GetCommonModel(request).UserId,
 	}
