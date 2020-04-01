@@ -14,7 +14,7 @@ import (
 )
 
 func Init(db *gorm.DB) {
-	userCommons.SetDB(db)
+	userCommons.Database = db
 	for path, config := range getSecurityMiddlewareConfigMap() {
 		commons.AddSecurityMiddlewarePathConfig("/user"+path, config)
 	}

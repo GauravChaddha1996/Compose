@@ -7,7 +7,7 @@ import (
 )
 
 func GetUserDao() *Dao {
-	return &Dao{userCommons.GetDB()}
+	return &Dao{userCommons.Database}
 }
 
 func GetUserDaoUnderTransaction(db *gorm.DB) *Dao {

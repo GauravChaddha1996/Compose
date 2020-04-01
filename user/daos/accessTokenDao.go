@@ -11,7 +11,7 @@ type AccessTokenDao struct {
 }
 
 func GetAccessTokenDao() AccessTokenDao {
-	return AccessTokenDao{db: userCommons.GetDB()}
+	return AccessTokenDao{db: userCommons.Database}
 }
 func GetAccessTokenDaoUnderTransaction(db *gorm.DB) AccessTokenDao {
 	return AccessTokenDao{db}

@@ -11,7 +11,7 @@ import (
 )
 
 func signup(requestModel *RequestModel) (string, error) {
-	db := userCommons.GetDB()
+	db := userCommons.Database
 	transaction := db.Begin()
 	userDao := daos.GetUserDaoUnderTransaction(transaction)
 	passwordDao := daos.GetPasswordDaoUnderTransaction(transaction)

@@ -3,6 +3,7 @@ package main
 import (
 	"compose/article"
 	"compose/commons"
+	"compose/serviceContracts"
 	"compose/user"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -48,9 +49,16 @@ func openDB() *gorm.DB {
 }
 
 func initPackages(db *gorm.DB) {
+	// Init with common things
 	commons.Init(db)
 	user.Init(db)
 	article.Init(db)
+
+	// Save all service impls
+	serviceContracts.Init(user.GetServiceContractImpl())
+
+	// Attach all service impls to other services
+	article.SetServiceContractImpl(serviceContracts.GetUserServiceContract())
 }
 
 func startServer() {

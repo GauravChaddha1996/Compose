@@ -10,7 +10,7 @@ import (
 )
 
 func createArticle(model *RequestModel) (*string, error) {
-	database := articleCommons.GetDB()
+	database := articleCommons.Database
 	transaction := database.Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetMarkdownDaoDuringTransaction(transaction)

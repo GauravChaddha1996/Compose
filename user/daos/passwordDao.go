@@ -11,7 +11,7 @@ type PasswordDao struct {
 }
 
 func GetPasswordDao() PasswordDao {
-	return PasswordDao{db: userCommons.GetDB()}
+	return PasswordDao{db: userCommons.Database}
 }
 func GetPasswordDaoUnderTransaction(db *gorm.DB) PasswordDao {
 	return PasswordDao{db}
