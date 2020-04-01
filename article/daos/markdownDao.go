@@ -35,3 +35,8 @@ func (dao MarkdownDao) UpdateMarkdown(markdownId string, changeMap map[string]in
 	var markdown articleCommons.Markdown
 	return dao.db.Model(markdown).Where("id = ?", markdownId).UpdateColumns(changeMap).Error
 }
+
+func (dao MarkdownDao) DeleteMarkdown(markdownId string) error {
+	var markdown articleCommons.Markdown
+	return dao.db.Where("id = ?", markdownId).Unscoped().Delete(&markdown).Error
+}
