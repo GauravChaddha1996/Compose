@@ -28,6 +28,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 		Markdown:    markdown.Markdown,
 		CreatedAt:   article.CreatedAt.Format("Posted on ", ),
 		PostedBy:    *postedByUser,
+		Editable:    model.commonModel.UserId == article.UserId,
 	}, nil
 }
 

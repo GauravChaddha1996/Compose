@@ -30,3 +30,8 @@ func (dao MarkdownDao) GetMarkdown(markdownId string) (*articleCommons.Markdown,
 	}
 	return &markdown, nil
 }
+
+func (dao MarkdownDao) UpdateMarkdown(markdownId string, changeMap map[string]interface{}) error {
+	var markdown articleCommons.Markdown
+	return dao.db.Model(markdown).Where("id = ?", markdownId).UpdateColumns(changeMap).Error
+}

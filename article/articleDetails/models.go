@@ -9,12 +9,14 @@ import (
 
 type RequestModel struct {
 	id string
+	commonModel *commons.CommonModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	vars := mux.Vars(r)
 	model := RequestModel{
-		id: vars["article_id"],
+		id:          vars["article_id"],
+		commonModel: commons.GetCommonModel(r),
 	}
 
 	err := model.isInvalid()
@@ -40,6 +42,7 @@ type ResponseModel struct {
 	Markdown    string                 `json:"markdown,omitempty"`
 	CreatedAt   string                 `json:"created_at,omitempty"`
 	PostedBy    PostedByUser           `json:"posted_by,omitempty"`
+	Editable    bool                   `json:"editable"`
 }
 
 type PostedByUser struct {

@@ -30,3 +30,8 @@ func (dao ArticleDao) GetArticle(articleId string) (*articleCommons.Article, err
 	}
 	return &article, nil
 }
+
+func (dao ArticleDao) UpdateArticle(articleId string, changeMap map[string]interface{}) error {
+	var article articleCommons.Article
+	return dao.db.Model(article).Where("id = ?", articleId).UpdateColumns(changeMap).Error
+}
