@@ -47,17 +47,18 @@ func createArticle(model *RequestModel) (*string, error) {
 		UpdatedAt:   time.Now(),
 	}
 
+	err = articleCommons.UserServiceContract.ChangeArticleCount(model.userId, true) // change = true to increase
+	if commons.InError(err) {
+		transaction.Rollback()
+		return nil, errors.New("User article count can't be increased")
+	}
+
 	err = articleDao.CreateArticle(articleEntry)
 	if commons.InError(err) {
 		transaction.Rollback()
 		return nil, errors.New("Article entry can't be created")
 	}
 
-	err = articleCommons.UserServiceContract.ChangeArticleCount(model.userId, true) // change = true to increase
-	if commons.InError(err) {
-		transaction.Rollback()
-		return nil, errors.New("User article count can't be increased")
-	}
 	transaction.Commit()
 	return &articleEntry.Id, nil
 }

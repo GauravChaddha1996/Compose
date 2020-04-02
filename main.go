@@ -3,6 +3,7 @@ package main
 import (
 	"compose/article"
 	"compose/commons"
+	"compose/like"
 	"compose/serviceContracts"
 	"compose/user"
 	"github.com/gorilla/mux"
@@ -53,12 +54,14 @@ func initPackages(db *gorm.DB) {
 	commons.Init(db)
 	user.Init(db)
 	article.Init(db)
+	like.Init(db)
 
 	// Save all service impls
-	serviceContracts.Init(user.GetServiceContractImpl())
+	serviceContracts.Init(user.GetServiceContractImpl(), article.GetServiceContractImpl())
 
 	// Attach all service impls to other services
 	article.SetServiceContractImpl(serviceContracts.GetUserServiceContract())
+	like.SetServiceContractImpl(serviceContracts.GetArticleServiceContract())
 }
 
 func startServer() {
@@ -88,6 +91,7 @@ func addApiRoutes(router *mux.Router) {
 	router.HandleFunc("/", home)
 	user.AddSubRoutes(router.PathPrefix("/user").Subrouter())
 	article.AddSubRoutes(router.PathPrefix("/article").Subrouter())
+	like.AddSubRoutes(router.PathPrefix("/article").Subrouter())
 }
 
 func home(writer http.ResponseWriter, _ *http.Request) {
