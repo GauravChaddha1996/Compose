@@ -22,7 +22,7 @@ func SetServiceContractImpl(userContract serviceContracts.UserServiceContract) {
 
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/create", create.Handler).Methods(http.MethodPost)
-	subRouter.HandleFunc("/{article_id}", articleDetails.Handler).Methods(http.MethodGet)
+	subRouter.HandleFunc("/get/{article_id}", articleDetails.Handler).Methods(http.MethodGet)
 	subRouter.HandleFunc("/update", update.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/delete", delete.Handler).Methods(http.MethodPost)
 }

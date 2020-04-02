@@ -3,6 +3,7 @@ package daos
 import (
 	"compose/commons"
 	"compose/like/likeCommons"
+	"errors"
 	"github.com/jinzhu/gorm"
 )
 
@@ -29,6 +30,21 @@ func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*likeCommons.
 		return nil, queryResult.Error
 	}
 	return &entry, nil
+}
+
+func (dao LikeDao) GetArticleLikes(articleId string, lastLikeId *string, limit int) (*[]likeCommons.LikeEntry, error) {
+	DefaultLimit := 20
+
+	if limit == 0 {
+		limit = DefaultLimit
+	}
+
+	var likeEntries []likeCommons.LikeEntry
+	queryResult := dao.db.Where("article_id = ? && id > ?", articleId, lastLikeId).Limit(limit).Find(&likeEntries)
+	if commons.InError(queryResult.Error) {
+		return nil, errors.New("Error in fetching like entries")
+	}
+	return &likeEntries, nil
 }
 
 func (dao LikeDao) UnlikeArticle(likeEntry *likeCommons.LikeEntry) error {

@@ -16,9 +16,9 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status    commons.ResponseStatus `json:"status, omitempty"`
-	Message   string                 `json:"message, omitempty"`
-	ArticleId string                 `json:"article_id, omitempty"`
+	Status    commons.ResponseStatus `json:"status,omitempty"`
+	Message   string                 `json:"message,omitempty"`
+	ArticleId string                 `json:"article_id,omitempty"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {

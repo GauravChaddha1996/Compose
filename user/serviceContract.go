@@ -26,6 +26,19 @@ func (impl ServiceContractImpl) GetUser(userId string) (*userCommons.User, error
 	return user, nil
 }
 
+func (impl ServiceContractImpl) GetUsers(userIds []string) ([]*userCommons.User, error) {
+	var users = make([]*userCommons.User, len(userIds))
+
+	for index := range userIds {
+		user, err := impl.dao.FindUserViaId(userIds[index])
+		if commons.InError(err) {
+			return nil, err
+		}
+		users[index] = user
+	}
+	return users, nil
+}
+
 func (impl ServiceContractImpl) ChangeArticleCount(userId string, change bool) error {
 	user, err := impl.dao.FindUserViaId(userId)
 	if commons.InError(err) {

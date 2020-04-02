@@ -61,7 +61,7 @@ func initPackages(db *gorm.DB) {
 
 	// Attach all service impls to other services
 	article.SetServiceContractImpl(serviceContracts.GetUserServiceContract())
-	like.SetServiceContractImpl(serviceContracts.GetArticleServiceContract())
+	like.SetServiceContractImpl(serviceContracts.GetArticleServiceContract(), serviceContracts.GetUserServiceContract())
 }
 
 func startServer() {

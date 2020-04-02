@@ -14,6 +14,10 @@ func GetServiceContractImpl() ServiceContractImpl {
 	return ServiceContractImpl{dao: daos.GetArticleDao()}
 }
 
+func (impl ServiceContractImpl) DoesArticleExist(articleId string) bool {
+	return impl.dao.DoesArticleExist(articleId)
+}
+
 func (impl ServiceContractImpl) GetArticleAuthorId(articleId string) *string {
 	article, err := impl.dao.GetArticle(articleId)
 	if commons.InError(err) {

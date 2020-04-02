@@ -13,8 +13,8 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status  commons.ResponseStatus `json:"status, omitempty"`
-	Message string                 `json:"message, omitempty"`
+	Status  commons.ResponseStatus `json:"status,omitempty"`
+	Message string                 `json:"message,omitempty"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
