@@ -15,6 +15,7 @@ type Article struct {
 	Title       string
 	Description string
 	MarkdownId  string
+	LikeCount   uint64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

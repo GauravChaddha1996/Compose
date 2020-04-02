@@ -8,7 +8,7 @@ import (
 )
 
 type RequestModel struct {
-	id string
+	id          string
 	commonModel *commons.CommonModel
 }
 
@@ -41,6 +41,7 @@ type ResponseModel struct {
 	Description string                 `json:"description,omitempty"`
 	Markdown    string                 `json:"markdown,omitempty"`
 	CreatedAt   string                 `json:"created_at,omitempty"`
+	LikeCount   uint64                 `json:"like_count"`
 	PostedBy    PostedByUser           `json:"posted_by,omitempty"`
 	Editable    bool                   `json:"editable"`
 }

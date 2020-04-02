@@ -26,6 +26,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 		Title:       article.Title,
 		Description: article.Description,
 		Markdown:    markdown.Markdown,
+		LikeCount:   article.LikeCount,
 		CreatedAt:   article.CreatedAt.Format("Posted on ", ),
 		PostedBy:    *postedByUser,
 		Editable:    model.commonModel.UserId == article.UserId,

@@ -8,7 +8,8 @@ import (
 )
 
 func likeArticle(model *RequestModel) error {
-	likeDao := daos.GetLikeDao()
+	tx := likeCommons.Database.Begin()
+	likeDao := daos.GetLikeDaoDuringTransaction(tx)
 	var likeEntry = likeCommons.LikeEntry{
 		UserId:    model.CommonModel.UserId,
 		ArticleId: model.ArticleId,
@@ -16,12 +17,22 @@ func likeArticle(model *RequestModel) error {
 
 	previousLikeEntry, _ := likeDao.FindLikeEntry(likeEntry.ArticleId, likeEntry.UserId)
 	if previousLikeEntry != nil {
+		tx.Rollback()
 		return errors.New("Article already liked")
 	}
 
-	err := likeDao.LikeArticle(&likeEntry)
+	err := likeCommons.ArticleServiceContract.ChangeArticleLikeCount(model.ArticleId, true)
 	if commons.InError(err) {
+		tx.Rollback()
+		return errors.New("Article like count can't be increased")
+	}
+
+	err = likeDao.LikeArticle(&likeEntry)
+	if commons.InError(err) {
+		tx.Rollback()
 		return errors.New("Article can't be liked")
 	}
+
+	tx.Commit()
 	return nil
 }
