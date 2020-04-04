@@ -5,22 +5,22 @@ import (
 	"errors"
 	"github.com/asaskevich/govalidator"
 	"net/http"
-	"strconv"
 	"strings"
+	"time"
 )
 
 type RequestModel struct {
 	ArticleId         string
-	LastLikeId        *string
+	MaxLikedAt        *time.Time
 	CommonModel       *commons.CommonModel
-	DefaultLastLikeId string
+	DefaultMaxLikedAt time.Time
 }
 
 type ResponseModel struct {
 	Status       commons.ResponseStatus `json:"status,omitempty"`
 	Message      string                 `json:"message,omitempty"`
 	LikedByUsers []LikedByUser          `json:"liked_by_users,omitempty"`
-	LastLikeId   string                 `json:"last_like_id,omitempty"`
+	MaxLikedAt   string                 `json:"max_liked_at,omitempty"`
 	HasMoreLikes bool                   `json:"has_more_likes"`
 }
 
@@ -31,24 +31,23 @@ type LikedByUser struct {
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
-	var DefaultLastLikeId = "0"
+	var DefaultMaxLikedAt, _ = time.ParseInLocation("2 Jan 2006 15:04:05", "2 Jan 3000 15:04:05", time.Now().Location())
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		ArticleId:         queryMap.Get("article_id"),
-		LastLikeId:        &DefaultLastLikeId,
-		DefaultLastLikeId: DefaultLastLikeId,
+		MaxLikedAt:        &DefaultMaxLikedAt,
+		DefaultMaxLikedAt: DefaultMaxLikedAt,
 		CommonModel:       commons.GetCommonModel(r),
 	}
 
 	for key, values := range queryMap {
 		value := strings.Join(values, "")
-		if key == "last_like_id" {
-			lastLikeId := value
-			_, err := strconv.ParseUint(lastLikeId, 10, 64)
+		if key == "max_liked_at" {
+			maxLikedAt, err := time.ParseInLocation("2 Jan 2006 15:04:05", value, time.Now().Location())
 			if commons.InError(err) {
-				model.LastLikeId = nil
+				model.MaxLikedAt = nil
 			} else {
-				model.LastLikeId = &lastLikeId
+				model.MaxLikedAt = &maxLikedAt
 			}
 		}
 	}
@@ -67,8 +66,8 @@ func (model RequestModel) isInvalid() error {
 	if govalidator.StringLength(model.ArticleId, "1", "255") == false {
 		return errors.New("ArticleId should be between 1 and 255")
 	}
-	if model.LastLikeId == nil {
-		return errors.New("Last Like id isn't valid")
+	if model.MaxLikedAt == nil {
+		return errors.New("Liked-at time isn't valid")
 	}
 	return nil
 }

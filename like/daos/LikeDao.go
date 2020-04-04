@@ -34,9 +34,13 @@ func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*dbModels.Lik
 	return &entry, nil
 }
 
-func (dao LikeDao) GetArticleLikes(articleId string, lastLikeId *string, limit int) (*[]dbModels.LikeEntry, error) {
+func (dao LikeDao) GetArticleLikes(articleId string, maxLikedAt *time.Time, limit int) (*[]dbModels.LikeEntry, error) {
 	var likeEntries []dbModels.LikeEntry
-	queryResult := dao.db.Where("article_id = ? && id > ?", articleId, lastLikeId).Limit(limit).Find(&likeEntries)
+	queryResult := dao.db.
+		Where("article_id = ? && created_at < ?", articleId, maxLikedAt).
+		Order("created_at desc").
+		Limit(limit).
+		Find(&likeEntries)
 	if commons.InError(queryResult.Error) {
 		return nil, errors.New("Error in fetching like entries")
 	}

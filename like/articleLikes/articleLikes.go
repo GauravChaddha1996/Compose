@@ -5,21 +5,20 @@ import (
 	"compose/like/daos"
 	"compose/like/likeCommons"
 	"errors"
-	"strconv"
 )
 
 func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 	likeDao := daos.GetLikeDao()
 
 	var articleLikeEntryLimit = 3
-	likeEntries, err := likeDao.GetArticleLikes(model.ArticleId, model.LastLikeId, articleLikeEntryLimit)
+	likeEntries, err := likeDao.GetArticleLikes(model.ArticleId, model.MaxLikedAt, articleLikeEntryLimit)
 	if commons.InError(err) {
 		return nil, errors.New("Error fetching liked userId list")
 	}
 	likeEntriesSize := len(*likeEntries)
 	if likeEntriesSize == 0 {
 		var message string
-		if *model.LastLikeId == model.DefaultLastLikeId {
+		if *model.MaxLikedAt == model.DefaultMaxLikedAt {
 			message = "No likes to show"
 		} else {
 			message = "No more likes to show"
@@ -30,7 +29,6 @@ func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 			HasMoreLikes: false,
 		}, nil
 	}
-	lastLikeEntry := (*likeEntries)[likeEntriesSize-1]
 
 	userIdList := make([]string, likeEntriesSize)
 	for index, entry := range *likeEntries {
@@ -50,11 +48,11 @@ func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 			Name:     user.Name,
 		}
 	}
-	lastLikeId := strconv.FormatUint(lastLikeEntry.Id, 10)
+	lastLikedAt := (*likeEntries)[likeEntriesSize-1].CreatedAt.Format("2 Jan 2006 15:04:05")
 	return &ResponseModel{
 		Status:       commons.NewResponseStatus().SUCCESS,
 		LikedByUsers: likedByUserArr,
-		LastLikeId:   lastLikeId,
+		MaxLikedAt:   lastLikedAt,
 		HasMoreLikes: !(likeEntriesSize < articleLikeEntryLimit),
 	}, nil
 }

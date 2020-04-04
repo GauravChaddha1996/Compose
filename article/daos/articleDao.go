@@ -26,14 +26,18 @@ func (dao ArticleDao) CreateArticle(article dbModels.Article) error {
 	return dao.db.Create(article).Error
 }
 
-func (dao ArticleDao) DoesArticleExist(articleId string) bool {
+func (dao ArticleDao) DoesArticleExist(articleId string) (bool, error) {
 	var article dbModels.Article
 	queryResult := dao.db.
 		Select("id").
 		Where("id = ?", articleId).
 		Limit(1).
 		Find(&article)
-	return queryResult.Error == nil && article.Id == articleId
+	if commons.InError(queryResult.Error) {
+		return false, queryResult.Error
+	} else {
+		return true, nil
+	}
 }
 
 func (dao ArticleDao) GetArticle(articleId string) (*dbModels.Article, error) {

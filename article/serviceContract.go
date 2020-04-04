@@ -16,7 +16,7 @@ func GetServiceContractImpl() ServiceContractImpl {
 	return ServiceContractImpl{dao: daos.GetArticleDao()}
 }
 
-func (impl ServiceContractImpl) DoesArticleExist(articleId string) bool {
+func (impl ServiceContractImpl) DoesArticleExist(articleId string) (bool, error) {
 	return impl.dao.DoesArticleExist(articleId)
 }
 

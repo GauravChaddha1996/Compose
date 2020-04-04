@@ -14,9 +14,9 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	articleExists := likeCommons.ArticleServiceContract.DoesArticleExist(requestModel.ArticleId)
-	if articleExists == false {
-		commons.WriteFailedResponse(errors.New("No such article id exists"), writer)
+	err = securityClearance(requestModel)
+	if commons.InError(err) {
+		commons.WriteForbiddenResponse(err, writer)
 		return
 	}
 
@@ -26,4 +26,15 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	commons.WriteSuccessResponse(response, writer)
+}
+
+func securityClearance(model *RequestModel) error {
+	articleExists, err := likeCommons.ArticleServiceContract.DoesArticleExist(model.ArticleId)
+	if commons.InError(err) {
+		return errors.New("Security problem. Can't confirm if article id exists")
+	}
+	if articleExists == false {
+		return errors.New("No such article id exists")
+	}
+	return nil
 }
