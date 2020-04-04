@@ -4,6 +4,7 @@ import (
 	"compose/commons"
 	"compose/serviceContracts"
 	"compose/user/delete"
+	"compose/user/likedArticles"
 	"compose/user/login"
 	"compose/user/postedArticles"
 	"compose/user/signup"
@@ -22,16 +23,18 @@ func Init(db *gorm.DB) {
 	}
 }
 
-func SetServiceContractImpls(articleContract serviceContracts.ArticleServiceContract) {
+func SetServiceContractImpls(articleContract serviceContracts.ArticleServiceContract, likeContract serviceContracts.LikeServiceContract) {
 	userCommons.ArticleService = articleContract
+	userCommons.LikeService = likeContract
 }
 
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/signup", signup.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/login", login.Handler).Methods(http.MethodPost)
-	subRouter.HandleFunc("/postedArticles", postedArticles.Handler).Methods(http.MethodGet)
 	subRouter.HandleFunc("/update", update.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/delete", delete.Handler).Methods(http.MethodPost)
+	subRouter.HandleFunc("/postedArticles", postedArticles.Handler).Methods(http.MethodGet)
+	subRouter.HandleFunc("/likedArticles", likedArticles.Handler).Methods(http.MethodGet)
 	subRouter.HandleFunc("/{user_id}", userDetails.Handler).Methods(http.MethodGet)
 }
 

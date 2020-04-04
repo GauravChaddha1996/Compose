@@ -7,3 +7,4 @@ import (
 
 var Database *gorm.DB
 var ArticleService serviceContracts.ArticleServiceContract
+var LikeService serviceContracts.LikeServiceContract

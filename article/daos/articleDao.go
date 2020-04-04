@@ -4,7 +4,9 @@ import (
 	"compose/article/articleCommons"
 	"compose/commons"
 	"compose/dbModels"
+	"fmt"
 	"github.com/jinzhu/gorm"
+	"strings"
 	"time"
 )
 
@@ -41,6 +43,19 @@ func (dao ArticleDao) GetArticle(articleId string) (*dbModels.Article, error) {
 		return nil, articleQuery.Error
 	}
 	return &article, nil
+}
+
+func (dao ArticleDao) GetArticles(articleIds []string) (*[]dbModels.Article, error) {
+	var articles []dbModels.Article
+	orderByExpr := fmt.Sprintf("FIELD(id, '%s') asc", strings.Join(articleIds, "','"))
+	articleQuery := dao.db.
+		Where("id IN (?)", articleIds).
+		Order(gorm.Expr(orderByExpr)).
+		Find(&articles)
+	if commons.InError(articleQuery.Error) {
+		return nil, articleQuery.Error
+	}
+	return &articles, nil
 }
 
 func (dao ArticleDao) GetArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {

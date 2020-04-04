@@ -2,10 +2,11 @@ package daos
 
 import (
 	"compose/commons"
-	"compose/like/likeCommons"
 	"compose/dbModels"
+	"compose/like/likeCommons"
 	"errors"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type LikeDao struct {
@@ -36,6 +37,19 @@ func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*dbModels.Lik
 func (dao LikeDao) GetArticleLikes(articleId string, lastLikeId *string, limit int) (*[]dbModels.LikeEntry, error) {
 	var likeEntries []dbModels.LikeEntry
 	queryResult := dao.db.Where("article_id = ? && id > ?", articleId, lastLikeId).Limit(limit).Find(&likeEntries)
+	if commons.InError(queryResult.Error) {
+		return nil, errors.New("Error in fetching like entries")
+	}
+	return &likeEntries, nil
+}
+
+func (dao LikeDao) GetUserLikes(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.LikeEntry, error) {
+	var likeEntries []dbModels.LikeEntry
+	queryResult := dao.db.
+		Where("user_id = ? && created_at < ?", userId, maxCreatedAtTime).
+		Order("created_at desc").
+		Limit(limit).
+		Find(&likeEntries)
 	if commons.InError(queryResult.Error) {
 		return nil, errors.New("Error in fetching like entries")
 	}

@@ -51,3 +51,7 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 func (impl ServiceContractImpl) GetAllArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {
 	return impl.dao.GetArticlesOfUser(userId, maxCreatedAtTime, limit)
 }
+
+func (impl ServiceContractImpl) GetAllArticles(articleIds []string) (*[]dbModels.Article, error) {
+	return impl.dao.GetArticles(articleIds)
+}
