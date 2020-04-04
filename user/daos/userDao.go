@@ -2,6 +2,7 @@ package daos
 
 import (
 	"compose/commons"
+	"compose/dbModels"
 	"compose/user/userCommons"
 	"github.com/jinzhu/gorm"
 )
@@ -18,12 +19,12 @@ type UserDao struct {
 	db *gorm.DB
 }
 
-func (dao UserDao) CreateUser(user userCommons.User) error {
+func (dao UserDao) CreateUser(user dbModels.User) error {
 	return dao.db.Create(user).Error
 }
 
-func (dao UserDao) FindUserViaEmail(email string) (*userCommons.User, error) {
-	var user userCommons.User
+func (dao UserDao) FindUserViaEmail(email string) (*dbModels.User, error) {
+	var user dbModels.User
 	userDeletionResult := dao.db.Where("email = ?", email).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return nil, userDeletionResult.Error
@@ -31,8 +32,8 @@ func (dao UserDao) FindUserViaEmail(email string) (*userCommons.User, error) {
 	return &user, nil
 }
 
-func (dao UserDao) FindUserViaId(userId string) (*userCommons.User, error) {
-	var user userCommons.User
+func (dao UserDao) FindUserViaId(userId string) (*dbModels.User, error) {
+	var user dbModels.User
 	userDeletionResult := dao.db.Where("user_id = ?", userId).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return nil, userDeletionResult.Error
@@ -41,11 +42,11 @@ func (dao UserDao) FindUserViaId(userId string) (*userCommons.User, error) {
 }
 
 func (dao UserDao) UpdateUser(changeMap map[string]interface{}, userId string) error {
-	var user userCommons.User
+	var user dbModels.User
 	return dao.db.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error
 }
 
 func (dao UserDao) DeleteUser(email string) error {
-	var user userCommons.User
+	var user dbModels.User
 	return dao.db.Where("email = ?", email).Unscoped().Delete(&user).Error
 }

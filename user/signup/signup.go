@@ -2,6 +2,7 @@ package signup
 
 import (
 	"compose/commons"
+	"compose/dbModels"
 	"compose/user/daos"
 	"compose/user/userCommons"
 	"errors"
@@ -33,7 +34,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		return "", errors.New("UUID can't be generated")
 	}
 
-	user := userCommons.User{
+	user := dbModels.User{
 		UserId:    userId.String(),
 		Email:     requestModel.Email,
 		Name:      requestModel.Name,
@@ -54,7 +55,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		return "", errors.New("Password hash can't be generated")
 	}
 
-	passwordEntry := userCommons.Password{
+	passwordEntry := dbModels.Password{
 		UserId:       user.UserId,
 		PasswordHash: passwordHash,
 		CreatedAt:    time.Now(),
@@ -73,7 +74,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		transaction.Rollback()
 		return "", errors.New("Access token can't be generated")
 	}
-	accessTokenEntry := userCommons.AccessToken{
+	accessTokenEntry := dbModels.AccessToken{
 		UserId:      user.UserId,
 		AccessToken: accessToken.String(),
 		CreatedAt:   time.Now(),

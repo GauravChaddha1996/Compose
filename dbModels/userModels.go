@@ -1,4 +1,4 @@
-package userCommons
+package dbModels
 
 import (
 	"time"

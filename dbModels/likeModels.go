@@ -1,4 +1,4 @@
-package likeCommons
+package dbModels
 
 type LikeEntry struct {
 	Id        uint64

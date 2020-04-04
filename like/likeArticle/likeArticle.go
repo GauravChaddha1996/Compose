@@ -4,13 +4,14 @@ import (
 	"compose/commons"
 	"compose/like/daos"
 	"compose/like/likeCommons"
+	"compose/dbModels"
 	"errors"
 )
 
 func likeArticle(model *RequestModel) error {
 	tx := likeCommons.Database.Begin()
 	likeDao := daos.GetLikeDaoDuringTransaction(tx)
-	var likeEntry = likeCommons.LikeEntry{
+	var likeEntry = dbModels.LikeEntry{
 		UserId:    model.CommonModel.UserId,
 		ArticleId: model.ArticleId,
 	}

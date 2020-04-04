@@ -4,6 +4,7 @@ import (
 	"compose/article/articleCommons"
 	"compose/article/daos"
 	"compose/commons"
+	"compose/dbModels"
 	"errors"
 )
 
@@ -33,7 +34,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 	}, nil
 }
 
-func getArticleDetails(model *RequestModel) (*articleCommons.Article, error) {
+func getArticleDetails(model *RequestModel) (*dbModels.Article, error) {
 	articleDao := daos.GetArticleDao()
 	article, err := articleDao.GetArticle(model.id)
 	if commons.InError(err) {
@@ -42,7 +43,7 @@ func getArticleDetails(model *RequestModel) (*articleCommons.Article, error) {
 	return article, nil
 }
 
-func getMarkdown(markdownId string) (*articleCommons.Markdown, error) {
+func getMarkdown(markdownId string) (*dbModels.Markdown, error) {
 	markdownDao := daos.GetMarkdownDao()
 	markdown, err := markdownDao.GetMarkdown(markdownId)
 	if commons.InError(err) {
@@ -51,7 +52,7 @@ func getMarkdown(markdownId string) (*articleCommons.Markdown, error) {
 	return markdown, nil
 }
 
-func getPostedByUser(article *articleCommons.Article) (*PostedByUser, error) {
+func getPostedByUser(article *dbModels.Article) (*PostedByUser, error) {
 	user, err := articleCommons.UserServiceContract.GetUser(article.UserId)
 	if commons.InError(err) {
 		return nil, err

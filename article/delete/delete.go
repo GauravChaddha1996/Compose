@@ -4,10 +4,11 @@ import (
 	"compose/article/articleCommons"
 	"compose/article/daos"
 	"compose/commons"
+	"compose/dbModels"
 	"errors"
 )
 
-func deleteArticle(article *articleCommons.Article) error {
+func deleteArticle(article *dbModels.Article) error {
 	tx := articleCommons.Database.Begin()
 
 	markdownDao := daos.GetMarkdownDaoDuringTransaction(tx)

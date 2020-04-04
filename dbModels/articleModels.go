@@ -1,4 +1,4 @@
-package articleCommons
+package dbModels
 
 import (
 	"time"

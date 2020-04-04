@@ -1,9 +1,9 @@
 package update
 
 import (
-	"compose/article/articleCommons"
 	"compose/article/daos"
 	"compose/commons"
+	"compose/dbModels"
 	"errors"
 	"net/http"
 )
@@ -41,7 +41,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	commons.WriteSuccessResponse(response, writer)
 }
 
-func securityClearance(model *RequestModel, article *articleCommons.Article) error {
+func securityClearance(model *RequestModel, article *dbModels.Article) error {
 	if model.CommonModel.UserId != article.UserId {
 		return errors.New("Article not posted by this user")
 	}

@@ -2,8 +2,8 @@ package user
 
 import (
 	"compose/commons"
+	"compose/dbModels"
 	"compose/user/daos"
-	"compose/user/userCommons"
 	"errors"
 )
 
@@ -17,7 +17,7 @@ func GetServiceContractImpl() ServiceContractImpl {
 	}
 }
 
-func (impl ServiceContractImpl) GetUser(userId string) (*userCommons.User, error) {
+func (impl ServiceContractImpl) GetUser(userId string) (*dbModels.User, error) {
 	// Convert this into a handler call
 	user, err := impl.dao.FindUserViaId(userId)
 	if commons.InError(err) {
@@ -26,8 +26,8 @@ func (impl ServiceContractImpl) GetUser(userId string) (*userCommons.User, error
 	return user, nil
 }
 
-func (impl ServiceContractImpl) GetUsers(userIds []string) ([]*userCommons.User, error) {
-	var users = make([]*userCommons.User, len(userIds))
+func (impl ServiceContractImpl) GetUsers(userIds []string) ([]*dbModels.User, error) {
+	var users = make([]*dbModels.User, len(userIds))
 
 	for index := range userIds {
 		user, err := impl.dao.FindUserViaId(userIds[index])

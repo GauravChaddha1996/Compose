@@ -4,10 +4,11 @@ import (
 	"compose/article/articleCommons"
 	"compose/article/daos"
 	"compose/commons"
+	"compose/dbModels"
 	"errors"
 )
 
-func updateArticle(model *RequestModel, article *articleCommons.Article) error {
+func updateArticle(model *RequestModel, article *dbModels.Article) error {
 	transaction := articleCommons.Database.Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetMarkdownDaoDuringTransaction(transaction)

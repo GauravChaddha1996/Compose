@@ -1,7 +1,7 @@
 package commons
 
 import (
-	"compose/user/userCommons"
+	"compose/dbModels"
 	"net/http"
 )
 
@@ -44,7 +44,7 @@ func makeCommonModel(r *http.Request) *CommonModel {
 }
 
 func getUserId(accessToken string) string {
-	var accessTokenEntry userCommons.AccessToken
+	var accessTokenEntry dbModels.AccessToken
 	accessTokenQuery := GetDB().Where("access_token = ?", accessToken).Find(&accessTokenEntry)
 	if InError(accessTokenQuery.Error) {
 		return ""
@@ -53,7 +53,7 @@ func getUserId(accessToken string) string {
 }
 
 func getUserEmail(userId string) string {
-	var user userCommons.User
+	var user dbModels.User
 	userQuery := GetDB().Where("user_id = ?", userId).Find(&user)
 	if InError(userQuery.Error) {
 		return ""

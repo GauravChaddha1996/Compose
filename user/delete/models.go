@@ -2,7 +2,7 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/user/userCommons"
+	"compose/dbModels"
 	"errors"
 	"github.com/asaskevich/govalidator"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 
 type RequestModel struct {
 	email string
-	user  *userCommons.User
+	user  *dbModels.User
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {

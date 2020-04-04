@@ -4,6 +4,7 @@ import (
 	"compose/article/articleCommons"
 	"compose/article/daos"
 	"compose/commons"
+	"compose/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"
 	"time"
@@ -21,7 +22,7 @@ func createArticle(model *RequestModel) (*string, error) {
 		return nil, errors.New("Markdown UUID can't be generated")
 	}
 
-	markdownEntry := articleCommons.Markdown{
+	markdownEntry := dbModels.Markdown{
 		Id:       markdownUuid.String(),
 		Markdown: model.markdown,
 	}
@@ -37,7 +38,7 @@ func createArticle(model *RequestModel) (*string, error) {
 		return nil, errors.New("Article UUID can't be generated")
 	}
 
-	articleEntry := articleCommons.Article{
+	articleEntry := dbModels.Article{
 		Id:          articleUuid.String(),
 		UserId:      model.userId,
 		Title:       model.title,
