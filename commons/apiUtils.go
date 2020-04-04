@@ -23,6 +23,11 @@ func WriteFailedResponse(err error, writer http.ResponseWriter) {
 	PanicIfError(err)
 }
 
+func WriteForbiddenResponse(err error, writer http.ResponseWriter) {
+	writer.WriteHeader(http.StatusForbidden)
+	WriteFailedResponse(err, writer)
+}
+
 type genericErrorResponseModel struct {
 	Status  ResponseStatus `json:"status,omitempty"`
 	Message string         `json:"message,omitempty"`

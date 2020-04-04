@@ -21,8 +21,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	}
 	err = securityClearance(requestModel, articleUserId)
 	if commons.InError(err) {
-		writer.WriteHeader(http.StatusForbidden)
-		commons.WriteFailedResponse(err, writer)
+		commons.WriteForbiddenResponse(err, writer)
 		return
 	}
 
