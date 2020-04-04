@@ -3,7 +3,6 @@ package unlikeArticle
 import (
 	"compose/commons"
 	"compose/like/likeCommons"
-	"encoding/json"
 	"errors"
 	"net/http"
 )
@@ -11,25 +10,25 @@ import (
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
 	if commons.InError(err) {
-		writeFailedResponse(err, writer)
+		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
 	articleUserId := likeCommons.ArticleServiceContract.GetArticleAuthorId(requestModel.ArticleId)
 	if articleUserId == nil {
-		writeFailedResponse(errors.New("No such article id exists"), writer)
+		commons.WriteFailedResponse(errors.New("No such article id exists"), writer)
 		return
 	}
 	err = securityClearance(requestModel, articleUserId)
 	if commons.InError(err) {
 		writer.WriteHeader(http.StatusForbidden)
-		writeFailedResponse(err, writer)
+		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
 	err = unlikeArticle(requestModel)
 	if commons.InError(err) {
-		writeFailedResponse(err, writer)
+		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
@@ -38,10 +37,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		Message: "Article unliked successfully",
 	}
 
-	jsonResponse, err := json.Marshal(response)
-	commons.PanicIfError(err)
-	_, err = writer.Write(jsonResponse)
-	commons.PanicIfError(err)
+	commons.WriteSuccessResponse(response, writer)
 }
 
 func securityClearance(model *RequestModel, articleUserId *string) error {
@@ -49,15 +45,4 @@ func securityClearance(model *RequestModel, articleUserId *string) error {
 		return errors.New("You cannot unlike your own article")
 	}
 	return nil
-}
-
-func writeFailedResponse(err error, writer http.ResponseWriter) {
-	failedResponse := ResponseModel{
-		Status:  commons.NewResponseStatus().FAILED,
-		Message: err.Error(),
-	}
-	failedResponseJson, err := json.Marshal(failedResponse)
-	commons.PanicIfError(err)
-	_, err = writer.Write(failedResponseJson)
-	commons.PanicIfError(err)
 }

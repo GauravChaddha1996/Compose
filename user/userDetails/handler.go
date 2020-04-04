@@ -2,7 +2,6 @@ package userDetails
 
 import (
 	"compose/commons"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -10,13 +9,13 @@ import (
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
 	if commons.InError(err) {
-		_writeFailedResponse(err, writer)
+		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
 	user, err := getUserDetails(requestModel)
 	if commons.InError(err) {
-		_writeFailedResponse(err, writer)
+		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
@@ -33,20 +32,5 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		Editable: user.UserId == commons.GetCommonModel(request).UserId,
 	}
 
-	jsonResponse, err := json.Marshal(response)
-	commons.PanicIfError(err)
-	_, err = writer.Write(jsonResponse)
-	commons.PanicIfError(err)
-
-}
-
-func _writeFailedResponse(err error, writer http.ResponseWriter) {
-	failedResponse := ResponseModel{
-		Status:  commons.NewResponseStatus().FAILED,
-		Message: err.Error(),
-	}
-	failedResponseJson, err := json.Marshal(failedResponse)
-	commons.PanicIfError(err)
-	_, err = writer.Write(failedResponseJson)
-	commons.PanicIfError(err)
+	commons.WriteSuccessResponse(response, writer)
 }
