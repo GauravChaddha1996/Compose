@@ -5,6 +5,7 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type ArticleDao struct {
@@ -40,6 +41,19 @@ func (dao ArticleDao) GetArticle(articleId string) (*dbModels.Article, error) {
 		return nil, articleQuery.Error
 	}
 	return &article, nil
+}
+
+func (dao ArticleDao) GetArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {
+	var articles []dbModels.Article
+	articleQuery := dao.db.
+		Where("user_id = ? && created_at < ?", userId, maxCreatedAtTime).
+		Order("created_at desc").
+		Limit(limit).
+		Find(&articles)
+	if commons.InError(articleQuery.Error) {
+		return nil, articleQuery.Error
+	}
+	return &articles, nil
 }
 
 func (dao ArticleDao) UpdateArticle(articleId string, changeMap map[string]interface{}) error {

@@ -2,8 +2,10 @@ package user
 
 import (
 	"compose/commons"
+	"compose/serviceContracts"
 	"compose/user/delete"
 	"compose/user/login"
+	"compose/user/postedArticles"
 	"compose/user/signup"
 	"compose/user/update"
 	"compose/user/userCommons"
@@ -20,12 +22,17 @@ func Init(db *gorm.DB) {
 	}
 }
 
+func SetServiceContractImpls(articleContract serviceContracts.ArticleServiceContract) {
+	userCommons.ArticleService = articleContract
+}
+
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/signup", signup.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/login", login.Handler).Methods(http.MethodPost)
-	subRouter.HandleFunc("/{user_id}", userDetails.Handler).Methods(http.MethodGet)
+	subRouter.HandleFunc("/postedArticles", postedArticles.Handler).Methods(http.MethodGet)
 	subRouter.HandleFunc("/update", update.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/delete", delete.Handler).Methods(http.MethodPost)
+	subRouter.HandleFunc("/{user_id}", userDetails.Handler).Methods(http.MethodGet)
 }
 
 func getSecurityMiddlewareConfigMap() map[string]*commons.SecurityMiddlewarePathConfig {

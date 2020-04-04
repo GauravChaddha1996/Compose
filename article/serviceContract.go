@@ -3,7 +3,9 @@ package article
 import (
 	"compose/article/daos"
 	"compose/commons"
+	"compose/dbModels"
 	"errors"
+	"time"
 )
 
 type ServiceContractImpl struct {
@@ -44,4 +46,8 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 		return errors.New("Article like count can't be updated")
 	}
 	return nil
+}
+
+func (impl ServiceContractImpl) GetAllArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {
+	return impl.dao.GetArticlesOfUser(userId, maxCreatedAtTime, limit)
 }
