@@ -32,10 +32,9 @@ type LikedArticle struct {
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	var DefaultMaxLikedAt, _ = time.ParseInLocation("2 Jan 2006 15:04:05", "2 Jan 3000 15:04:05", time.Now().Location())
 	queryMap := r.URL.Query()
-	commonModel := commons.GetCommonModel(r)
 	model := RequestModel{
-		UserId:            commonModel.UserId,
-		CommonModel:       commonModel,
+		UserId:            queryMap.Get("user_id"),
+		CommonModel:       commons.GetCommonModel(r),
 		MaxLikedAt:        &DefaultMaxLikedAt,
 		DefaultMaxLikedAt: DefaultMaxLikedAt,
 	}
@@ -60,6 +59,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
+	if len(model.UserId) == 0 {
+		return errors.New("User id can't be empty")
+	}
 	if model.MaxLikedAt == nil {
 		return errors.New("Liked-at time isn't valid")
 	}

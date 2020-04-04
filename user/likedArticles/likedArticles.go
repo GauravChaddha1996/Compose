@@ -8,7 +8,7 @@ import (
 
 func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 	likedArticleLimit := 3
-	likeEntriesOfUser, err := userCommons.LikeService.GetAllLikeEntriesOfUser(model.CommonModel.UserId, *model.MaxLikedAt, likedArticleLimit)
+	likeEntriesOfUser, err := userCommons.LikeService.GetAllLikeEntriesOfUser(model.UserId, *model.MaxLikedAt, likedArticleLimit)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch posted articles")
 	}

@@ -32,10 +32,9 @@ type PostedArticle struct {
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	var DefaultMaxCreatedAt, _ = time.ParseInLocation("2 Jan 2006 15:04:05", "2 Jan 3000 15:04:05", time.Now().Location())
 	queryMap := r.URL.Query()
-	commonModel := commons.GetCommonModel(r)
 	model := RequestModel{
-		UserId:              commonModel.UserId,
-		CommonModel:         commonModel,
+		UserId:              queryMap.Get("user_id"),
+		CommonModel:         commons.GetCommonModel(r),
 		MaxCreatedAt:        &DefaultMaxCreatedAt,
 		DefaultMaxCreatedAt: DefaultMaxCreatedAt,
 	}
@@ -60,6 +59,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
+	if len(model.UserId) == 0 {
+		return errors.New("User id can't be empty")
+	}
 	if model.MaxCreatedAt == nil {
 		return errors.New("Created_at time isn't valid")
 	}

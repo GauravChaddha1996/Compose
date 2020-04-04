@@ -41,6 +41,15 @@ func (dao UserDao) FindUserViaId(userId string) (*dbModels.User, error) {
 	return &user, nil
 }
 
+func (dao UserDao) DoesUserIdExist(userId string) (bool, error) {
+	_, err := dao.FindUserViaId(userId)
+	if commons.InError(err) {
+		return false, err
+	} else {
+		return true, nil
+	}
+}
+
 func (dao UserDao) UpdateUser(changeMap map[string]interface{}, userId string) error {
 	var user dbModels.User
 	return dao.db.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error

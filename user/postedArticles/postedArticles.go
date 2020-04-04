@@ -8,7 +8,7 @@ import (
 
 func getPostedArticles(model *RequestModel) (*ResponseModel, error) {
 	postedArticleLimit := 3
-	articleArr, err := userCommons.ArticleService.GetAllArticlesOfUser(model.CommonModel.UserId, *model.MaxCreatedAt, postedArticleLimit)
+	articleArr, err := userCommons.ArticleService.GetAllArticlesOfUser(model.UserId, *model.MaxCreatedAt, postedArticleLimit)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch posted articles")
 	}
