@@ -59,3 +59,24 @@ func (impl ServiceContractImpl) ChangeArticleCount(userId string, change bool) e
 	}
 	return nil
 }
+
+func (impl ServiceContractImpl) ChangeLikeCount(userId string, change bool) error {
+	user, err := impl.dao.FindUserViaId(userId)
+	if commons.InError(err) {
+		return errors.New("Can't find any such user")
+	}
+	if change {
+		user.LikeCount += 1
+	} else {
+		user.LikeCount -= 1
+	}
+
+	var changeMap = make(map[string]interface{})
+	changeMap["like_count"] = user.LikeCount
+
+	err = impl.dao.UpdateUser(changeMap, userId)
+	if commons.InError(err) {
+		return errors.New("User like count can't be updated")
+	}
+	return nil
+}

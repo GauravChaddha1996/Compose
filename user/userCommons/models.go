@@ -11,6 +11,7 @@ type User struct {
 	Description  string
 	PhotoUrl     string
 	ArticleCount uint64
+	LikeCount    uint64
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

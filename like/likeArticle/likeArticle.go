@@ -27,6 +27,12 @@ func likeArticle(model *RequestModel) error {
 		return errors.New("Article like count can't be increased")
 	}
 
+	err = likeCommons.UserServiceContract.ChangeLikeCount(model.CommonModel.UserId, true)
+	if commons.InError(err) {
+		tx.Rollback()
+		return errors.New("User like count can't be increased")
+	}
+
 	err = likeDao.LikeArticle(&likeEntry)
 	if commons.InError(err) {
 		tx.Rollback()

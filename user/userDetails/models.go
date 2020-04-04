@@ -42,6 +42,7 @@ type ResponseModel struct {
 	Description  string                 `json:"description,omitempty"`
 	PhotoUrl     string                 `json:"photo_url,omitempty"`
 	ArticleCount uint64                 `json:"article_count"`
+	LikeCount    uint64                 `json:"like_count"`
 	MemberSince  string                 `json:"member_since,omitempty"`
 	Editable     bool                   `json:"editable"`
 }
