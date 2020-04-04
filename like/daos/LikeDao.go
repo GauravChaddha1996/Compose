@@ -33,12 +33,6 @@ func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*likeCommons.
 }
 
 func (dao LikeDao) GetArticleLikes(articleId string, lastLikeId *string, limit int) (*[]likeCommons.LikeEntry, error) {
-	DefaultLimit := 20
-
-	if limit == 0 {
-		limit = DefaultLimit
-	}
-
 	var likeEntries []likeCommons.LikeEntry
 	queryResult := dao.db.Where("article_id = ? && id > ?", articleId, lastLikeId).Limit(limit).Find(&likeEntries)
 	if commons.InError(queryResult.Error) {

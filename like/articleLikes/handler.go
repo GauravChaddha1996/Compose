@@ -5,7 +5,6 @@ import (
 	"compose/like/likeCommons"
 	"errors"
 	"net/http"
-	"strconv"
 )
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
@@ -21,25 +20,10 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	likedByUserArr, lastLikeId, err := getArticleLikeUserList(requestModel)
+	response, err := getArticleLikesResponse(requestModel)
 	if commons.InError(err) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
-	var response ResponseModel
-	if likedByUserArr == nil {
-		response = ResponseModel{
-			Status:       commons.NewResponseStatus().SUCCESS,
-			Message:      "No more likes to show",
-			LikedByUsers: []LikedByUser{},
-		}
-	} else {
-		response = ResponseModel{
-			Status:       commons.NewResponseStatus().SUCCESS,
-			LikedByUsers: *likedByUserArr,
-			LastLikeId:   strconv.FormatUint(*lastLikeId, 10),
-		}
-	}
-
 	commons.WriteSuccessResponse(response, writer)
 }

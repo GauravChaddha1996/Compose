@@ -10,16 +10,18 @@ import (
 )
 
 type RequestModel struct {
-	ArticleId   string
-	LastLikeId  *string
-	CommonModel *commons.CommonModel
+	ArticleId         string
+	LastLikeId        *string
+	CommonModel       *commons.CommonModel
+	DefaultLastLikeId string
 }
 
 type ResponseModel struct {
 	Status       commons.ResponseStatus `json:"status,omitempty"`
 	Message      string                 `json:"message,omitempty"`
-	LikedByUsers []LikedByUser          `json:"liked_by_users"`
+	LikedByUsers []LikedByUser          `json:"liked_by_users,omitempty"`
 	LastLikeId   string                 `json:"last_like_id,omitempty"`
+	HasMoreLikes bool                   `json:"has_more_likes"`
 }
 
 type LikedByUser struct {
@@ -29,12 +31,13 @@ type LikedByUser struct {
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
-	DefaultLastLikeId := "0"
+	var DefaultLastLikeId = "0"
 	queryMap := r.URL.Query()
 	model := RequestModel{
-		ArticleId:   queryMap.Get("article_id"),
-		LastLikeId:  &DefaultLastLikeId,
-		CommonModel: commons.GetCommonModel(r),
+		ArticleId:         queryMap.Get("article_id"),
+		LastLikeId:        &DefaultLastLikeId,
+		DefaultLastLikeId: DefaultLastLikeId,
+		CommonModel:       commons.GetCommonModel(r),
 	}
 
 	for key, values := range queryMap {

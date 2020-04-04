@@ -5,17 +5,30 @@ import (
 	"compose/like/daos"
 	"compose/like/likeCommons"
 	"errors"
+	"strconv"
 )
 
-func getArticleLikeUserList(model *RequestModel) (*[]LikedByUser, *uint64, error) {
+func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 	likeDao := daos.GetLikeDao()
-	likeEntries, err := likeDao.GetArticleLikes(model.ArticleId, model.LastLikeId, 0) // Send 0 for using default limit
+
+	var articleLikeEntryLimit = 3
+	likeEntries, err := likeDao.GetArticleLikes(model.ArticleId, model.LastLikeId, articleLikeEntryLimit)
 	if commons.InError(err) {
-		return nil, nil, errors.New("Error fetching liked userId list")
+		return nil, errors.New("Error fetching liked userId list")
 	}
 	likeEntriesSize := len(*likeEntries)
 	if likeEntriesSize == 0 {
-		return nil, nil, nil
+		var message string
+		if *model.LastLikeId == model.DefaultLastLikeId {
+			message = "No likes to show"
+		} else {
+			message = "No more likes to show"
+		}
+		return &ResponseModel{
+			Status:       commons.ResponseStatusWrapper{}.SUCCESS,
+			Message:      message,
+			HasMoreLikes: false,
+		}, nil
 	}
 	lastLikeEntry := (*likeEntries)[likeEntriesSize-1]
 
@@ -25,7 +38,7 @@ func getArticleLikeUserList(model *RequestModel) (*[]LikedByUser, *uint64, error
 	}
 	users, err := likeCommons.UserServiceContract.GetUsers(userIdList)
 	if commons.InError(err) {
-		return nil, nil, errors.New("Cannot fetch details via userId")
+		return nil, errors.New("Cannot fetch details via userId")
 	}
 
 	likedByUserArr := make([]LikedByUser, likeEntriesSize)
@@ -37,5 +50,11 @@ func getArticleLikeUserList(model *RequestModel) (*[]LikedByUser, *uint64, error
 			Name:     user.Name,
 		}
 	}
-	return &likedByUserArr, &lastLikeEntry.Id, nil
+	lastLikeId := strconv.FormatUint(lastLikeEntry.Id, 10)
+	return &ResponseModel{
+		Status:       commons.NewResponseStatus().SUCCESS,
+		LikedByUsers: likedByUserArr,
+		LastLikeId:   lastLikeId,
+		HasMoreLikes: !(likeEntriesSize < articleLikeEntryLimit),
+	}, nil
 }
