@@ -32,3 +32,7 @@ func (dao CommentDao) GetNextRootCommentsOfArticle(articleId string, maxCreatedA
 	}
 	return &comments, nil
 }
+
+func (dao CommentDao) CreateComment(comment dbModels.Comment) error {
+	return dao.db.Create(&comment).Error
+}

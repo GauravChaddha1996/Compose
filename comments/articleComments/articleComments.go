@@ -98,7 +98,7 @@ func getCommentMarkdown(markdownId string, dao *daos.CommentMarkdownDao) (string
 func getPostedAtTime(comment dbModels.Comment) string {
 	var t time.Time
 	var postedAt string
-	if comment.UpdatedAt != nil {
+	if comment.UpdatedAt.After(comment.CreatedAt) {
 		t = *comment.UpdatedAt
 		postedAt = fmt.Sprint("Updated at ")
 	} else {

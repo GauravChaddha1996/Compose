@@ -5,6 +5,7 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"errors"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -49,6 +50,27 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 	return nil
 }
 
+func (impl ServiceContractImpl) ChangeArticleCommentCount(articleId string, change bool, transaction *gorm.DB) error {
+	articleDao := impl.getArticleDao(transaction)
+	article, err := articleDao.GetArticle(articleId)
+	if commons.InError(err) {
+		return errors.New("Can't find any such article")
+	}
+	if change {
+		article.CommentCount += 1
+	} else {
+		article.CommentCount -= 1
+	}
+	var changeMap = make(map[string]interface{})
+	changeMap["comment_count"] = article.CommentCount
+
+	err = articleDao.UpdateArticle(articleId, changeMap)
+	if commons.InError(err) {
+		return errors.New("Article comment count can't be updated")
+	}
+	return nil
+}
+
 func (impl ServiceContractImpl) GetAllArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {
 	return impl.articleDao.GetArticlesOfUser(userId, maxCreatedAtTime, limit)
 }
@@ -59,4 +81,12 @@ func (impl ServiceContractImpl) GetAllArticles(articleIds []string) (*[]dbModels
 
 func (impl ServiceContractImpl) GetArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
 	return impl.markdownDao.GetArticleMarkdown(markdownId)
+}
+
+func (impl ServiceContractImpl) getArticleDao(transaction *gorm.DB) *daos.ArticleDao {
+	if transaction != nil {
+		return daos.GetArticleDaoDuringTransaction(transaction)
+	} else {
+		return impl.articleDao
+	}
 }

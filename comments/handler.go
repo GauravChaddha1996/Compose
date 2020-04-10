@@ -3,6 +3,7 @@ package comments
 import (
 	"compose/comments/articleComments"
 	"compose/comments/commentCommons"
+	"compose/comments/create"
 	"compose/serviceContracts"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -20,4 +21,5 @@ func SetServiceContractImpl(articleContract serviceContracts.ArticleServiceContr
 
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/comments", articleComments.Handler).Methods(http.MethodGet)
+	subRouter.HandleFunc("/comment", create.Handler).Methods(http.MethodPost)
 }
