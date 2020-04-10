@@ -13,6 +13,7 @@ import (
 
 func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	commentDao := daos.GetCommentDao()
+	markdownDao := daos.GetCommentMarkdownDao()
 
 	var articleRootCommentsLimit = 3
 	rootComments, _ := commentDao.GetNextRootCommentsOfArticle(model.ArticleId, model.MaxCreatedAt, articleRootCommentsLimit)
@@ -30,7 +31,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 		rootCommentWaitGroup.Add(1)
 		go func(index int, comment dbModels.Comment) {
 			postedByUser, err1 := getPostedByUser(comment.UserId)
-			markdown, err2 := getCommentMarkdown(comment.MarkdownId)
+			markdown, err2 := getCommentMarkdown(comment.MarkdownId, markdownDao)
 			if commons.InError(err1) {
 				err = err1
 			} else if commons.InError(err2) {
@@ -86,8 +87,8 @@ func getPostedByUser(userId string) (*commentCommons.PostedByUser, error) {
 	}, nil
 }
 
-func getCommentMarkdown(markdownId string) (string, error) {
-	markdown, err := commentCommons.ArticleServiceContract.GetArticleMarkdown(markdownId)
+func getCommentMarkdown(markdownId string, dao *daos.CommentMarkdownDao) (string, error) {
+	markdown, err := dao.GetCommentMarkdown(markdownId)
 	if commons.InError(err) {
 		return "", errors.New("Error in fetching markdown for comment")
 	}

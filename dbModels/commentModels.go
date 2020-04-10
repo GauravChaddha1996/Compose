@@ -2,6 +2,11 @@ package dbModels
 
 import "time"
 
+type CommentMarkdown struct {
+	Id       string
+	Markdown string
+}
+
 type Comment struct {
 	CommentId     string
 	UserId        string
