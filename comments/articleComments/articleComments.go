@@ -54,7 +54,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	}
 	lastCreatedAt := (*rootComments)[rootCommentsLen-1].CreatedAt.Format("2 Jan 2006 15:04:05")
 	return &ResponseModel{
-		Status:          commons.ResponseStatusWrapper{}.SUCCESS,
+		Status:          commons.NewResponseStatus().SUCCESS,
 		Comments:        commentEntityArr,
 		MaxCreatedAt:    lastCreatedAt,
 		HasMoreComments: !(rootCommentsLen < articleRootCommentsLimit),
@@ -69,7 +69,7 @@ func getNoCommentsResponseModel(model *RequestModel) *ResponseModel {
 		message = "No more comments to show"
 	}
 	return &ResponseModel{
-		Status:          commons.ResponseStatusWrapper{}.SUCCESS,
+		Status:          commons.NewResponseStatus().SUCCESS,
 		Message:         message,
 		HasMoreComments: false,
 	}

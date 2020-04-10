@@ -24,7 +24,7 @@ func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 			message = "No more likes to show"
 		}
 		return &ResponseModel{
-			Status:       commons.ResponseStatusWrapper{}.SUCCESS,
+			Status:       commons.NewResponseStatus().SUCCESS,
 			Message:      message,
 			HasMoreLikes: false,
 		}, nil

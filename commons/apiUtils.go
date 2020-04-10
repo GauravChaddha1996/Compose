@@ -14,7 +14,7 @@ func WriteSuccessResponse(response interface{}, writer http.ResponseWriter) {
 
 func WriteFailedResponse(err error, writer http.ResponseWriter) {
 	failedResponse := genericErrorResponseModel{
-		Status:  ResponseStatusWrapper{}.FAILED,
+		Status:  NewResponseStatus().FAILED,
 		Message: err.Error(),
 	}
 	failedResponseJson, err := json.Marshal(failedResponse)

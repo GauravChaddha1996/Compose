@@ -22,7 +22,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 		return nil, errors.New("Cannot fetch user who posted this article")
 	}
 	return &ResponseModel{
-		Status:      commons.ResponseStatusWrapper{}.SUCCESS,
+		Status:      commons.NewResponseStatus().SUCCESS,
 		Message:     "",
 		Title:       article.Title,
 		Description: article.Description,

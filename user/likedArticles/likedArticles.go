@@ -21,7 +21,7 @@ func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 			message = "No more liked articles to show"
 		}
 		return &ResponseModel{
-			Status:          commons.ResponseStatusWrapper{}.SUCCESS,
+			Status:          commons.NewResponseStatus().SUCCESS,
 			Message:         message,
 			HasMoreArticles: false,
 		}, nil
@@ -46,7 +46,7 @@ func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 	}
 	lastCreatedAt := (*likeEntriesOfUser)[likeEntriesLen-1].CreatedAt.Format("2 Jan 2006 15:04:05")
 	return &ResponseModel{
-		Status:          commons.ResponseStatusWrapper{}.SUCCESS,
+		Status:          commons.NewResponseStatus().SUCCESS,
 		LikedArticles:   likedArticleArr,
 		MaxLikedAt:      lastCreatedAt,
 		HasMoreArticles: !(likeEntriesLen < likedArticleLimit),
