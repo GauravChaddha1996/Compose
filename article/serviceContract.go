@@ -9,19 +9,20 @@ import (
 )
 
 type ServiceContractImpl struct {
-	dao *daos.ArticleDao
+	articleDao  *daos.ArticleDao
+	markdownDao *daos.MarkdownDao
 }
 
 func GetServiceContractImpl() ServiceContractImpl {
-	return ServiceContractImpl{dao: daos.GetArticleDao()}
+	return ServiceContractImpl{articleDao: daos.GetArticleDao(), markdownDao: daos.GetMarkdownDao()}
 }
 
 func (impl ServiceContractImpl) DoesArticleExist(articleId string) (bool, error) {
-	return impl.dao.DoesArticleExist(articleId)
+	return impl.articleDao.DoesArticleExist(articleId)
 }
 
 func (impl ServiceContractImpl) GetArticleAuthorId(articleId string) *string {
-	article, err := impl.dao.GetArticle(articleId)
+	article, err := impl.articleDao.GetArticle(articleId)
 	if commons.InError(err) {
 		return nil
 	}
@@ -29,7 +30,7 @@ func (impl ServiceContractImpl) GetArticleAuthorId(articleId string) *string {
 }
 
 func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change bool) error {
-	article, err := impl.dao.GetArticle(articleId)
+	article, err := impl.articleDao.GetArticle(articleId)
 	if commons.InError(err) {
 		return errors.New("Can't find any such article")
 	}
@@ -41,7 +42,7 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 	var changeMap = make(map[string]interface{})
 	changeMap["like_count"] = article.LikeCount
 
-	err = impl.dao.UpdateArticle(articleId, changeMap)
+	err = impl.articleDao.UpdateArticle(articleId, changeMap)
 	if commons.InError(err) {
 		return errors.New("Article like count can't be updated")
 	}
@@ -49,9 +50,13 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 }
 
 func (impl ServiceContractImpl) GetAllArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {
-	return impl.dao.GetArticlesOfUser(userId, maxCreatedAtTime, limit)
+	return impl.articleDao.GetArticlesOfUser(userId, maxCreatedAtTime, limit)
 }
 
 func (impl ServiceContractImpl) GetAllArticles(articleIds []string) (*[]dbModels.Article, error) {
-	return impl.dao.GetArticles(articleIds)
+	return impl.articleDao.GetArticles(articleIds)
+}
+
+func (impl ServiceContractImpl) GetMarkdown(markdownId string) (*dbModels.Markdown, error) {
+	return impl.markdownDao.GetMarkdown(markdownId)
 }

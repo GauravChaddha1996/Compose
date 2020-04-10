@@ -11,4 +11,5 @@ type ArticleServiceContract interface {
 	ChangeArticleLikeCount(articleId string, change bool) error // send change true to increase and false to decrease
 	GetAllArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error)
 	GetAllArticles(articleIds []string) (*[]dbModels.Article, error)
+	GetMarkdown(markdownId string) (*dbModels.Markdown, error)
 }
