@@ -11,9 +11,9 @@ import (
 func deleteArticle(article *dbModels.Article) error {
 	tx := articleCommons.Database.Begin()
 
-	markdownDao := daos.GetMarkdownDaoDuringTransaction(tx)
+	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(tx)
 
-	err := markdownDao.DeleteMarkdown(article.MarkdownId)
+	err := markdownDao.DeleteArticleMarkdown(article.MarkdownId)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Cannot delete associated markdown")

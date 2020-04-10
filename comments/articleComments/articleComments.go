@@ -87,7 +87,7 @@ func getPostedByUser(userId string) (*commentCommons.PostedByUser, error) {
 }
 
 func getCommentMarkdown(markdownId string) (string, error) {
-	markdown, err := commentCommons.ArticleServiceContract.GetMarkdown(markdownId)
+	markdown, err := commentCommons.ArticleServiceContract.GetArticleMarkdown(markdownId)
 	if commons.InError(err) {
 		return "", errors.New("Error in fetching markdown for comment")
 	}

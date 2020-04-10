@@ -11,9 +11,9 @@ import (
 func updateArticle(model *RequestModel, article *dbModels.Article) error {
 	transaction := articleCommons.Database.Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
-	markdownDao := daos.GetMarkdownDaoDuringTransaction(transaction)
+	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)
 
-	markdownEntry, err := markdownDao.GetMarkdown(article.MarkdownId)
+	markdownEntry, err := markdownDao.GetArticleMarkdown(article.MarkdownId)
 	if commons.InError(err) {
 		transaction.Rollback()
 		return errors.New("Associated markdown doesnt' exist")
@@ -24,10 +24,10 @@ func updateArticle(model *RequestModel, article *dbModels.Article) error {
 		markdownChangeMap["markdown"] = *model.Markdown
 	}
 	if len(markdownChangeMap) > 0 {
-		err := markdownDao.UpdateMarkdown(markdownEntry.Id, markdownChangeMap)
+		err := markdownDao.UpdateArticleMarkdown(markdownEntry.Id, markdownChangeMap)
 		if commons.InError(err) {
 			transaction.Rollback()
-			return errors.New("Markdown update operation failure")
+			return errors.New("ArticleMarkdown update operation failure")
 		}
 	}
 

@@ -10,11 +10,11 @@ import (
 
 type ServiceContractImpl struct {
 	articleDao  *daos.ArticleDao
-	markdownDao *daos.MarkdownDao
+	markdownDao *daos.ArticleMarkdownDao
 }
 
 func GetServiceContractImpl() ServiceContractImpl {
-	return ServiceContractImpl{articleDao: daos.GetArticleDao(), markdownDao: daos.GetMarkdownDao()}
+	return ServiceContractImpl{articleDao: daos.GetArticleDao(), markdownDao: daos.GetArticleMarkdownDao()}
 }
 
 func (impl ServiceContractImpl) DoesArticleExist(articleId string) (bool, error) {
@@ -57,6 +57,6 @@ func (impl ServiceContractImpl) GetAllArticles(articleIds []string) (*[]dbModels
 	return impl.articleDao.GetArticles(articleIds)
 }
 
-func (impl ServiceContractImpl) GetMarkdown(markdownId string) (*dbModels.Markdown, error) {
-	return impl.markdownDao.GetMarkdown(markdownId)
+func (impl ServiceContractImpl) GetArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
+	return impl.markdownDao.GetArticleMarkdown(markdownId)
 }

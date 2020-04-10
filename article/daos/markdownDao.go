@@ -7,24 +7,24 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type MarkdownDao struct {
+type ArticleMarkdownDao struct {
 	db *gorm.DB
 }
 
-func GetMarkdownDaoDuringTransaction(db *gorm.DB) *MarkdownDao {
-	return &MarkdownDao{db: db}
+func GetArticleMarkdownDaoDuringTransaction(db *gorm.DB) *ArticleMarkdownDao {
+	return &ArticleMarkdownDao{db: db}
 }
 
-func GetMarkdownDao() *MarkdownDao {
-	return &MarkdownDao{db: articleCommons.Database}
+func GetArticleMarkdownDao() *ArticleMarkdownDao {
+	return &ArticleMarkdownDao{db: articleCommons.Database}
 }
 
-func (dao MarkdownDao) CreateMarkdown(markdown dbModels.Markdown) error {
+func (dao ArticleMarkdownDao) CreateArticleMarkdown(markdown dbModels.ArticleMarkdown) error {
 	return dao.db.Create(markdown).Error
 }
 
-func (dao MarkdownDao) GetMarkdown(markdownId string) (*dbModels.Markdown, error) {
-	var markdown dbModels.Markdown
+func (dao ArticleMarkdownDao) GetArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
+	var markdown dbModels.ArticleMarkdown
 	markdownQuery := dao.db.Where("id = ?", markdownId).Find(&markdown)
 	if commons.InError(markdownQuery.Error) {
 		return nil, markdownQuery.Error
@@ -32,12 +32,12 @@ func (dao MarkdownDao) GetMarkdown(markdownId string) (*dbModels.Markdown, error
 	return &markdown, nil
 }
 
-func (dao MarkdownDao) UpdateMarkdown(markdownId string, changeMap map[string]interface{}) error {
-	var markdown dbModels.Markdown
+func (dao ArticleMarkdownDao) UpdateArticleMarkdown(markdownId string, changeMap map[string]interface{}) error {
+	var markdown dbModels.ArticleMarkdown
 	return dao.db.Model(markdown).Where("id = ?", markdownId).UpdateColumns(changeMap).Error
 }
 
-func (dao MarkdownDao) DeleteMarkdown(markdownId string) error {
-	var markdown dbModels.Markdown
+func (dao ArticleMarkdownDao) DeleteArticleMarkdown(markdownId string) error {
+	var markdown dbModels.ArticleMarkdown
 	return dao.db.Where("id = ?", markdownId).Unscoped().Delete(&markdown).Error
 }

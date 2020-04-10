@@ -13,9 +13,9 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch article details'")
 	}
-	markdown, err := getMarkdown(article.MarkdownId)
+	articleMarkdown, err := getArticleMarkdown(article.MarkdownId)
 	if commons.InError(err) {
-		return nil, errors.New("Cannot fetch markdown details")
+		return nil, errors.New("Cannot fetch articleMarkdown details")
 	}
 	postedByUser, err := getPostedByUser(article)
 	if commons.InError(err) {
@@ -26,7 +26,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 		Message:     "",
 		Title:       article.Title,
 		Description: article.Description,
-		Markdown:    markdown.Markdown,
+		Markdown:    articleMarkdown.Markdown,
 		LikeCount:   article.LikeCount,
 		CreatedAt:   article.CreatedAt.Format("Posted on ", ),
 		PostedBy:    *postedByUser,
@@ -43,9 +43,9 @@ func getArticleDetails(model *RequestModel) (*dbModels.Article, error) {
 	return article, nil
 }
 
-func getMarkdown(markdownId string) (*dbModels.Markdown, error) {
-	markdownDao := daos.GetMarkdownDao()
-	markdown, err := markdownDao.GetMarkdown(markdownId)
+func getArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
+	dao := daos.GetArticleMarkdownDao()
+	markdown, err := dao.GetArticleMarkdown(markdownId)
 	if commons.InError(err) {
 		return nil, err
 	}

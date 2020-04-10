@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Markdown struct {
+type ArticleMarkdown struct {
 	Id       string
 	Markdown string
 }

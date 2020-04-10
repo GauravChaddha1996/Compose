@@ -14,22 +14,22 @@ func createArticle(model *RequestModel) (*string, error) {
 	database := articleCommons.Database
 	transaction := database.Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
-	markdownDao := daos.GetMarkdownDaoDuringTransaction(transaction)
+	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)
 
 	markdownUuid, err := uuid.NewV4()
 	if commons.InError(err) {
 		transaction.Rollback()
-		return nil, errors.New("Markdown UUID can't be generated")
+		return nil, errors.New("ArticleMarkdown UUID can't be generated")
 	}
 
-	markdownEntry := dbModels.Markdown{
+	markdownEntry := dbModels.ArticleMarkdown{
 		Id:       markdownUuid.String(),
 		Markdown: model.markdown,
 	}
 
-	err = markdownDao.CreateMarkdown(markdownEntry)
+	err = markdownDao.CreateArticleMarkdown(markdownEntry)
 	if commons.InError(err) {
-		return nil, errors.New("Markdown entry can't be created")
+		return nil, errors.New("ArticleMarkdown entry can't be created")
 	}
 
 	articleUuid, err := uuid.NewV4()
