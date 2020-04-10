@@ -5,6 +5,7 @@ import (
 	"compose/dbModels"
 	"compose/user/daos"
 	"errors"
+	"github.com/jinzhu/gorm"
 )
 
 type ServiceContractImpl struct {
@@ -39,8 +40,9 @@ func (impl ServiceContractImpl) GetUsers(userIds []string) ([]*dbModels.User, er
 	return users, nil
 }
 
-func (impl ServiceContractImpl) ChangeArticleCount(userId string, change bool) error {
-	user, err := impl.dao.FindUserViaId(userId)
+func (impl ServiceContractImpl) ChangeArticleCount(userId string, change bool, transaction *gorm.DB) error {
+	userDao := impl.getUserDao(transaction)
+	user, err := userDao.FindUserViaId(userId)
 	if commons.InError(err) {
 		return errors.New("Can't find any such user")
 	}
@@ -53,15 +55,16 @@ func (impl ServiceContractImpl) ChangeArticleCount(userId string, change bool) e
 	var changeMap = make(map[string]interface{})
 	changeMap["article_count"] = user.ArticleCount
 
-	err = impl.dao.UpdateUser(changeMap, userId)
+	err = userDao.UpdateUser(changeMap, userId)
 	if commons.InError(err) {
 		return errors.New("User article count can't be updated")
 	}
 	return nil
 }
 
-func (impl ServiceContractImpl) ChangeLikeCount(userId string, change bool) error {
-	user, err := impl.dao.FindUserViaId(userId)
+func (impl ServiceContractImpl) ChangeLikeCount(userId string, change bool, transaction *gorm.DB) error {
+	userDao := impl.getUserDao(transaction)
+	user, err := userDao.FindUserViaId(userId)
 	if commons.InError(err) {
 		return errors.New("Can't find any such user")
 	}
@@ -74,9 +77,17 @@ func (impl ServiceContractImpl) ChangeLikeCount(userId string, change bool) erro
 	var changeMap = make(map[string]interface{})
 	changeMap["like_count"] = user.LikeCount
 
-	err = impl.dao.UpdateUser(changeMap, userId)
+	err = userDao.UpdateUser(changeMap, userId)
 	if commons.InError(err) {
 		return errors.New("User like count can't be updated")
 	}
 	return nil
+}
+
+func (impl ServiceContractImpl) getUserDao(transaction *gorm.DB) *daos.UserDao {
+	if transaction != nil {
+		return daos.GetUserDaoUnderTransaction(transaction)
+	} else {
+		return impl.dao
+	}
 }

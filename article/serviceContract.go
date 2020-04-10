@@ -30,8 +30,9 @@ func (impl ServiceContractImpl) GetArticleAuthorId(articleId string) *string {
 	return &article.UserId
 }
 
-func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change bool) error {
-	article, err := impl.articleDao.GetArticle(articleId)
+func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change bool, transaction *gorm.DB) error {
+	articleDao := impl.getArticleDao(transaction)
+	article, err := articleDao.GetArticle(articleId)
 	if commons.InError(err) {
 		return errors.New("Can't find any such article")
 	}
@@ -43,7 +44,7 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 	var changeMap = make(map[string]interface{})
 	changeMap["like_count"] = article.LikeCount
 
-	err = impl.articleDao.UpdateArticle(articleId, changeMap)
+	err = articleDao.UpdateArticle(articleId, changeMap)
 	if commons.InError(err) {
 		return errors.New("Article like count can't be updated")
 	}

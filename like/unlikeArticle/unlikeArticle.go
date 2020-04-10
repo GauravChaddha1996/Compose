@@ -17,13 +17,13 @@ func unlikeArticle(model *RequestModel) error {
 		return errors.New("Article not liked")
 	}
 
-	err := likeCommons.ArticleServiceContract.ChangeArticleLikeCount(model.ArticleId, false)
+	err := likeCommons.ArticleServiceContract.ChangeArticleLikeCount(model.ArticleId, false, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Article like count can't be decreased")
 	}
 
-	err = likeCommons.UserServiceContract.ChangeLikeCount(model.CommonModel.UserId, false)
+	err = likeCommons.UserServiceContract.ChangeLikeCount(model.CommonModel.UserId, false, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("User like count can't be decreased")

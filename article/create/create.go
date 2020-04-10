@@ -48,7 +48,7 @@ func createArticle(model *RequestModel) (*string, error) {
 		UpdatedAt:   time.Now(),
 	}
 
-	err = articleCommons.UserServiceContract.ChangeArticleCount(model.userId, true) // change = true to increase
+	err = articleCommons.UserServiceContract.ChangeArticleCount(model.userId, true, transaction) // change = true to increase
 	if commons.InError(err) {
 		transaction.Rollback()
 		return nil, errors.New("User article count can't be increased")
