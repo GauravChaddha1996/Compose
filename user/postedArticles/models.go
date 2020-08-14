@@ -30,7 +30,7 @@ type PostedArticle struct {
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
-	var DefaultMaxCreatedAt, _ = time.ParseInLocation("2 Jan 2006 15:04:05", "2 Jan 3000 15:04:05", time.Now().Location())
+	var DefaultMaxCreatedAt, _ = commons.MaxTime()
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		UserId:              queryMap.Get("user_id"),
@@ -42,7 +42,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	for key, values := range queryMap {
 		value := strings.Join(values, "")
 		if key == "max_created_at" {
-			maxCreatedAt, err := time.ParseInLocation("2 Jan 2006 15:04:05", value, time.Now().Location())
+			maxCreatedAt, err := commons.ParseTime(value)
 			if commons.InError(err) {
 				model.MaxCreatedAt = nil
 			} else {

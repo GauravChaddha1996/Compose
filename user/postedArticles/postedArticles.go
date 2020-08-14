@@ -35,7 +35,7 @@ func getPostedArticles(model *RequestModel) (*ResponseModel, error) {
 			Description: article.Description,
 		}
 	}
-	lastCreatedAt := (*articleArr)[articleArrLen-1].CreatedAt.Format("2 Jan 2006 15:04:05")
+	lastCreatedAt := (*articleArr)[articleArrLen-1].CreatedAt.Format(commons.TimeFormat)
 	return &ResponseModel{
 		Status:          commons.NewResponseStatus().SUCCESS,
 		PostedArticles:  postedArticleArr,

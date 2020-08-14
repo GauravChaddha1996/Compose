@@ -48,7 +48,7 @@ func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 			Name:     user.Name,
 		}
 	}
-	lastLikedAt := (*likeEntries)[likeEntriesSize-1].CreatedAt.Format("2 Jan 2006 15:04:05")
+	lastLikedAt := (*likeEntries)[likeEntriesSize-1].CreatedAt.Format(commons.TimeFormat)
 	return &ResponseModel{
 		Status:       commons.NewResponseStatus().SUCCESS,
 		LikedByUsers: likedByUserArr,

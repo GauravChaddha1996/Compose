@@ -30,7 +30,7 @@ type LikedArticle struct {
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
-	var DefaultMaxLikedAt, _ = time.ParseInLocation("2 Jan 2006 15:04:05", "2 Jan 3000 15:04:05", time.Now().Location())
+	var DefaultMaxLikedAt, _ = commons.MaxTime()
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		UserId:            queryMap.Get("user_id"),
@@ -42,7 +42,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	for key, values := range queryMap {
 		value := strings.Join(values, "")
 		if key == "max_liked_at" {
-			maxLikedAt, err := time.ParseInLocation("2 Jan 2006 15:04:05", value, time.Now().Location())
+			maxLikedAt, err := commons.ParseTime(value)
 			if commons.InError(err) {
 				model.MaxLikedAt = nil
 			} else {
