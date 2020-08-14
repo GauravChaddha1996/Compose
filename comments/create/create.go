@@ -13,24 +13,8 @@ import (
 func createComment(model *RequestModel) (*ResponseModel, error) {
 	tx := commentCommons.Database.Begin()
 	commentDao := daos.GetCommentDaoDuringTransaction(tx)
-	markdownDao := daos.GetCommentMarkdownDaoDuringTransaction(tx)
 
-	markdownUUId, err := uuid.NewV4()
-	if commons.InError(err) {
-		return nil, errors.New("Error in generating markdown uuid")
-	}
-
-	commentMarkdown := dbModels.CommentMarkdown{
-		Id:       markdownUUId.String(),
-		Markdown: model.Markdown,
-	}
-	err = markdownDao.CreateCommentMarkdown(commentMarkdown)
-	if commons.InError(err) {
-		tx.Rollback()
-		return nil, errors.New("Error in saving comment markdown")
-	}
-
-	err = commentCommons.ArticleServiceContract.ChangeArticleCommentCount(model.ArticleId, true, tx)
+	err := commentCommons.ArticleServiceContract.ChangeArticleCommentCount(model.ArticleId, true, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return nil, errors.New("Error in increasing comment count of article")
@@ -42,14 +26,14 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 		return nil, errors.New("Error in generating comment uuid")
 	}
 	comment := dbModels.Comment{
-		CommentId:     commentUUId.String(),
-		UserId:        model.CommonModel.UserId,
-		ArticleId:     model.ArticleId,
-		MarkdownId:    commentMarkdown.Id,
-		ParentId:      "",
-		RootCommentId: "",
-		Level:         1,
-		CreatedAt:     time.Now(),
+		CommentId: commentUUId.String(),
+		ArticleId: model.ArticleId,
+		UserId:    model.CommonModel.UserId,
+		Markdown:  model.Markdown,
+		LikeCount: 0,
+		IsDeleted: 0,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	err = commentDao.CreateComment(comment)
