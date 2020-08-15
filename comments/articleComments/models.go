@@ -1,6 +1,7 @@
 package articleComments
 
 import (
+	"compose/comments/commentCommons"
 	"compose/commons"
 	"encoding/json"
 	"errors"
@@ -15,23 +16,11 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status         commons.ResponseStatus `json:"status,omitempty"`
-	Message        string                 `json:"message,omitempty"`
-	Comments       []CommentResponse      `json:"comments,omitempty"`
-	PostbackParams string                 `json:"postback_params,omitempty"`
-	HasMore        bool                   `json:"has_more"`
-}
-
-type CommentResponse struct {
-	CommentId     string        `json:"comment_id,omitempty"`
-	Markdown      string        `json:"markdown,omitempty"`
-	CommentByUser CommentByUser `json:"name,omitempty"`
-}
-
-type CommentByUser struct {
-	UserId   string `json:"user_id,omitempty"`
-	PhotoUrl string `json:"photo_url,omitempty"`
-	Name     string `json:"name,omitempty"`
+	Status         commons.ResponseStatus         `json:"status,omitempty"`
+	Message        string                         `json:"message,omitempty"`
+	Comments       []commentCommons.CommentEntity `json:"comments,omitempty"`
+	PostbackParams string                         `json:"postback_params,omitempty"`
+	HasMore        bool                           `json:"has_more"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
