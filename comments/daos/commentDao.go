@@ -31,3 +31,12 @@ func (dao CommentDao) ReadComments(articleId string, maxCreatedAtTime time.Time,
 	}
 	return &comments, nil
 }
+
+func (dao CommentDao) DoesCommentExist(commentId string) bool {
+	var comment dbModels.Comment
+	queryResult := dao.db.Select("comment_id").Where("comment_id = ?", commentId).Limit(1).Find(&comment)
+	if commons.InError(queryResult.Error) {
+		return false
+	}
+	return true
+}

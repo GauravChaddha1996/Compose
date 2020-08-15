@@ -1,4 +1,4 @@
-package create
+package createComment
 
 import (
 	"compose/comments/commentCommons"

@@ -1,4 +1,4 @@
-package create
+package createReply
 
 import (
 	"compose/comments/commentCommons"
@@ -10,9 +10,9 @@ import (
 	"time"
 )
 
-func createComment(model *RequestModel) (*ResponseModel, error) {
+func createReply(model *RequestModel) (*ResponseModel, error) {
 	tx := commentCommons.Database.Begin()
-	commentDao := daos.GetCommentDaoDuringTransaction(tx)
+	replyDao := daos.GetReplyDaoDuringTransaction(tx)
 
 	err := commentCommons.ArticleServiceContract.ChangeArticleCommentCount(model.ArticleId, true, tx)
 	if commons.InError(err) {
@@ -20,13 +20,14 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 		return nil, errors.New("Error in increasing comment count of article")
 	}
 
-	commentUUId, err := uuid.NewV4()
+	replyUUId, err := uuid.NewV4()
 	if commons.InError(err) {
 		tx.Rollback()
-		return nil, errors.New("Error in generating comment uuid")
+		return nil, errors.New("Error in generating reply uuid")
 	}
-	comment := dbModels.Comment{
-		CommentId: commentUUId.String(),
+	reply := dbModels.Reply{
+		ReplyId:   replyUUId.String(),
+		ParentId:  model.ParentId,
 		ArticleId: model.ArticleId,
 		UserId:    model.CommonModel.UserId,
 		Markdown:  model.Markdown,
@@ -36,15 +37,15 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 		UpdatedAt: time.Now(),
 	}
 
-	err = commentDao.CreateComment(comment)
+	err = replyDao.CreateReply(reply)
 	if commons.InError(err) {
 		tx.Rollback()
-		return nil, errors.New("Error in saving comment")
+		return nil, errors.New("Error in saving reply")
 	}
 
 	tx.Commit()
 	return &ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,
-		Message: "Comment created successfully",
+		Message: "Reply created successfully",
 	}, nil
 }
