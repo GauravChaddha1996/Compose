@@ -11,6 +11,10 @@ type ReplyDao struct {
 	db *gorm.DB
 }
 
+func GetReplyDao() *ReplyDao {
+	return &ReplyDao{commentCommons.Database}
+}
+
 func GetReplyDaoDuringTransaction(db *gorm.DB) *ReplyDao {
 	return &ReplyDao{db}
 }

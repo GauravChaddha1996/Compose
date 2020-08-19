@@ -1,6 +1,7 @@
 package daos
 
 import (
+	"compose/comments/commentCommons"
 	"compose/commons"
 	"compose/dbModels"
 	"github.com/jinzhu/gorm"
@@ -9,6 +10,10 @@ import (
 
 type CommentDao struct {
 	db *gorm.DB
+}
+
+func GetCommentDao() *CommentDao {
+	return &CommentDao{commentCommons.Database}
 }
 
 func GetCommentDaoDuringTransaction(db *gorm.DB) *CommentDao {

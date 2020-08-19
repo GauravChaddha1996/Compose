@@ -6,15 +6,15 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"encoding/json"
+	"sync"
 	"time"
 )
 
 const ArticleCommentLimit = 20
 
 func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
-	tx := commentCommons.Database.Begin()
-	commentDao := daos.GetCommentDaoDuringTransaction(tx)
-	replyDao := daos.GetReplyDaoDuringTransaction(tx)
+	commentDao := daos.GetCommentDao()
+	replyDao := daos.GetReplyDao()
 	createdAt := model.PostbackParams["created_at"]
 
 	comments, err := commentDao.ReadComments(model.ArticleId, getCreatedAtTimeFromPostbackParams(createdAt), ArticleCommentLimit)
@@ -34,21 +34,27 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	}
 
 	commentsResponseArr := make([]commentCommons.CommentEntity, commentsLen)
+	wg := sync.WaitGroup{}
 	for index, entry := range *comments {
-		repliesForEntry := replyDao.GetReplies(entry.CommentId, 10, 1, 20)
-		var replies []commentCommons.ReplyEntity
-		if repliesForEntry == nil {
-			replies = nil
-		} else {
-			replies = *repliesForEntry
-		}
-		commentsResponseArr[index] = commentCommons.CommentEntity{
-			CommentId:     entry.CommentId,
-			Markdown:      entry.Markdown,
-			PostedByUser: (*PostedByUserArr)[index],
-			Replies:       replies,
-		}
+		wg.Add(1)
+		go func(i int, e dbModels.Comment) {
+			repliesForEntry := replyDao.GetReplies(e.CommentId, 10, 1, 20)
+			var replies []commentCommons.ReplyEntity
+			if repliesForEntry == nil {
+				replies = nil
+			} else {
+				replies = *repliesForEntry
+			}
+			commentsResponseArr[i] = commentCommons.CommentEntity{
+				CommentId:    e.CommentId,
+				Markdown:     e.Markdown,
+				PostedByUser: (*PostedByUserArr)[i],
+				Replies:      replies,
+			}
+			wg.Done()
+		}(index, entry)
 	}
+	wg.Wait()
 
 	return &ResponseModel{
 		Comments:       commentsResponseArr,

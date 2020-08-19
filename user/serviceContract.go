@@ -6,6 +6,7 @@ import (
 	"compose/user/daos"
 	"errors"
 	"github.com/jinzhu/gorm"
+	"sync"
 )
 
 type ServiceContractImpl struct {
@@ -29,13 +30,23 @@ func (impl ServiceContractImpl) GetUser(userId string) (*dbModels.User, error) {
 
 func (impl ServiceContractImpl) GetUsers(userIds []string) ([]*dbModels.User, error) {
 	var users = make([]*dbModels.User, len(userIds))
-
+	var errorInFetchingUsers error
+	errorInFetchingUsers = nil
+	wg := sync.WaitGroup{}
 	for index := range userIds {
-		user, err := impl.dao.FindUserViaId(userIds[index])
-		if commons.InError(err) {
-			return nil, err
-		}
-		users[index] = user
+		wg.Add(1)
+		go func(i int) {
+			user, err := impl.dao.FindUserViaId(userIds[i])
+			if commons.InError(err) {
+				errorInFetchingUsers = err
+			}
+			users[i] = user
+			wg.Done()
+		}(index)
+	}
+	wg.Wait()
+	if errorInFetchingUsers != nil {
+		return nil, errorInFetchingUsers
 	}
 	return users, nil
 }
