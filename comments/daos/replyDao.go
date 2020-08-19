@@ -40,7 +40,7 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 
 	queryResult := dao.db.Where("parent_id = ?", parentId).Order("created_at desc").Limit(limit).Find(&replies)
 	if commons.InError(queryResult.Error) {
-		return nil
+		return commentCommons.GetErrorReplies()
 	}
 	if queryResult.RowsAffected == 0 {
 		return nil
@@ -49,7 +49,7 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 	replyResponseArr := make([]commentCommons.ReplyEntity, len(replies))
 	userArr, err := commentCommons.GetUsersForReplies(&replies)
 	if commons.InError(err) {
-		return nil
+		return commentCommons.GetErrorReplies()
 	}
 	for index, reply := range replies {
 		childReplies := dao.GetReplies(reply.ReplyId, maxLevel, currentLevel+1, limit)
@@ -60,10 +60,11 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 			childRepliesResponse = nil
 		}
 		replyResponseArr[index] = commentCommons.ReplyEntity{
-			ReplyId:       reply.ReplyId,
-			Markdown:      reply.Markdown,
-			PostedByUser: (*userArr)[index],
-			Replies:       childRepliesResponse,
+			ReplyType:    commentCommons.NewReplyEntityTypeWrapper().ReplyTypeNormal,
+			ReplyId:      reply.ReplyId,
+			Markdown:     reply.Markdown,
+			PostedByUser: &(*userArr)[index],
+			Replies:      childRepliesResponse,
 		}
 	}
 	return &replyResponseArr

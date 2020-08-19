@@ -46,6 +46,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 				replies = *repliesForEntry
 			}
 			commentsResponseArr[i] = commentCommons.CommentEntity{
+				CommentType:  commentCommons.NewCommentEntityTypeWrapper().CommentTypeNormal,
 				CommentId:    e.CommentId,
 				Markdown:     e.Markdown,
 				PostedByUser: (*PostedByUserArr)[i],
