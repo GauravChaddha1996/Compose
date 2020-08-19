@@ -49,7 +49,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 				CommentType:  commentCommons.NewCommentEntityTypeWrapper().CommentTypeNormal,
 				CommentId:    e.CommentId,
 				Markdown:     e.Markdown,
-				PostedByUser: (*PostedByUserArr)[i],
+				PostedByUser: &(*PostedByUserArr)[i],
 				Replies:      replies,
 			}
 			wg.Done()
@@ -81,8 +81,8 @@ func getNoCommentsResponse(createdAt string) *ResponseModel {
 	}
 	return &ResponseModel{
 		Status:         commons.NewResponseStatus().SUCCESS,
-		Message:        message,
-		Comments:       nil,
+		Message:        "",
+		Comments:       []commentCommons.CommentEntity{commentCommons.GetNoMoreCommentEntity(message)},
 		PostbackParams: "",
 		HasMore:        false,
 	}

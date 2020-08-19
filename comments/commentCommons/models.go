@@ -4,9 +4,11 @@ type CommentEntityType int
 type ReplyEntityType int
 
 const ReplyTypeErrorId = "reply_type_error_id"
+const CommentTypeEndId = "comment_type_end_id"
 
 type CommentEntityTypeWrapper struct {
 	CommentTypeNormal CommentEntityType
+	CommentTypeEnd    CommentEntityType
 }
 type ReplyEntityTypeWrapper struct {
 	ReplyTypeNormal ReplyEntityType
@@ -14,7 +16,10 @@ type ReplyEntityTypeWrapper struct {
 }
 
 func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
-	return CommentEntityTypeWrapper{CommentTypeNormal: 0}
+	return CommentEntityTypeWrapper{
+		CommentTypeNormal: 0,
+		CommentTypeEnd:    1,
+	}
 }
 
 func NewReplyEntityTypeWrapper() ReplyEntityTypeWrapper {
@@ -28,7 +33,7 @@ type CommentEntity struct {
 	CommentType  CommentEntityType `json:"comment_type,omitempty"`
 	CommentId    string            `json:"comment_id,omitempty"`
 	Markdown     string            `json:"markdown,omitempty"`
-	PostedByUser PostedByUser      `json:"user,omitempty"`
+	PostedByUser *PostedByUser      `json:"user,omitempty"`
 	Replies      []ReplyEntity     `json:"replies,omitempty"`
 }
 
@@ -48,6 +53,16 @@ type ReplyEntity struct {
 
 func GetErrorReplies() *[]ReplyEntity {
 	return &[]ReplyEntity{GetErrorReplyEntity()}
+}
+
+func GetNoMoreCommentEntity(msg string) CommentEntity {
+	return CommentEntity{
+		CommentType:  NewCommentEntityTypeWrapper().CommentTypeEnd,
+		CommentId:    CommentTypeEndId,
+		Markdown:     msg,
+		PostedByUser: nil,
+		Replies:      nil,
+	}
 }
 
 func GetErrorReplyEntity() ReplyEntity {
