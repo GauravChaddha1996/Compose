@@ -6,6 +6,7 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"encoding/json"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -16,6 +17,11 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	commentDao := daos.GetCommentDao()
 	replyDao := daos.GetReplyDao()
 	createdAt := model.PostbackParams["created_at"]
+	commentsCountServedTillNow, err := strconv.ParseUint(model.PostbackParams["count"], 10, 64)
+	if commons.InError(err) {
+		commentsCountServedTillNow = 0
+	}
+	totalTopCommentCount := commentCommons.ArticleServiceContract.GetArticleTopCommentCount(model.ArticleId)
 
 	comments, err := commentDao.ReadComments(model.ArticleId, getCreatedAtTimeFromPostbackParams(createdAt), ArticleCommentLimit)
 	if commons.InError(err) {
@@ -59,8 +65,8 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 
 	return &ResponseModel{
 		Comments:       commentsResponseArr,
-		PostbackParams: getPostbackParamsForPagination(comments, commentsLen),
-		HasMore:        !(commentsLen > ArticleCommentLimit),
+		PostbackParams: getPostbackParamsForPagination(comments, commentsLen, commentsCountServedTillNow),
+		HasMore:        (commentsCountServedTillNow + uint64(commentsLen)) < totalTopCommentCount,
 	}, nil
 }
 
@@ -88,9 +94,10 @@ func getNoCommentsResponse(createdAt string) *ResponseModel {
 	}
 }
 
-func getPostbackParamsForPagination(comments *[]dbModels.Comment, commentsLen int) string {
+func getPostbackParamsForPagination(comments *[]dbModels.Comment, commentsLen int, count uint64) string {
 	postbackParamsMap := make(map[string]string)
 	postbackParamsMap["created_at"] = ((*comments)[commentsLen-1]).CreatedAt.Format(commons.TimeFormat)
+	postbackParamsMap["count"] = strconv.FormatUint(count + uint64(commentsLen), 10)
 	postbackParamsStr, err := json.Marshal(postbackParamsMap)
 	var postbackParams string
 	if commons.InError(err) {

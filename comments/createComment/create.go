@@ -14,7 +14,7 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 	tx := commentCommons.Database.Begin()
 	commentDao := daos.GetCommentDaoDuringTransaction(tx)
 
-	err := commentCommons.ArticleServiceContract.ChangeArticleCommentCount(model.ArticleId, true, tx)
+	err := commentCommons.ArticleServiceContract.ChangeArticleTopCommentCount(model.ArticleId, true, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return nil, errors.New("Error in increasing comment count of article")

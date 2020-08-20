@@ -30,6 +30,14 @@ func (impl ServiceContractImpl) GetArticleAuthorId(articleId string) *string {
 	return &article.UserId
 }
 
+func (impl ServiceContractImpl) GetArticleTopCommentCount(articleId string) uint64 {
+	article, err := impl.articleDao.GetArticle(articleId)
+	if commons.InError(err) {
+		return 0
+	}
+	return article.TopCommentCount
+}
+
 func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change bool, transaction *gorm.DB) error {
 	articleDao := impl.getArticleDao(transaction)
 	article, err := articleDao.GetArticle(articleId)
@@ -51,23 +59,47 @@ func (impl ServiceContractImpl) ChangeArticleLikeCount(articleId string, change 
 	return nil
 }
 
-func (impl ServiceContractImpl) ChangeArticleCommentCount(articleId string, change bool, transaction *gorm.DB) error {
+func (impl ServiceContractImpl) ChangeArticleTopCommentCount(articleId string, change bool, transaction *gorm.DB) error {
 	articleDao := impl.getArticleDao(transaction)
 	article, err := articleDao.GetArticle(articleId)
 	if commons.InError(err) {
 		return errors.New("Can't find any such article")
 	}
 	if change {
-		article.CommentCount += 1
+		article.TopCommentCount += 1
+		article.TotalCommentCount += 1
 	} else {
-		article.CommentCount -= 1
+		article.TopCommentCount -= 1
+		article.TotalCommentCount -= 1
 	}
 	var changeMap = make(map[string]interface{})
-	changeMap["comment_count"] = article.CommentCount
+	changeMap["top_comment_count"] = article.TopCommentCount
+	changeMap["total_comment_count"] = article.TotalCommentCount
 
 	err = articleDao.UpdateArticle(articleId, changeMap)
 	if commons.InError(err) {
-		return errors.New("Article comment count can't be updated")
+		return errors.New("Article top comment count can't be updated")
+	}
+	return nil
+}
+
+func (impl ServiceContractImpl) ChangeArticleReplyCommentCount(articleId string, change bool, transaction *gorm.DB) error {
+	articleDao := impl.getArticleDao(transaction)
+	article, err := articleDao.GetArticle(articleId)
+	if commons.InError(err) {
+		return errors.New("Can't find any such article")
+	}
+	if change {
+		article.TotalCommentCount += 1
+	} else {
+		article.TotalCommentCount -= 1
+	}
+	var changeMap = make(map[string]interface{})
+	changeMap["total_comment_count"] = article.TotalCommentCount
+
+	err = articleDao.UpdateArticle(articleId, changeMap)
+	if commons.InError(err) {
+		return errors.New("Article reply count can't be updated")
 	}
 	return nil
 }

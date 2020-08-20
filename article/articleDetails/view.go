@@ -22,15 +22,16 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 		return nil, errors.New("Cannot fetch user who posted this article")
 	}
 	return &ResponseModel{
-		Status:      commons.NewResponseStatus().SUCCESS,
-		Message:     "",
-		Title:       article.Title,
-		Description: article.Description,
-		Markdown:    articleMarkdown.Markdown,
-		LikeCount:   article.LikeCount,
-		CreatedAt:   article.CreatedAt.Format("Posted on ", ),
-		PostedBy:    *postedByUser,
-		Editable:    model.commonModel.UserId == article.UserId,
+		Status:       commons.NewResponseStatus().SUCCESS,
+		Message:      "",
+		Title:        article.Title,
+		Description:  article.Description,
+		Markdown:     articleMarkdown.Markdown,
+		LikeCount:    article.LikeCount,
+		CommentCount: article.TotalCommentCount,
+		CreatedAt:    article.CreatedAt.Format("Posted on ", ),
+		PostedBy:     *postedByUser,
+		Editable:     model.commonModel.UserId == article.UserId,
 	}, nil
 }
 
