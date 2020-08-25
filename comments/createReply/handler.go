@@ -44,6 +44,8 @@ func securityClearance(model *RequestModel) error {
 
 	commentExists := commentDao.DoesCommentExist(model.ParentId)
 	replyParentExists := replyDao.DoesParentExist(model.ParentId)
+	model.ParentIsComment = commentExists
+	model.ParentIsReply = replyParentExists
 	if commentExists == false && replyParentExists == false {
 		// Neither the parent id is a top level comment or a reply
 		return errors.New("No such parent id exists")

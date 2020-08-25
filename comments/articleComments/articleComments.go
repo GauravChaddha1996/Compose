@@ -12,6 +12,8 @@ import (
 )
 
 const ArticleCommentLimit = 20
+const CommentReplyLimit = 20
+const CommentReplyMaxLevel = 10
 
 func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	commentDao := daos.GetCommentDao()
@@ -44,7 +46,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	for index, entry := range *comments {
 		wg.Add(1)
 		go func(i int, e dbModels.Comment) {
-			repliesForEntry := replyDao.GetReplies(e.CommentId, 10, 1, 20)
+			repliesForEntry := replyDao.GetReplies(e.CommentId, CommentReplyMaxLevel, 1, CommentReplyLimit)
 			var replies []commentCommons.ReplyEntity
 			if repliesForEntry == nil {
 				replies = nil
@@ -97,7 +99,7 @@ func getNoCommentsResponse(createdAt string) *ResponseModel {
 func getPostbackParamsForPagination(comments *[]dbModels.Comment, commentsLen int, count uint64) string {
 	postbackParamsMap := make(map[string]string)
 	postbackParamsMap["created_at"] = ((*comments)[commentsLen-1]).CreatedAt.Format(commons.TimeFormat)
-	postbackParamsMap["count"] = strconv.FormatUint(count + uint64(commentsLen), 10)
+	postbackParamsMap["count"] = strconv.FormatUint(count+uint64(commentsLen), 10)
 	postbackParamsStr, err := json.Marshal(postbackParamsMap)
 	var postbackParams string
 	if commons.InError(err) {

@@ -8,10 +8,12 @@ import (
 )
 
 type RequestModel struct {
-	ArticleId   string
-	ParentId    string
-	Markdown    string
-	CommonModel *commons.CommonModel
+	ArticleId       string
+	ParentId        string
+	Markdown        string
+	CommonModel     *commons.CommonModel
+	ParentIsComment bool
+	ParentIsReply   bool
 }
 
 type ResponseModel struct {
@@ -26,10 +28,12 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 	model := RequestModel{
-		ArticleId:   r.FormValue("article_id"),
-		ParentId:    r.FormValue("parent_id"),
-		Markdown:    r.FormValue("markdown"),
-		CommonModel: commons.GetCommonModel(r),
+		ArticleId:       r.FormValue("article_id"),
+		ParentId:        r.FormValue("parent_id"),
+		Markdown:        r.FormValue("markdown"),
+		CommonModel:     commons.GetCommonModel(r),
+		ParentIsComment: false,
+		ParentIsReply:   false,
 	}
 	err = model.isInvalid()
 	if commons.InError(err) {

@@ -4,6 +4,7 @@ import (
 	"compose/comments/commentCommons"
 	"compose/commons"
 	"compose/dbModels"
+	"errors"
 	"github.com/jinzhu/gorm"
 	"time"
 )
@@ -44,4 +45,28 @@ func (dao CommentDao) DoesCommentExist(commentId string) bool {
 		return false
 	}
 	return true
+}
+
+func (dao CommentDao) FindComment(commentId string) (*dbModels.Comment, error) {
+	var comment dbModels.Comment
+	queryResult := dao.db.Where("comment_id = ?", commentId).Limit(1).Find(&comment)
+	if commons.InError(queryResult.Error) {
+		return nil, queryResult.Error
+	}
+	return &comment, nil
+}
+
+func (dao CommentDao) IncreaseReplyCount(commentId string) error {
+	comment, err := dao.FindComment(commentId)
+	if commons.InError(err) {
+		return errors.New("Cannot find comment for this comment id")
+	}
+	var changeMap = make(map[string]interface{})
+	changeMap["reply_count"] = (*comment).ReplyCount + 1
+	return dao.UpdateComment(commentId, changeMap)
+}
+
+func (dao CommentDao) UpdateComment(commentId string, changeMap map[string]interface{}) error {
+	var comment dbModels.Comment
+	return dao.db.Model(comment).Where("comment_id = ?", commentId).UpdateColumns(changeMap).Error
 }

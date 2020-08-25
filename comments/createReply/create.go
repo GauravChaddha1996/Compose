@@ -13,11 +13,28 @@ import (
 func createReply(model *RequestModel) (*ResponseModel, error) {
 	tx := commentCommons.Database.Begin()
 	replyDao := daos.GetReplyDaoDuringTransaction(tx)
+	commentDao := daos.GetCommentDaoDuringTransaction(tx)
 
 	err := commentCommons.ArticleServiceContract.ChangeArticleReplyCommentCount(model.ArticleId, true, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return nil, errors.New("Error in increasing comment count of article")
+	}
+
+	if model.ParentIsComment {
+		// increase parent comment reply count
+		err := commentDao.IncreaseReplyCount(model.ParentId)
+		if commons.InError(err) {
+			tx.Rollback()
+			return nil, errors.New("Error in increasing reply count of parent comment")
+		}
+	} else if model.ParentIsReply {
+		// increase parent reply - child reply count
+		err := replyDao.IncreaseReplyCount(model.ParentId)
+		if commons.InError(err) {
+			tx.Rollback()
+			return nil, errors.New("Error in increasing reply count of parent reply")
+		}
 	}
 
 	replyUUId, err := uuid.NewV4()
