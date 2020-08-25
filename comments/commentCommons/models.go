@@ -4,6 +4,7 @@ type CommentEntityType int
 type ReplyEntityType int
 
 const ReplyTypeErrorId = "reply_type_error_id"
+const ReplyTypeContinueId = "reply_type_continue_id"
 const CommentTypeEndId = "comment_type_end_id"
 
 type CommentEntityTypeWrapper struct {
@@ -11,8 +12,9 @@ type CommentEntityTypeWrapper struct {
 	CommentTypeEnd    CommentEntityType
 }
 type ReplyEntityTypeWrapper struct {
-	ReplyTypeNormal ReplyEntityType
-	ReplyTypeError  ReplyEntityType
+	ReplyTypeNormal   ReplyEntityType
+	ReplyTypeError    ReplyEntityType
+	ReplyTypeContinue ReplyEntityType
 }
 
 func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
@@ -24,8 +26,9 @@ func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
 
 func NewReplyEntityTypeWrapper() ReplyEntityTypeWrapper {
 	return ReplyEntityTypeWrapper{
-		ReplyTypeNormal: 0,
-		ReplyTypeError:  1,
+		ReplyTypeNormal:   0,
+		ReplyTypeError:    1,
+		ReplyTypeContinue: 2,
 	}
 }
 
@@ -33,7 +36,7 @@ type CommentEntity struct {
 	CommentType  CommentEntityType `json:"comment_type,omitempty"`
 	CommentId    string            `json:"comment_id,omitempty"`
 	Markdown     string            `json:"markdown,omitempty"`
-	PostedByUser *PostedByUser      `json:"user,omitempty"`
+	PostedByUser *PostedByUser     `json:"user,omitempty"`
 	Replies      []ReplyEntity     `json:"replies,omitempty"`
 }
 
@@ -70,6 +73,16 @@ func GetErrorReplyEntity() ReplyEntity {
 		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeError,
 		ReplyId:      ReplyTypeErrorId,
 		Markdown:     "Error loading replies. Tap to try again.",
+		PostedByUser: nil,
+		Replies:      nil,
+	}
+}
+
+func GetContinueReplyEntity() ReplyEntity {
+	return ReplyEntity{
+		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeContinue,
+		ReplyId:      ReplyTypeContinueId,
+		Markdown:     "Continue reading this thread ...",
 		PostedByUser: nil,
 		Replies:      nil,
 	}

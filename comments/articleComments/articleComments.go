@@ -52,6 +52,11 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 				replies = nil
 			} else {
 				replies = *repliesForEntry
+				repliesLen := len(replies)
+				// this means that we have more reply in this comment entry
+				if uint64(repliesLen) <= e.ReplyCount {
+					replies = append(replies, commentCommons.GetContinueReplyEntity())
+				}
 			}
 			commentsResponseArr[i] = commentCommons.CommentEntity{
 				CommentType:  commentCommons.NewCommentEntityTypeWrapper().CommentTypeNormal,
