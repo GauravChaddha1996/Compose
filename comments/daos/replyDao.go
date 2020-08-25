@@ -57,6 +57,11 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 		var childRepliesResponse []commentCommons.ReplyEntity
 		if childReplies != nil {
 			childRepliesResponse = *childReplies
+			childRepliesLen := len(childRepliesResponse)
+			// this means that we have more reply in this reply entry
+			if uint64(childRepliesLen) < reply.ReplyCount {
+				childRepliesResponse = append(childRepliesResponse, commentCommons.GetContinueReplyEntity())
+			}
 		} else {
 			childRepliesResponse = nil
 		}

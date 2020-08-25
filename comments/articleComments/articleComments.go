@@ -54,7 +54,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 				replies = *repliesForEntry
 				repliesLen := len(replies)
 				// this means that we have more reply in this comment entry
-				if uint64(repliesLen) <= e.ReplyCount {
+				if uint64(repliesLen) < e.ReplyCount {
 					replies = append(replies, commentCommons.GetContinueReplyEntity())
 				}
 			}
