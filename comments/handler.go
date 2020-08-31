@@ -5,6 +5,7 @@ import (
 	"compose/comments/commentCommons"
 	"compose/comments/createComment"
 	"compose/comments/createReply"
+	"compose/comments/replyThread"
 	"compose/serviceContracts"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -23,5 +24,6 @@ func SetServiceContractImpl(articleContract serviceContracts.ArticleServiceContr
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/comments", articleComments.Handler).Methods(http.MethodGet)
 	subRouter.HandleFunc("/comment", createComment.Handler).Methods(http.MethodPost)
+	subRouter.HandleFunc("/replyThread", replyThread.Handler).Methods(http.MethodGet)
 	subRouter.HandleFunc("/reply", createReply.Handler).Methods(http.MethodPost)
 }

@@ -46,7 +46,8 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	for index, entry := range *comments {
 		wg.Add(1)
 		go func(i int, e dbModels.Comment) {
-			repliesForEntry := replyDao.GetReplies(e.CommentId, CommentReplyMaxLevel, 1, CommentReplyLimit)
+			maxTime, _ := commons.MaxTime()
+			repliesForEntry := replyDao.GetReplies(e.CommentId, CommentReplyMaxLevel, 1, CommentReplyLimit, &maxTime, 0)
 			var replies []commentCommons.ReplyEntity
 			if repliesForEntry == nil {
 				replies = nil
@@ -55,7 +56,9 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 				repliesLen := len(replies)
 				// this means that we have more reply in this comment entry
 				if uint64(repliesLen) < e.ReplyCount {
-					replies = append(replies, commentCommons.GetContinueReplyEntity())
+					lastReplyEntity := (*repliesForEntry)[repliesLen-1]
+					continueThreadPostbackParams := commentCommons.GetContinueThreadPostbackParams(model.ArticleId, e.CommentId, lastReplyEntity.PostedAt, repliesLen)
+					replies = append(replies, commentCommons.GetContinueReplyEntity(continueThreadPostbackParams))
 				}
 			}
 			commentsResponseArr[i] = commentCommons.CommentEntity{
@@ -63,6 +66,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 				CommentId:    e.CommentId,
 				Markdown:     e.Markdown,
 				PostedByUser: &(*PostedByUserArr)[i],
+				PostedAt:     e.CreatedAt.Format(commons.TimeFormat),
 				Replies:      replies,
 			}
 			wg.Done()
@@ -71,6 +75,7 @@ func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
 	wg.Wait()
 
 	return &ResponseModel{
+		Status:         commons.NewResponseStatus().SUCCESS,
 		Comments:       commentsResponseArr,
 		PostbackParams: getPostbackParamsForPagination(comments, commentsLen, commentsCountServedTillNow),
 		HasMore:        (commentsCountServedTillNow + uint64(commentsLen)) < totalTopCommentCount,
@@ -107,6 +112,22 @@ func getPostbackParamsForPagination(comments *[]dbModels.Comment, commentsLen in
 	postbackParamsMap["count"] = strconv.FormatUint(count+uint64(commentsLen), 10)
 	postbackParamsStr, err := json.Marshal(postbackParamsMap)
 	var postbackParams string
+	if commons.InError(err) {
+		postbackParams = ""
+	} else {
+		postbackParams = string(postbackParamsStr)
+	}
+	return postbackParams
+}
+
+func getContinueThreadPostbackParams(articleId string, parentId string, createdAt string, replyCount int) string {
+	var postbackParams string
+	postbackParamsMap := make(map[string]string)
+	postbackParamsMap["parent_id"] = parentId
+	postbackParamsMap["article_id"] = articleId
+	postbackParamsMap["created_at"] = createdAt
+	postbackParamsMap["reply_count"] = strconv.Itoa(replyCount)
+	postbackParamsStr, err := json.Marshal(postbackParamsMap)
 	if commons.InError(err) {
 		postbackParams = ""
 	} else {

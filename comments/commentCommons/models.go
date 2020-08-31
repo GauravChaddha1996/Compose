@@ -37,6 +37,7 @@ type CommentEntity struct {
 	CommentId    string            `json:"comment_id,omitempty"`
 	Markdown     string            `json:"markdown,omitempty"`
 	PostedByUser *PostedByUser     `json:"user,omitempty"`
+	PostedAt     string            `json:"posted_at,omitempty"`
 	Replies      []ReplyEntity     `json:"replies,omitempty"`
 }
 
@@ -47,11 +48,20 @@ type PostedByUser struct {
 }
 
 type ReplyEntity struct {
-	ReplyType    ReplyEntityType `json:"reply_type,omitempty"`
-	ReplyId      string          `json:"reply_id,omitempty"`
-	Markdown     string          `json:"markdown,omitempty"`
-	PostedByUser *PostedByUser   `json:"user,omitempty"`
-	Replies      []ReplyEntity   `json:"replies,omitempty"`
+	ReplyType              ReplyEntityType `json:"reply_type,omitempty"`
+	ReplyId                string          `json:"reply_id,omitempty"`
+	Markdown               string          `json:"markdown,omitempty"`
+	PostedByUser           *PostedByUser   `json:"user,omitempty"`
+	Replies                []ReplyEntity   `json:"replies,omitempty"`
+	PostedAt               string          `json:"posted_at,omitempty"`
+	ContinuePostbackParams string          `json:"continue_postback_params,omitempty"`
+}
+
+type ParentEntity struct {
+	ParentId     string        `json:"parent_id,omitempty"`
+	Markdown     string        `json:"markdown,omitempty"`
+	PostedByUser *PostedByUser `json:"user,omitempty"`
+	ReplyCount   uint64        `json:"total_replies,omitempty"`
 }
 
 func GetErrorReplies() *[]ReplyEntity {
@@ -78,12 +88,13 @@ func GetErrorReplyEntity() ReplyEntity {
 	}
 }
 
-func GetContinueReplyEntity() ReplyEntity {
+func GetContinueReplyEntity(continuePostbackParams string) ReplyEntity {
 	return ReplyEntity{
-		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeContinue,
-		ReplyId:      ReplyTypeContinueId,
-		Markdown:     "Continue reading this thread ...",
-		PostedByUser: nil,
-		Replies:      nil,
+		ReplyType:              NewReplyEntityTypeWrapper().ReplyTypeContinue,
+		ReplyId:                ReplyTypeContinueId,
+		Markdown:               "Continue reading this thread ...",
+		PostedByUser:           nil,
+		Replies:                nil,
+		ContinuePostbackParams: continuePostbackParams,
 	}
 }

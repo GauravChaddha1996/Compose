@@ -6,6 +6,7 @@ import (
 	"compose/dbModels"
 	"errors"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type ReplyDao struct {
@@ -33,13 +34,13 @@ func (dao ReplyDao) DoesParentExist(parentId string) bool {
 	return true
 }
 
-func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, limit int) *[]commentCommons.ReplyEntity {
+func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, limit int, maxCreatedAtTime *time.Time, previousReplyCount int) *[]commentCommons.ReplyEntity {
 	if currentLevel > maxLevel {
 		return nil
 	}
 	replies := make([]dbModels.Reply, limit)
 
-	queryResult := dao.db.Where("parent_id = ?", parentId).Order("created_at desc").Limit(limit).Find(&replies)
+	queryResult := dao.db.Where("parent_id = ? && created_at < ?", parentId, maxCreatedAtTime).Order("created_at desc").Limit(limit).Find(&replies)
 	if commons.InError(queryResult.Error) {
 		return commentCommons.GetErrorReplies()
 	}
@@ -53,14 +54,19 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 		return commentCommons.GetErrorReplies()
 	}
 	for index, reply := range replies {
-		childReplies := dao.GetReplies(reply.ReplyId, maxLevel, currentLevel+1, limit)
+		maxTime, _ := commons.MaxTime()
+		childReplies := dao.GetReplies(reply.ReplyId, maxLevel, currentLevel+1, limit, &maxTime, 0)
 		var childRepliesResponse []commentCommons.ReplyEntity
 		if childReplies != nil {
 			childRepliesResponse = *childReplies
 			childRepliesLen := len(childRepliesResponse)
+			newReplyCount := childRepliesLen + previousReplyCount
+
 			// this means that we have more reply in this reply entry
-			if uint64(childRepliesLen) < reply.ReplyCount {
-				childRepliesResponse = append(childRepliesResponse, commentCommons.GetContinueReplyEntity())
+			if uint64(newReplyCount) < reply.ReplyCount {
+				lastChildReply := childRepliesResponse[childRepliesLen-1]
+				continueThreadPostbackParams := commentCommons.GetContinueThreadPostbackParams(reply.ArticleId, reply.ReplyId, lastChildReply.PostedAt, newReplyCount)
+				childRepliesResponse = append(childRepliesResponse, commentCommons.GetContinueReplyEntity(continueThreadPostbackParams))
 			}
 		} else {
 			childRepliesResponse = nil
@@ -70,6 +76,7 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 			ReplyId:      reply.ReplyId,
 			Markdown:     reply.Markdown,
 			PostedByUser: &(*userArr)[index],
+			PostedAt:     reply.CreatedAt.Format(commons.TimeFormat),
 			Replies:      childRepliesResponse,
 		}
 	}
