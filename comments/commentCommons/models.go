@@ -38,7 +38,8 @@ type CommentEntity struct {
 	Markdown     string            `json:"markdown,omitempty"`
 	PostedByUser *PostedByUser     `json:"user,omitempty"`
 	PostedAt     string            `json:"posted_at,omitempty"`
-	Replies      []ReplyEntity     `json:"replies,omitempty"`
+	Replies      []*ReplyEntity    `json:"replies,omitempty"`
+	ReplyCount   uint64            `json:"-"`
 }
 
 type PostedByUser struct {
@@ -52,9 +53,11 @@ type ReplyEntity struct {
 	ReplyId                string          `json:"reply_id,omitempty"`
 	Markdown               string          `json:"markdown,omitempty"`
 	PostedByUser           *PostedByUser   `json:"user,omitempty"`
-	Replies                []ReplyEntity   `json:"replies,omitempty"`
+	RepliesDeprecated      []ReplyEntity   `json:"-"`
 	PostedAt               string          `json:"posted_at,omitempty"`
 	ContinuePostbackParams string          `json:"continue_postback_params,omitempty"`
+	Replies                []*ReplyEntity  `json:"replies,omitempty"`
+	ReplyCount             uint64          `json:"-"`
 }
 
 type ParentEntity struct {
@@ -74,7 +77,6 @@ func GetNoMoreCommentEntity(msg string) CommentEntity {
 		CommentId:    CommentTypeEndId,
 		Markdown:     msg,
 		PostedByUser: nil,
-		Replies:      nil,
 	}
 }
 
@@ -84,7 +86,6 @@ func GetErrorReplyEntity() ReplyEntity {
 		ReplyId:      ReplyTypeErrorId,
 		Markdown:     "Error loading replies. Tap to try again.",
 		PostedByUser: nil,
-		Replies:      nil,
 	}
 }
 
@@ -94,7 +95,6 @@ func GetContinueReplyEntity(continuePostbackParams string) ReplyEntity {
 		ReplyId:                ReplyTypeContinueId,
 		Markdown:               "Continue reading this thread ...",
 		PostedByUser:           nil,
-		Replies:                nil,
 		ContinuePostbackParams: continuePostbackParams,
 	}
 }

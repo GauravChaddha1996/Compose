@@ -20,7 +20,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	response, err := getArticleCommentsResponse(requestModel)
+	response, err := getArticleComments(requestModel)
 	if commons.InError(err) {
 		commons.WriteFailedResponse(err, writer)
 		return

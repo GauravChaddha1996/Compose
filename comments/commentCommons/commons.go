@@ -32,16 +32,29 @@ func GetUsersForReplies(replies *[]dbModels.Reply) (*[]PostedByUser, error) {
 	return getUserArr(&userIdList)
 }
 
+func GetUsersForRepliesCorrect(replies []*dbModels.Reply) (*[]PostedByUser, error) {
+	commentsLen := len(replies)
+	userIdList := make([]string, commentsLen)
+	for index, entry := range replies {
+		userIdList[index] = entry.UserId
+	}
+	return getUserArr(&userIdList)
+}
+
 func getUserArr(userIdList *[]string) (*[]PostedByUser, error) {
 	userLen := len(*userIdList)
 	users, err := UserServiceContract.GetUsers(*userIdList)
 	if commons.InError(err) {
 		return nil, errors.New("Cannot fetch details via userId")
 	}
+	userMap := make(map[string]*dbModels.User)
+	for _, user := range users {
+		userMap[user.UserId] = user
+	}
 
 	PostedByUserArr := make([]PostedByUser, userLen)
-	for index := range users {
-		user := users[index]
+	for index, userId := range *userIdList {
+		user := userMap[userId]
 		PostedByUserArr[index] = PostedByUser{
 			UserId:   user.UserId,
 			PhotoUrl: user.PhotoUrl,

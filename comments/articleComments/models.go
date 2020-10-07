@@ -7,20 +7,27 @@ import (
 	"errors"
 	"github.com/asaskevich/govalidator"
 	"net/http"
+	"strings"
 )
 
 type RequestModel struct {
 	ArticleId      string
-	PostbackParams map[string]string
+	PostbackParams *PostbackParams
 	CommonModel    *commons.CommonModel
 }
 
 type ResponseModel struct {
-	Status         commons.ResponseStatus         `json:"status,omitempty"`
-	Message        string                         `json:"message,omitempty"`
-	Comments       []commentCommons.CommentEntity `json:"comments,omitempty"`
-	PostbackParams string                         `json:"postback_params,omitempty"`
-	HasMore        bool                           `json:"has_more"`
+	Status           commons.ResponseStatus          `json:"status,omitempty"`
+	Message          string                          `json:"message,omitempty"`
+	Comments         []commentCommons.CommentEntity  `json:"comments,omitempty"`
+	CommentsPointers []*commentCommons.CommentEntity `json:"comments_pointers,omitempty"`
+	PostbackParams   string                          `json:"postback_params,omitempty"`
+	HasMore          bool                            `json:"has_more"`
+}
+
+type PostbackParams struct {
+	Count     int    `json:"count"`
+	CreatedAt string `json:"created_at"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -32,12 +39,13 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 	postbackParamsStr := queryMap.Get("postback_params")
 	if len(postbackParamsStr) != 0 {
-		postbackParamsMap := make(map[string]string)
-		err := json.Unmarshal([]byte(postbackParamsStr), &postbackParamsMap)
+		postbackParamsStr = strings.ReplaceAll(postbackParamsStr, "\\\"", "\"")
+		var postbackParams PostbackParams
+		err := json.Unmarshal([]byte(postbackParamsStr), &postbackParams)
 		if commons.InError(err) {
 			return nil, errors.New("Postback params are faulty")
 		}
-		model.PostbackParams = postbackParamsMap
+		model.PostbackParams = &postbackParams
 	}
 	err := model.isInvalid()
 	if commons.InError(err) {

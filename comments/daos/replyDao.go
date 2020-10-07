@@ -72,15 +72,37 @@ func (dao ReplyDao) GetReplies(parentId string, maxLevel int, currentLevel int, 
 			childRepliesResponse = nil
 		}
 		replyResponseArr[index] = commentCommons.ReplyEntity{
-			ReplyType:    commentCommons.NewReplyEntityTypeWrapper().ReplyTypeNormal,
-			ReplyId:      reply.ReplyId,
-			Markdown:     reply.Markdown,
-			PostedByUser: &(*userArr)[index],
-			PostedAt:     reply.CreatedAt.Format(commons.TimeFormat),
-			Replies:      childRepliesResponse,
+			ReplyType:         commentCommons.NewReplyEntityTypeWrapper().ReplyTypeNormal,
+			ReplyId:           reply.ReplyId,
+			Markdown:          reply.Markdown,
+			PostedByUser:      &(*userArr)[index],
+			PostedAt:          reply.CreatedAt.Format(commons.TimeFormat),
+			RepliesDeprecated: childRepliesResponse,
 		}
 	}
 	return &replyResponseArr
+}
+
+func (dao ReplyDao) GetRepliesInParentIds(parentIds []string) ([]*dbModels.Reply, error) {
+	parentIdsLen := len(parentIds)
+	if parentIdsLen == 0 {
+		return []*dbModels.Reply{}, nil
+	}
+	parentIdQuery := ""
+	for index, parentId := range parentIds {
+		parentIdQuery += "\"" + parentId + "\""
+		if index != parentIdsLen-1 {
+			parentIdQuery += ","
+		}
+	}
+	whereQuery := "parent_id IN (" + parentIdQuery + ")"
+
+	var dbReplies []*dbModels.Reply
+	queryResult := dao.db.Where(whereQuery).Find(&dbReplies)
+	if commons.InError(queryResult.Error) {
+		return nil, queryResult.Error
+	}
+	return dbReplies, nil
 }
 
 func (dao ReplyDao) FindReply(replyId string) (*dbModels.Reply, error) {

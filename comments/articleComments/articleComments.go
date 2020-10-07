@@ -6,132 +6,203 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"encoding/json"
-	"strconv"
-	"sync"
-	"time"
+	"errors"
 )
 
 const ArticleCommentLimit = 20
-const CommentReplyLimit = 20
-const CommentReplyMaxLevel = 10
+const MaxRepliesCount = 1000
+const MaxCommentReplyLevel = 5
 
-func getArticleCommentsResponse(model *RequestModel) (*ResponseModel, error) {
-	commentDao := daos.GetCommentDao()
-	replyDao := daos.GetReplyDao()
-	createdAt := model.PostbackParams["created_at"]
-	commentsCountServedTillNow, err := strconv.ParseUint(model.PostbackParams["count"], 10, 64)
-	if commons.InError(err) {
-		commentsCountServedTillNow = 0
-	}
-	totalTopCommentCount := commentCommons.ArticleServiceContract.GetArticleTopCommentCount(model.ArticleId)
-
-	comments, err := commentDao.ReadComments(model.ArticleId, getCreatedAtTimeFromPostbackParams(createdAt), ArticleCommentLimit)
+func getArticleComments(model *RequestModel) (*ResponseModel, error) {
+	commentEntityArr, err := getCommentEntityArr(model)
 	if commons.InError(err) {
 		return nil, err
 	}
-
-	commentsLen := len(*comments)
-
-	if commentsLen == 0 {
-		return getNoCommentsResponse(createdAt), nil
+	if len(commentEntityArr) == 0 {
+		createdAtTime := ""
+		if model.PostbackParams != nil {
+			createdAtTime = model.PostbackParams.CreatedAt
+		}
+		return getNoCommentsResponse(createdAtTime), nil
 	}
 
-	PostedByUserArr, err := commentCommons.GetUsersForComments(comments)
-	if commons.InError(err) {
-		return nil, err
-	}
+	fillCommentEntityArrWithReplies(model, commentEntityArr)
 
-	commentsResponseArr := make([]commentCommons.CommentEntity, commentsLen)
-	wg := sync.WaitGroup{}
-	for index, entry := range *comments {
-		wg.Add(1)
-		go func(i int, e dbModels.Comment) {
-			maxTime, _ := commons.MaxTime()
-			repliesForEntry := replyDao.GetReplies(e.CommentId, CommentReplyMaxLevel, 1, CommentReplyLimit, &maxTime, 0)
-			var replies []commentCommons.ReplyEntity
-			if repliesForEntry == nil {
-				replies = nil
-			} else {
-				replies = *repliesForEntry
-				repliesLen := len(replies)
-				// this means that we have more reply in this comment entry
-				if uint64(repliesLen) < e.ReplyCount {
-					lastReplyEntity := (*repliesForEntry)[repliesLen-1]
-					continueThreadPostbackParams := commentCommons.GetContinueThreadPostbackParams(model.ArticleId, e.CommentId, lastReplyEntity.PostedAt, repliesLen)
-					replies = append(replies, commentCommons.GetContinueReplyEntity(continueThreadPostbackParams))
-				}
-			}
-			commentsResponseArr[i] = commentCommons.CommentEntity{
-				CommentType:  commentCommons.NewCommentEntityTypeWrapper().CommentTypeNormal,
-				CommentId:    e.CommentId,
-				Markdown:     e.Markdown,
-				PostedByUser: &(*PostedByUserArr)[i],
-				PostedAt:     e.CreatedAt.Format(commons.TimeFormat),
-				Replies:      replies,
-			}
-			wg.Done()
-		}(index, entry)
-	}
-	wg.Wait()
-
+	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{
-		Status:         commons.NewResponseStatus().SUCCESS,
-		Comments:       commentsResponseArr,
-		PostbackParams: getPostbackParamsForPagination(comments, commentsLen, commentsCountServedTillNow),
-		HasMore:        (commentsCountServedTillNow + uint64(commentsLen)) < totalTopCommentCount,
+		Status:           commons.NewResponseStatus().SUCCESS,
+		Message:          "",
+		CommentsPointers: commentEntityArr,
+		PostbackParams:   postbackParams,
+		HasMore:          hasMore,
 	}, nil
 }
 
-func getCreatedAtTimeFromPostbackParams(createdAt string) time.Time {
-	if len(createdAt) == 0 {
-		createdAt = commons.MAX_TIME
-	}
-	createdAtTime, _ := commons.ParseTime(createdAt)
-	return createdAtTime
-}
-
-func getNoCommentsResponse(createdAt string) *ResponseModel {
-	var message string
-	if createdAt == commons.MAX_TIME {
-		message = "No comments to show"
-	} else {
-		message = "No more comments to show"
-	}
-	return &ResponseModel{
-		Status:         commons.NewResponseStatus().SUCCESS,
-		Message:        "",
-		Comments:       []commentCommons.CommentEntity{commentCommons.GetNoMoreCommentEntity(message)},
-		PostbackParams: "",
-		HasMore:        false,
-	}
-}
-
-func getPostbackParamsForPagination(comments *[]dbModels.Comment, commentsLen int, count uint64) string {
-	postbackParamsMap := make(map[string]string)
-	postbackParamsMap["created_at"] = ((*comments)[commentsLen-1]).CreatedAt.Format(commons.TimeFormat)
-	postbackParamsMap["count"] = strconv.FormatUint(count+uint64(commentsLen), 10)
-	postbackParamsStr, err := json.Marshal(postbackParamsMap)
-	var postbackParams string
+func getCommentEntityArr(model *RequestModel) ([]*commentCommons.CommentEntity, error) {
+	commentDao := daos.GetCommentDao()
+	createdAtTime, err := commons.MaxTime()
 	if commons.InError(err) {
-		postbackParams = ""
-	} else {
-		postbackParams = string(postbackParamsStr)
+		return nil, errors.New("Error in parsing max time")
 	}
-	return postbackParams
+	if model.PostbackParams != nil {
+		createdAtTime, err = commons.ParseTime(model.PostbackParams.CreatedAt)
+		if commons.InError(err) {
+			return nil, errors.New("Error in parsing created at time")
+		}
+	}
+
+	commentDbModels, err := commentDao.ReadComments(model.ArticleId, createdAtTime, ArticleCommentLimit)
+	if commons.InError(err) {
+		return nil, errors.New("Error is fetching comments")
+	}
+
+	commentEntityArr := make([]*commentCommons.CommentEntity, len(*commentDbModels))
+	PostedByUserArr, err := commentCommons.GetUsersForComments(commentDbModels)
+	if commons.InError(err) {
+		return nil, errors.New("Error in fetching users for comments")
+	}
+	for index, commentDbModel := range *commentDbModels {
+		commentEntityArr[index] = &commentCommons.CommentEntity{
+			CommentType:  commentCommons.NewCommentEntityTypeWrapper().CommentTypeNormal,
+			CommentId:    commentDbModel.CommentId,
+			Markdown:     commentDbModel.Markdown,
+			PostedByUser: &(*PostedByUserArr)[index],
+			PostedAt:     commentDbModel.CreatedAt.Format(commons.TimeFormat),
+			Replies:      []*commentCommons.ReplyEntity{},
+			ReplyCount:   commentDbModel.ReplyCount,
+		}
+	}
+	return commentEntityArr, nil
 }
 
-func getContinueThreadPostbackParams(articleId string, parentId string, createdAt string, replyCount int) string {
-	var postbackParams string
-	postbackParamsMap := make(map[string]string)
-	postbackParamsMap["parent_id"] = parentId
-	postbackParamsMap["article_id"] = articleId
-	postbackParamsMap["created_at"] = createdAt
-	postbackParamsMap["reply_count"] = strconv.Itoa(replyCount)
-	postbackParamsStr, err := json.Marshal(postbackParamsMap)
-	if commons.InError(err) {
-		postbackParams = ""
-	} else {
-		postbackParams = string(postbackParamsStr)
+func fillCommentEntityArrWithReplies(model *RequestModel, commentEntityArr []*commentCommons.CommentEntity) {
+	currentReplyLevel := 0
+	repliesCount := 0
+	parentEntityArr, parentEntryMap := getParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
+
+	repliesFinishReached := false
+	breakDueToError := false
+	for currentReplyLevel < MaxCommentReplyLevel && repliesCount < MaxRepliesCount && repliesFinishReached == false {
+		replyDbModels, replyEntityArr, err := getReplyEntityArr(parentEntityArr)
+		if len(replyDbModels) == 0 {
+			repliesFinishReached = true
+		}
+
+		if commons.InError(err) {
+			breakDueToError = true
+			break
+		}
+		for index, replyEntity := range replyEntityArr {
+			replyDbModel := replyDbModels[index]
+			index = (*parentEntryMap)[replyDbModel.ParentId]
+			parentEntity := parentEntityArr[index]
+			if parentEntity.IsComment {
+				parentComment := parentEntity.commentEntity
+				parentComment.Replies = append(parentComment.Replies, replyEntity)
+			}
+			if parentEntity.IsReply {
+				parentReply := parentEntity.replyEntity
+				parentReply.Replies = append(parentReply.Replies, replyEntity)
+			}
+		}
+
+		parentEntityArr, parentEntryMap = getParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
+		repliesCount += len(replyEntityArr)
+		currentReplyLevel += 1
 	}
-	return postbackParams
+	checkForContinueThread(repliesFinishReached, breakDueToError, model, parentEntityArr)
+}
+
+func getReplyEntityArr(parentEntityArr []*ParentEntity) ([]*dbModels.Reply, []*commentCommons.ReplyEntity, error) {
+	replyDao := daos.GetReplyDao()
+	parentEntityArrLen := len(parentEntityArr)
+	parentIds := make([]string, parentEntityArrLen)
+	for index, parentEntity := range parentEntityArr {
+		parentIds[index] = parentEntity.Id
+	}
+	replyDbModels, err := replyDao.GetRepliesInParentIds(parentIds)
+	if commons.InError(err) {
+		return nil, nil, errors.New("Error in fetching replies for parent entity arr")
+	}
+
+	PostedByUserArr, err := commentCommons.GetUsersForRepliesCorrect(replyDbModels)
+	if commons.InError(err) {
+		return nil, nil, errors.New("Error in fetching users for comments")
+	}
+
+	replyDbModelsLen := len(replyDbModels)
+	replyEntityArr := make([]*commentCommons.ReplyEntity, replyDbModelsLen)
+	for index, replyDbModel := range replyDbModels {
+		replyEntityArr[index] = &commentCommons.ReplyEntity{
+			ReplyType:              commentCommons.ReplyEntityTypeWrapper{}.ReplyTypeNormal,
+			ReplyId:                replyDbModel.ReplyId,
+			Markdown:               replyDbModel.Markdown,
+			PostedByUser:           &(*PostedByUserArr)[index],
+			Replies:                []*commentCommons.ReplyEntity{},
+			PostedAt:               replyDbModel.CreatedAt.Format(commons.TimeFormat),
+			ContinuePostbackParams: "",
+			ReplyCount:             replyDbModel.ReplyCount,
+		}
+	}
+	return replyDbModels, replyEntityArr, nil
+}
+
+func checkForContinueThread(repliesFinishReached bool, breakDueToError bool, model *RequestModel, parentEntityArr []*ParentEntity) {
+	if repliesFinishReached == false || breakDueToError {
+		for _, parentEntity := range parentEntityArr {
+			if parentEntity.IsComment {
+				parentComment := parentEntity.commentEntity
+				if parentComment.ReplyCount > 0 {
+					repliesLen := len(parentComment.Replies)
+					var createdAtTime string
+					if repliesLen == 0 {
+						createdAtTime = commons.MAX_TIME
+					} else {
+						createdAtTime = parentComment.Replies[repliesLen-1].PostedAt
+					}
+					continuePostbackParams := getContinueThreadPostbackParams(model.ArticleId, parentComment.CommentId, createdAtTime, repliesLen)
+					continueReplyEntity := commentCommons.GetContinueReplyEntity(continuePostbackParams)
+					parentComment.Replies = append(parentComment.Replies, &continueReplyEntity)
+				}
+			}
+			if parentEntity.IsReply {
+				parentReply := parentEntity.replyEntity
+				if parentReply.ReplyCount > 0 {
+					repliesLen := len(parentReply.Replies)
+					var createdAtTime string
+					if repliesLen == 0 {
+						createdAtTime = commons.MAX_TIME
+					} else {
+						createdAtTime = parentReply.Replies[repliesLen-1].PostedAt
+					}
+					continuePostbackParams := getContinueThreadPostbackParams(model.ArticleId, parentReply.ReplyId, createdAtTime, repliesLen)
+					continueReplyEntity := commentCommons.GetContinueReplyEntity(continuePostbackParams)
+					parentReply.Replies = append(parentReply.Replies, &continueReplyEntity)
+				}
+			}
+		}
+	}
+}
+
+func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons.CommentEntity) (string, bool) {
+	totalTopCommentCount := commentCommons.ArticleServiceContract.GetArticleTopCommentCount(model.ArticleId)
+	commentEntityArrLen := len(commentEntityArr)
+
+	commentsServedTillNowCount := commentEntityArrLen
+	if commentEntityArrLen == 0 {
+		return "", false
+	}
+	if model.PostbackParams != nil {
+		commentsServedTillNowCount += model.PostbackParams.Count
+	}
+	postbackParams := PostbackParams{
+		Count:     commentsServedTillNowCount,
+		CreatedAt: (commentEntityArr[commentEntityArrLen-1]).PostedAt,
+	}
+	postbackParamsStr, err := json.Marshal(postbackParams)
+	if commons.InError(err) {
+		return "", false
+	} else {
+		return string(postbackParamsStr), uint64(commentsServedTillNowCount) < totalTopCommentCount
+	}
 }

@@ -41,6 +41,28 @@ func (dao UserDao) FindUserViaId(userId string) (*dbModels.User, error) {
 	return &user, nil
 }
 
+func (dao UserDao) FindUserViaIds(userIds []string) ([]*dbModels.User, error) {
+	parentIdQuery := ""
+	userIdsLen := len(userIds)
+	if userIdsLen == 0 {
+		return []*dbModels.User{}, nil
+	}
+	for index, parentId := range userIds {
+		parentIdQuery += "\"" + parentId + "\""
+		if index != userIdsLen-1 {
+			parentIdQuery += ","
+		}
+	}
+	whereQuery := "user_id IN (" + parentIdQuery + ")"
+
+	var users []*dbModels.User
+	queryResult := dao.db.Where(whereQuery).Find(&users)
+	if commons.InError(queryResult.Error) {
+		return nil, queryResult.Error
+	}
+	return users, nil
+}
+
 func (dao UserDao) DoesUserIdExist(userId string) (bool, error) {
 	_, err := dao.FindUserViaId(userId)
 	if commons.InError(err) {
