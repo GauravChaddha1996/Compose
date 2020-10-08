@@ -3,75 +3,103 @@ package replyThread
 import (
 	"compose/comments/commentCommons"
 	"compose/comments/daos"
+	"compose/comments/replyThreadCommon"
 	"compose/commons"
+	"compose/dbModels"
+	"errors"
 )
 
-const ReplyThreadLimit = 20
 const ReplyThreadMaxLevel = 10
+const ReplyThreadRepliesMaxCount = 2000
 
 func getReplyThread(model *RequestModel) (*ResponseModel, error) {
 	replyDao := daos.GetReplyDao()
 	commentDao := daos.GetCommentDao()
-	replies := replyDao.GetReplies(model.ParentId, ReplyThreadMaxLevel, 1, ReplyThreadLimit, model.CreatedAt, model.ReplyCount)
+	parentEntity, parentCommentEntity, parentReplyEntity := getParentEntity(model, replyDao, commentDao)
 
-	if replies == nil {
-		return &ResponseModel{
-			Status:  commons.NewResponseStatus().SUCCESS,
-			Message: "No more replies in this thread",
-		}, nil
+	replyEntityArr, err := getReplyEntityArr(model, parentCommentEntity, parentReplyEntity, replyDao)
+	if commons.InError(err) {
+		return nil, err
 	}
-	repliesEntity := *replies
-	repliesLen := len(repliesEntity)
-	newReplyCount := repliesLen + model.ReplyCount
-	parentEntity := getParentEntity(model, replyDao, commentDao)
+	if len(replyEntityArr) == 0 {
+		return getNoReplyResponse(parentEntity), nil
+	}
 
-	// this means that we have more reply in this comment entry
-	if uint64(newReplyCount) < parentEntity.ReplyCount {
-		lastReplyEntity := repliesEntity[repliesLen-1]
-		continueThreadPostbackParams := commentCommons.GetContinueThreadPostbackParams(model.ArticleId, model.ParentId, lastReplyEntity.PostedAt, newReplyCount)
-		repliesEntity = append(repliesEntity, commentCommons.GetContinueReplyEntity(continueThreadPostbackParams))
-	}
+	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
+	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, ReplyThreadMaxLevel, ReplyThreadRepliesMaxCount, parentEntityArr, parentEntryMap, replyDao)
+
 	return &ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,
 		Parent:  parentEntity,
-		Replies: repliesEntity,
+		Replies: replyEntityArr,
 	}, nil
 }
 
-func getParentEntity(model *RequestModel, replyDao *daos.ReplyDao, commentDao *daos.CommentDao) *commentCommons.ParentEntity {
+func getReplyEntityArr(
+	model *RequestModel,
+	parentCommentEntity *commentCommons.CommentEntity,
+	parentReplyEntity *commentCommons.ReplyEntity,
+	replyDao *daos.ReplyDao) ([]*commentCommons.ReplyEntity, error) {
+
+	replyThreadParentModel := &replyThreadCommon.ReplyThreadParentModel{
+		Id:            model.ParentId,
+		IsComment:     parentCommentEntity != nil,
+		IsReply:       parentReplyEntity != nil,
+		CommentEntity: parentCommentEntity,
+		ReplyEntity:   parentReplyEntity,
+	}
+	_, replyEntityArr, err := replyThreadCommon.GetReplyEntityArr([]*replyThreadCommon.ReplyThreadParentModel{replyThreadParentModel}, replyDao)
+	if commons.InError(err) {
+		return nil, errors.New("Error in fetching replies to parent")
+	}
+	return replyEntityArr, nil
+}
+
+func getNoReplyResponse(parentEntity *commentCommons.ParentEntity) *ResponseModel {
+	message := "No more replies to show"
+	noMoreReplyEntity := commentCommons.GetNoMoreReplyEntity(message)
+	return &ResponseModel{
+		Status:  commons.NewResponseStatus().SUCCESS,
+		Message: "",
+		Replies: []*commentCommons.ReplyEntity{&noMoreReplyEntity},
+		Parent:  parentEntity,
+	}
+}
+
+func getParentEntity(model *RequestModel, replyDao *daos.ReplyDao, commentDao *daos.CommentDao) (*commentCommons.ParentEntity, *commentCommons.CommentEntity, *commentCommons.ReplyEntity) {
+	markdown := ""
+	replyCount := uint64(0)
+	user := &dbModels.User{}
+	userId := ""
+
 	parentReplyEntity, err := replyDao.FindReply(model.ParentId)
-	if !commons.InError(err) {
-		user, err := commentCommons.UserServiceContract.GetUser(parentReplyEntity.UserId)
-		if commons.InError(err) {
-			return nil
-		}
-		return &commentCommons.ParentEntity{
-			ParentId:   model.ParentId,
-			Markdown:   parentReplyEntity.Markdown,
-			ReplyCount: parentReplyEntity.ReplyCount,
-			PostedByUser: &commentCommons.PostedByUser{
-				UserId:   user.UserId,
-				PhotoUrl: user.PhotoUrl,
-				Name:     user.Name,
-			},
-		}
-	}
 	parentCommentEntity, err := commentDao.FindComment(model.ParentId)
-	if !commons.InError(err) {
-		user, err := commentCommons.UserServiceContract.GetUser(parentCommentEntity.UserId)
-		if commons.InError(err) {
-			return nil
-		}
-		return &commentCommons.ParentEntity{
-			ParentId:   model.ParentId,
-			Markdown:   parentCommentEntity.Markdown,
-			ReplyCount: parentCommentEntity.ReplyCount,
-			PostedByUser: &commentCommons.PostedByUser{
-				UserId:   user.UserId,
-				PhotoUrl: user.PhotoUrl,
-				Name:     user.Name,
-			},
-		}
+	if parentReplyEntity != nil {
+		userId = parentReplyEntity.UserId
+		markdown = parentReplyEntity.Markdown
+		replyCount = parentReplyEntity.ReplyCount
+	} else if parentCommentEntity != nil {
+		userId = parentCommentEntity.UserId
+		markdown = parentCommentEntity.Markdown
+		replyCount = parentCommentEntity.ReplyCount
+	} else {
+		return nil, nil, nil
 	}
-	return nil
+
+	user, err = commentCommons.UserServiceContract.GetUser(userId)
+	if commons.InError(err) {
+		return nil, nil, nil
+	}
+	postedByUser := &commentCommons.PostedByUser{
+		UserId:   user.UserId,
+		PhotoUrl: user.PhotoUrl,
+		Name:     user.Name,
+	}
+	return &commentCommons.ParentEntity{
+			ParentId:     model.ParentId,
+			Markdown:     markdown,
+			ReplyCount:   replyCount,
+			PostedByUser: postedByUser,
+		}, commentCommons.GetCommentEntityFromModel(parentCommentEntity, postedByUser),
+		commentCommons.GetReplyEntityFromModel(parentReplyEntity, postedByUser)
 }

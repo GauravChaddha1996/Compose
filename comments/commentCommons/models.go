@@ -1,11 +1,16 @@
 package commentCommons
 
+import (
+	"compose/commons"
+	"compose/dbModels"
+)
+
 type CommentEntityType int
 type ReplyEntityType int
 
-const ReplyTypeErrorId = "reply_type_error_id"
-const ReplyTypeContinueId = "reply_type_continue_id"
 const CommentTypeEndId = "comment_type_end_id"
+const ReplyTypeContinueId = "reply_type_continue_id"
+const ReplyTypeEndId = "reply_type_end_id"
 
 type CommentEntityTypeWrapper struct {
 	CommentTypeNormal CommentEntityType
@@ -13,8 +18,8 @@ type CommentEntityTypeWrapper struct {
 }
 type ReplyEntityTypeWrapper struct {
 	ReplyTypeNormal   ReplyEntityType
-	ReplyTypeError    ReplyEntityType
 	ReplyTypeContinue ReplyEntityType
+	ReplyTypeEnd      ReplyEntityType
 }
 
 func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
@@ -27,8 +32,8 @@ func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
 func NewReplyEntityTypeWrapper() ReplyEntityTypeWrapper {
 	return ReplyEntityTypeWrapper{
 		ReplyTypeNormal:   0,
-		ReplyTypeError:    1,
-		ReplyTypeContinue: 2,
+		ReplyTypeContinue: 1,
+		ReplyTypeEnd:      2,
 	}
 }
 
@@ -53,7 +58,6 @@ type ReplyEntity struct {
 	ReplyId                string          `json:"reply_id,omitempty"`
 	Markdown               string          `json:"markdown,omitempty"`
 	PostedByUser           *PostedByUser   `json:"user,omitempty"`
-	RepliesDeprecated      []ReplyEntity   `json:"-"`
 	PostedAt               string          `json:"posted_at,omitempty"`
 	ContinuePostbackParams string          `json:"continue_postback_params,omitempty"`
 	Replies                []*ReplyEntity  `json:"replies,omitempty"`
@@ -67,8 +71,19 @@ type ParentEntity struct {
 	ReplyCount   uint64        `json:"total_replies,omitempty"`
 }
 
-func GetErrorReplies() *[]ReplyEntity {
-	return &[]ReplyEntity{GetErrorReplyEntity()}
+func GetCommentEntityFromModel(comment *dbModels.Comment, user *PostedByUser) *CommentEntity {
+	if comment == nil {
+		return nil
+	}
+	return &CommentEntity{
+		CommentType:  NewCommentEntityTypeWrapper().CommentTypeNormal,
+		CommentId:    comment.CommentId,
+		Markdown:     comment.Markdown,
+		PostedByUser: user,
+		PostedAt:     comment.CreatedAt.Format(commons.TimeFormat),
+		Replies:      []*ReplyEntity{},
+		ReplyCount:   comment.ReplyCount,
+	}
 }
 
 func GetNoMoreCommentEntity(msg string) CommentEntity {
@@ -80,21 +95,36 @@ func GetNoMoreCommentEntity(msg string) CommentEntity {
 	}
 }
 
-func GetErrorReplyEntity() ReplyEntity {
-	return ReplyEntity{
-		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeError,
-		ReplyId:      ReplyTypeErrorId,
-		Markdown:     "Error loading replies. Tap to try again.",
-		PostedByUser: nil,
+func GetReplyEntityFromModel(reply *dbModels.Reply, user *PostedByUser) *ReplyEntity {
+	if reply == nil {
+		return nil
+	}
+	return &ReplyEntity{
+		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeNormal,
+		ReplyId:      reply.ReplyId,
+		Markdown:     reply.Markdown,
+		PostedByUser: user,
+		PostedAt:     reply.CreatedAt.Format(commons.TimeFormat),
+		Replies:      []*ReplyEntity{},
+		ReplyCount:   reply.ReplyCount,
 	}
 }
 
-func GetContinueReplyEntity(continuePostbackParams string) ReplyEntity {
-	return ReplyEntity{
+func GetContinueReplyEntity(continuePostbackParams string) *ReplyEntity {
+	return &ReplyEntity{
 		ReplyType:              NewReplyEntityTypeWrapper().ReplyTypeContinue,
 		ReplyId:                ReplyTypeContinueId,
 		Markdown:               "Continue reading this thread ...",
 		PostedByUser:           nil,
 		ContinuePostbackParams: continuePostbackParams,
+	}
+}
+
+func GetNoMoreReplyEntity(msg string) ReplyEntity {
+	return ReplyEntity{
+		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeEnd,
+		ReplyId:      ReplyTypeEndId,
+		Markdown:     msg,
+		PostedByUser: nil,
 	}
 }

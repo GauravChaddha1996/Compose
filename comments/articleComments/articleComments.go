@@ -3,15 +3,15 @@ package articleComments
 import (
 	"compose/comments/commentCommons"
 	"compose/comments/daos"
+	"compose/comments/replyThreadCommon"
 	"compose/commons"
-	"compose/dbModels"
 	"encoding/json"
 	"errors"
 )
 
 const ArticleCommentLimit = 20
 const MaxRepliesCount = 1000
-const MaxCommentReplyLevel = 5
+const MaxCommentReplyLevel = 2
 
 func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 	commentEntityArr, err := getCommentEntityArr(model)
@@ -26,7 +26,8 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 		return getNoCommentsResponse(createdAtTime), nil
 	}
 
-	fillCommentEntityArrWithReplies(model, commentEntityArr)
+	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
+	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, daos.GetReplyDao())
 
 	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{
@@ -62,126 +63,9 @@ func getCommentEntityArr(model *RequestModel) ([]*commentCommons.CommentEntity, 
 		return nil, errors.New("Error in fetching users for comments")
 	}
 	for index, commentDbModel := range *commentDbModels {
-		commentEntityArr[index] = &commentCommons.CommentEntity{
-			CommentType:  commentCommons.NewCommentEntityTypeWrapper().CommentTypeNormal,
-			CommentId:    commentDbModel.CommentId,
-			Markdown:     commentDbModel.Markdown,
-			PostedByUser: &(*PostedByUserArr)[index],
-			PostedAt:     commentDbModel.CreatedAt.Format(commons.TimeFormat),
-			Replies:      []*commentCommons.ReplyEntity{},
-			ReplyCount:   commentDbModel.ReplyCount,
-		}
+		commentEntityArr[index] = commentCommons.GetCommentEntityFromModel(&commentDbModel, &(*PostedByUserArr)[index])
 	}
 	return commentEntityArr, nil
-}
-
-func fillCommentEntityArrWithReplies(model *RequestModel, commentEntityArr []*commentCommons.CommentEntity) {
-	currentReplyLevel := 0
-	repliesCount := 0
-	parentEntityArr, parentEntryMap := getParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
-
-	repliesFinishReached := false
-	breakDueToError := false
-	for currentReplyLevel < MaxCommentReplyLevel && repliesCount < MaxRepliesCount && repliesFinishReached == false {
-		replyDbModels, replyEntityArr, err := getReplyEntityArr(parentEntityArr)
-		if len(replyDbModels) == 0 {
-			repliesFinishReached = true
-		}
-
-		if commons.InError(err) {
-			breakDueToError = true
-			break
-		}
-		for index, replyEntity := range replyEntityArr {
-			replyDbModel := replyDbModels[index]
-			index = (*parentEntryMap)[replyDbModel.ParentId]
-			parentEntity := parentEntityArr[index]
-			if parentEntity.IsComment {
-				parentComment := parentEntity.commentEntity
-				parentComment.Replies = append(parentComment.Replies, replyEntity)
-			}
-			if parentEntity.IsReply {
-				parentReply := parentEntity.replyEntity
-				parentReply.Replies = append(parentReply.Replies, replyEntity)
-			}
-		}
-
-		parentEntityArr, parentEntryMap = getParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
-		repliesCount += len(replyEntityArr)
-		currentReplyLevel += 1
-	}
-	checkForContinueThread(repliesFinishReached, breakDueToError, model, parentEntityArr)
-}
-
-func getReplyEntityArr(parentEntityArr []*ParentEntity) ([]*dbModels.Reply, []*commentCommons.ReplyEntity, error) {
-	replyDao := daos.GetReplyDao()
-	parentEntityArrLen := len(parentEntityArr)
-	parentIds := make([]string, parentEntityArrLen)
-	for index, parentEntity := range parentEntityArr {
-		parentIds[index] = parentEntity.Id
-	}
-	replyDbModels, err := replyDao.GetRepliesInParentIds(parentIds)
-	if commons.InError(err) {
-		return nil, nil, errors.New("Error in fetching replies for parent entity arr")
-	}
-
-	PostedByUserArr, err := commentCommons.GetUsersForRepliesCorrect(replyDbModels)
-	if commons.InError(err) {
-		return nil, nil, errors.New("Error in fetching users for comments")
-	}
-
-	replyDbModelsLen := len(replyDbModels)
-	replyEntityArr := make([]*commentCommons.ReplyEntity, replyDbModelsLen)
-	for index, replyDbModel := range replyDbModels {
-		replyEntityArr[index] = &commentCommons.ReplyEntity{
-			ReplyType:              commentCommons.ReplyEntityTypeWrapper{}.ReplyTypeNormal,
-			ReplyId:                replyDbModel.ReplyId,
-			Markdown:               replyDbModel.Markdown,
-			PostedByUser:           &(*PostedByUserArr)[index],
-			Replies:                []*commentCommons.ReplyEntity{},
-			PostedAt:               replyDbModel.CreatedAt.Format(commons.TimeFormat),
-			ContinuePostbackParams: "",
-			ReplyCount:             replyDbModel.ReplyCount,
-		}
-	}
-	return replyDbModels, replyEntityArr, nil
-}
-
-func checkForContinueThread(repliesFinishReached bool, breakDueToError bool, model *RequestModel, parentEntityArr []*ParentEntity) {
-	if repliesFinishReached == false || breakDueToError {
-		for _, parentEntity := range parentEntityArr {
-			if parentEntity.IsComment {
-				parentComment := parentEntity.commentEntity
-				if parentComment.ReplyCount > 0 {
-					repliesLen := len(parentComment.Replies)
-					var createdAtTime string
-					if repliesLen == 0 {
-						createdAtTime = commons.MAX_TIME
-					} else {
-						createdAtTime = parentComment.Replies[repliesLen-1].PostedAt
-					}
-					continuePostbackParams := getContinueThreadPostbackParams(model.ArticleId, parentComment.CommentId, createdAtTime, repliesLen)
-					continueReplyEntity := commentCommons.GetContinueReplyEntity(continuePostbackParams)
-					parentComment.Replies = append(parentComment.Replies, &continueReplyEntity)
-				}
-			}
-			if parentEntity.IsReply {
-				parentReply := parentEntity.replyEntity
-				if parentReply.ReplyCount > 0 {
-					repliesLen := len(parentReply.Replies)
-					var createdAtTime string
-					if repliesLen == 0 {
-						createdAtTime = commons.MAX_TIME
-					} else {
-						createdAtTime = parentReply.Replies[repliesLen-1].PostedAt
-					}
-					continuePostbackParams := getContinueThreadPostbackParams(model.ArticleId, parentReply.ReplyId, createdAtTime, repliesLen)
-					continueReplyEntity := commentCommons.GetContinueReplyEntity(continuePostbackParams)
-					parentReply.Replies = append(parentReply.Replies, &continueReplyEntity)
-				}
-			}
-		}
-	}
 }
 
 func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons.CommentEntity) (string, bool) {
@@ -204,5 +88,21 @@ func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons.C
 		return "", false
 	} else {
 		return string(postbackParamsStr), uint64(commentsServedTillNowCount) < totalTopCommentCount
+	}
+}
+
+func getNoCommentsResponse(createdAt string) *ResponseModel {
+	var message string
+	if createdAt == "" {
+		message = "No comments to show"
+	} else {
+		message = "No more comments to show"
+	}
+	return &ResponseModel{
+		Status:         commons.NewResponseStatus().SUCCESS,
+		Message:        "",
+		Comments:       []commentCommons.CommentEntity{commentCommons.GetNoMoreCommentEntity(message)},
+		PostbackParams: "",
+		HasMore:        false,
 	}
 }

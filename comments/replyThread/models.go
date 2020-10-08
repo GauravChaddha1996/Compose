@@ -8,6 +8,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,10 +22,10 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status  commons.ResponseStatus       `json:"status,omitempty"`
-	Message string                       `json:"message,omitempty"`
+	Status  commons.ResponseStatus        `json:"status,omitempty"`
+	Message string                        `json:"message,omitempty"`
 	Parent  *commentCommons.ParentEntity  `json:"parent,omitempty"`
-	Replies []commentCommons.ReplyEntity `json:"replies,omitempty"`
+	Replies []*commentCommons.ReplyEntity `json:"replies,omitempty"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -37,6 +38,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 	postbackParamsStr := queryMap.Get("postback_params")
 	if len(postbackParamsStr) != 0 {
+		postbackParamsStr = strings.ReplaceAll(postbackParamsStr, "\\\"", "\"")
 		postbackParamsMap := make(map[string]string)
 		err := json.Unmarshal([]byte(postbackParamsStr), &postbackParamsMap)
 		if commons.InError(err) {
