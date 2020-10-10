@@ -78,3 +78,8 @@ func (dao ReplyDao) UpdateReply(replyId string, changeMap map[string]interface{}
 	var reply dbModels.Reply
 	return dao.db.Model(reply).Where("reply_id = ?", replyId).UpdateColumns(changeMap).Error
 }
+
+func (dao ReplyDao) DeleteReply(replyId string) error {
+	var reply dbModels.Reply
+	return dao.db.Where("reply_id = ?", replyId).Find(&reply).Unscoped().Delete(reply).Error
+}

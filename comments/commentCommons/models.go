@@ -9,7 +9,6 @@ type CommentEntityType int
 type ReplyEntityType int
 
 const CommentTypeEndId = "comment_type_end_id"
-const CommentTypeDeletedId = "comment_type_deleted_id"
 const ReplyTypeContinueId = "reply_type_continue_id"
 const ReplyTypeEndId = "reply_type_end_id"
 
@@ -22,6 +21,7 @@ type ReplyEntityTypeWrapper struct {
 	ReplyTypeNormal   ReplyEntityType
 	ReplyTypeContinue ReplyEntityType
 	ReplyTypeEnd      ReplyEntityType
+	ReplyTypeDeleted  ReplyEntityType
 }
 
 func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
@@ -37,6 +37,7 @@ func NewReplyEntityTypeWrapper() ReplyEntityTypeWrapper {
 		ReplyTypeNormal:   0,
 		ReplyTypeContinue: 1,
 		ReplyTypeEnd:      2,
+		ReplyTypeDeleted:  3,
 	}
 }
 
@@ -117,10 +118,25 @@ func GetReplyEntityFromModel(reply *dbModels.Reply, user *PostedByUser) *ReplyEn
 	if reply == nil {
 		return nil
 	}
+	if reply.IsDeleted == 1 {
+		return GetDeletedReplyEntity(reply, user)
+	}
 	return &ReplyEntity{
 		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeNormal,
 		ReplyId:      reply.ReplyId,
 		Markdown:     reply.Markdown,
+		PostedByUser: user,
+		PostedAt:     reply.CreatedAt.Format(commons.TimeFormat),
+		Replies:      []*ReplyEntity{},
+		ReplyCount:   reply.ReplyCount,
+	}
+}
+
+func GetDeletedReplyEntity(reply *dbModels.Reply, user *PostedByUser) *ReplyEntity {
+	return &ReplyEntity{
+		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeDeleted,
+		ReplyId:      reply.ReplyId,
+		Markdown:     "This reply has been deleted",
 		PostedByUser: user,
 		PostedAt:     reply.CreatedAt.Format(commons.TimeFormat),
 		Replies:      []*ReplyEntity{},
