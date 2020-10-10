@@ -9,12 +9,14 @@ type CommentEntityType int
 type ReplyEntityType int
 
 const CommentTypeEndId = "comment_type_end_id"
+const CommentTypeDeletedId = "comment_type_deleted_id"
 const ReplyTypeContinueId = "reply_type_continue_id"
 const ReplyTypeEndId = "reply_type_end_id"
 
 type CommentEntityTypeWrapper struct {
-	CommentTypeNormal CommentEntityType
-	CommentTypeEnd    CommentEntityType
+	CommentTypeNormal  CommentEntityType
+	CommentTypeEnd     CommentEntityType
+	CommentTypeDeleted CommentEntityType
 }
 type ReplyEntityTypeWrapper struct {
 	ReplyTypeNormal   ReplyEntityType
@@ -24,8 +26,9 @@ type ReplyEntityTypeWrapper struct {
 
 func NewCommentEntityTypeWrapper() CommentEntityTypeWrapper {
 	return CommentEntityTypeWrapper{
-		CommentTypeNormal: 0,
-		CommentTypeEnd:    1,
+		CommentTypeNormal:  0,
+		CommentTypeEnd:     1,
+		CommentTypeDeleted: 2,
 	}
 }
 
@@ -75,10 +78,25 @@ func GetCommentEntityFromModel(comment *dbModels.Comment, user *PostedByUser) *C
 	if comment == nil {
 		return nil
 	}
+	if comment.IsDeleted == 1 {
+		return GetDeletedCommentEntity(comment, user)
+	}
 	return &CommentEntity{
 		CommentType:  NewCommentEntityTypeWrapper().CommentTypeNormal,
 		CommentId:    comment.CommentId,
 		Markdown:     comment.Markdown,
+		PostedByUser: user,
+		PostedAt:     comment.CreatedAt.Format(commons.TimeFormat),
+		Replies:      []*ReplyEntity{},
+		ReplyCount:   comment.ReplyCount,
+	}
+}
+
+func GetDeletedCommentEntity(comment *dbModels.Comment, user *PostedByUser) *CommentEntity {
+	return &CommentEntity{
+		CommentType:  NewCommentEntityTypeWrapper().CommentTypeDeleted,
+		CommentId:    comment.CommentId,
+		Markdown:     "This comment has been deleted",
 		PostedByUser: user,
 		PostedAt:     comment.CreatedAt.Format(commons.TimeFormat),
 		Replies:      []*ReplyEntity{},
