@@ -12,6 +12,7 @@ func deleteArticle(article *dbModels.Article) error {
 	tx := articleCommons.Database.Begin()
 
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(tx)
+	articleDao := daos.GetArticleDaoDuringTransaction(tx)
 
 	err := markdownDao.DeleteArticleMarkdown(article.MarkdownId)
 	if commons.InError(err) {
@@ -24,6 +25,19 @@ func deleteArticle(article *dbModels.Article) error {
 		tx.Rollback()
 		return errors.New("User article count can't be decreased")
 	}
+
+	err = articleCommons.CommentServiceContract.DeleteAssociatedCommentsAndReplies(article.Id, tx)
+	if commons.InError(err) {
+		tx.Rollback()
+		return errors.New("Cannot delete associated comments and replies")
+	}
+
+	err = articleDao.DeleteArticle(article)
+	if commons.InError(err) {
+		tx.Rollback()
+		return errors.New("Error in deleting article")
+	}
+
 	tx.Commit()
 	return nil
 }

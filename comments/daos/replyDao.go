@@ -83,3 +83,8 @@ func (dao ReplyDao) DeleteReply(replyId string) error {
 	var reply dbModels.Reply
 	return dao.db.Where("reply_id = ?", replyId).Find(&reply).Unscoped().Delete(reply).Error
 }
+
+func (dao ReplyDao) DeleteRepliesForArticle(articleId string) error {
+	var replies []dbModels.Reply
+	return dao.db.Where("article_id = ?", articleId).Find(&replies).Unscoped().Delete(replies).Error
+}

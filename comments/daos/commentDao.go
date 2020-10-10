@@ -70,3 +70,8 @@ func (dao CommentDao) UpdateComment(commentId string, changeMap map[string]inter
 	var comment dbModels.Comment
 	return dao.db.Model(comment).Where("comment_id = ?", commentId).UpdateColumns(changeMap).Error
 }
+
+func (dao CommentDao) DeleteCommentsForArticle(articleId string) error {
+	var comments []dbModels.Comment
+	return dao.db.Where("article_id = ?", articleId).Find(&comments).Unscoped().Delete(comments).Error
+}

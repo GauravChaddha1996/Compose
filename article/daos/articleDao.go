@@ -79,3 +79,7 @@ func (dao ArticleDao) UpdateArticle(articleId string, changeMap map[string]inter
 	var article dbModels.Article
 	return dao.db.Model(article).Where("id = ?", articleId).UpdateColumns(changeMap).Error
 }
+
+func (dao ArticleDao) DeleteArticle(article *dbModels.Article) error {
+	return dao.db.Unscoped().Delete(&article).Error
+}
