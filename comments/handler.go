@@ -8,6 +8,7 @@ import (
 	"compose/comments/deleteComment"
 	"compose/comments/replyThread"
 	"compose/comments/updateComment"
+	"compose/comments/updateReply"
 	"compose/serviceContracts"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -30,5 +31,7 @@ func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/comment", createComment.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/updateComment", updateComment.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/deleteComment", deleteComment.Handler).Methods(http.MethodPost)
+
 	subRouter.HandleFunc("/reply", createReply.Handler).Methods(http.MethodPost)
+	subRouter.HandleFunc("/updateReply", updateReply.Handler).Methods(http.MethodPost)
 }

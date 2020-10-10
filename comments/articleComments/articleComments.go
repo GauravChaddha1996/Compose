@@ -31,11 +31,11 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 
 	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{
-		Status:           commons.NewResponseStatus().SUCCESS,
-		Message:          "",
-		CommentsPointers: commentEntityArr,
-		PostbackParams:   postbackParams,
-		HasMore:          hasMore,
+		Status:         commons.NewResponseStatus().SUCCESS,
+		Message:        "",
+		Comments:       commentEntityArr,
+		PostbackParams: postbackParams,
+		HasMore:        hasMore,
 	}, nil
 }
 
@@ -98,10 +98,11 @@ func getNoCommentsResponse(createdAt string) *ResponseModel {
 	} else {
 		message = "No more comments to show"
 	}
+	entity := commentCommons.GetNoMoreCommentEntity(message)
 	return &ResponseModel{
 		Status:         commons.NewResponseStatus().SUCCESS,
 		Message:        "",
-		Comments:       []commentCommons.CommentEntity{commentCommons.GetNoMoreCommentEntity(message)},
+		Comments:       []*commentCommons.CommentEntity{&entity},
 		PostbackParams: "",
 		HasMore:        false,
 	}

@@ -1,4 +1,4 @@
-package updateComment
+package updateReply
 
 import (
 	"compose/comments/daos"
@@ -18,30 +18,30 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		commons.WriteForbiddenResponse(err, writer)
 		return
 	}
-	err = updateComment(requestModel)
+	err = updateReply(requestModel)
 	if commons.InError(err) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
 	response := ResponseModel{
-		Status:    commons.NewResponseStatus().SUCCESS,
-		CommentId: requestModel.CommentId,
+		Status:  commons.NewResponseStatus().SUCCESS,
+		ReplyId: requestModel.ReplyId,
 	}
 
 	commons.WriteSuccessResponse(response, writer)
 }
 
 func securityClearance(model *RequestModel) error {
-	comment, err := daos.GetCommentDao().FindComment(model.CommentId)
+	reply, err := daos.GetReplyDao().FindReply(model.ReplyId)
 	if commons.InError(err) {
-		return errors.New("Unable to find this comment")
+		return errors.New("Unable to find this reply")
 	}
-	if comment.IsDeleted==1 {
-		return errors.New("Cannot update a deleted comment")
+	if reply.IsDeleted == 1 {
+		return errors.New("Cannot updated deleted reply")
 	}
-	if model.CommonModel.UserId != comment.UserId {
-		return errors.New("Comment not posted by this user")
+	if model.CommonModel.UserId != reply.UserId {
+		return errors.New("Reply not posted by this user")
 	}
 	return nil
 }

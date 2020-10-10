@@ -17,12 +17,11 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status           commons.ResponseStatus          `json:"status,omitempty"`
-	Message          string                          `json:"message,omitempty"`
-	Comments         []commentCommons.CommentEntity  `json:"comments,omitempty"`
-	CommentsPointers []*commentCommons.CommentEntity `json:"comments_pointers,omitempty"`
-	PostbackParams   string                          `json:"postback_params,omitempty"`
-	HasMore          bool                            `json:"has_more"`
+	Status         commons.ResponseStatus          `json:"status,omitempty"`
+	Message        string                          `json:"message,omitempty"`
+	Comments       []*commentCommons.CommentEntity `json:"comments,omitempty"`
+	PostbackParams string                          `json:"postback_params,omitempty"`
+	HasMore        bool                            `json:"has_more"`
 }
 
 type PostbackParams struct {
