@@ -6,6 +6,7 @@ import (
 	"compose/user/delete"
 	"compose/user/likedArticles"
 	"compose/user/login"
+	"compose/user/logout"
 	"compose/user/postedArticles"
 	"compose/user/signup"
 	"compose/user/update"
@@ -31,6 +32,7 @@ func SetServiceContractImpls(articleContract serviceContracts.ArticleServiceCont
 func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/signup", signup.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/login", login.Handler).Methods(http.MethodPost)
+	subRouter.HandleFunc("/logout", logout.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/update", update.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/delete", delete.Handler).Methods(http.MethodPost)
 	subRouter.HandleFunc("/postedArticles", postedArticles.Handler).Methods(http.MethodGet)

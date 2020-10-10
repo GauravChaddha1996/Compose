@@ -30,3 +30,8 @@ func (dao AccessTokenDao) FindAccessTokenEntryViaUserId(userId string) (*dbModel
 	}
 	return &accessTokenEntry, nil
 }
+
+func (dao AccessTokenDao) DeleteAccessTokenEntry(accessToken string) error {
+	var accessTokenEntry dbModels.AccessToken
+	return dao.db.Where("access_token = ?", accessToken).Find(&accessTokenEntry).Unscoped().Delete(accessTokenEntry).Error
+}
