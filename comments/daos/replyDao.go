@@ -5,7 +5,7 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"errors"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type ReplyDao struct {

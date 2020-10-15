@@ -7,7 +7,7 @@ import (
 	"compose/like/unlikeArticle"
 	"compose/serviceContracts"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"net/http"
 )
 

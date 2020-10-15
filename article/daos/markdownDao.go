@@ -4,7 +4,7 @@ import (
 	"compose/article/articleCommons"
 	"compose/commons"
 	"compose/dbModels"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type ArticleMarkdownDao struct {

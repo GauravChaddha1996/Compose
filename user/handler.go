@@ -13,7 +13,7 @@ import (
 	"compose/user/userCommons"
 	"compose/user/userDetails"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"net/http"
 )
 

@@ -8,7 +8,7 @@ import (
 	"compose/article/update"
 	"compose/serviceContracts"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"net/http"
 )
 

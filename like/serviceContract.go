@@ -3,7 +3,7 @@ package like
 import (
 	"compose/dbModels"
 	"compose/like/daos"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 

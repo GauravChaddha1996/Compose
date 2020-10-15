@@ -1,7 +1,7 @@
 package commons
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 var database *gorm.DB

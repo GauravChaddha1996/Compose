@@ -3,7 +3,7 @@ package comments
 import (
 	"compose/comments/daos"
 	"compose/commons"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type CommentServiceContractImpl struct{}

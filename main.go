@@ -8,9 +8,10 @@ import (
 	"compose/serviceContracts"
 	"compose/user"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/spf13/viper"
+	"gorm.io/driver/mysql"
+	_ "gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 )
@@ -20,7 +21,6 @@ func main() {
 	log.Println("Starting project compose")
 	loadConfig()
 	db := openDB()
-	defer db.Close()
 	initPackages(db)
 	startServer()
 }
@@ -42,9 +42,8 @@ func openDB() *gorm.DB {
 	dbParams := viper.GetString("db.params")
 	dbConnectionConfig := viper.GetString("db.username") + ":" + viper.GetString("db.password") +
 		"@tcp(" + viper.GetString("db.host") + ":" + viper.GetString("db.port") + ")"
-	dbImplementation := viper.GetString("db.implementation")
 	dbArgs := dbConnectionConfig + "/" + dbName + "?" + dbParams
-	db, err := gorm.Open(dbImplementation, dbArgs)
+	db, err := gorm.Open(mysql.Open(dbArgs), &gorm.Config{})
 	commons.PanicIfError(err)
 	log.Print("Database connection established")
 	return db

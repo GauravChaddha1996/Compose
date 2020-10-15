@@ -2,7 +2,7 @@ package serviceContracts
 
 import (
 	"compose/dbModels"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type UserServiceContract interface {

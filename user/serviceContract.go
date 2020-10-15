@@ -5,7 +5,7 @@ import (
 	"compose/dbModels"
 	"compose/user/daos"
 	"errors"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type ServiceContractImpl struct {

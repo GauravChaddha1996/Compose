@@ -1,6 +1,5 @@
 {
   "db": {
-    "implementation": "mysql",
     "name": "compose",
     "params": "charset=utf8&parseTime=True&loc=Local",
     "username": "root",

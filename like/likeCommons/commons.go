@@ -2,7 +2,7 @@ package likeCommons
 
 import (
 	"compose/serviceContracts"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 var Database *gorm.DB

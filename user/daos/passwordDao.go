@@ -4,7 +4,7 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"compose/user/userCommons"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type PasswordDao struct {

@@ -5,7 +5,7 @@ import (
 	"compose/commons"
 	"compose/dbModels"
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 )

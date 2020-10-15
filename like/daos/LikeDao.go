@@ -5,7 +5,7 @@ import (
 	"compose/dbModels"
 	"compose/like/likeCommons"
 	"errors"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 

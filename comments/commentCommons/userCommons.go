@@ -5,7 +5,7 @@ import (
 	"compose/dbModels"
 	"compose/serviceContracts"
 	"errors"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 var Database *gorm.DB
