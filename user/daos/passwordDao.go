@@ -30,3 +30,8 @@ func (dao PasswordDao) FindPasswordEntryViaUserId(userId string) (*dbModels.Pass
 	}
 	return &passwordEntry, nil
 }
+
+func (dao PasswordDao) DeletePasswordEntryViaUserId(userId string) error {
+	var passwordEntry dbModels.Password
+	return dao.db.Where("user_id = ?", userId).Unscoped().Delete(&passwordEntry).Error
+}

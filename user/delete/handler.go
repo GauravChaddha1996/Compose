@@ -13,7 +13,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = securityClearance(requestModel, request)
+	err = securityClearance(requestModel)
 	if commons.InError(err) {
 		commons.WriteForbiddenResponse(err, writer)
 		return
@@ -33,9 +33,8 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	commons.WriteSuccessResponse(response, writer)
 }
 
-func securityClearance(model *RequestModel, request *http.Request) error {
-	commonsModel := commons.GetCommonModel(request)
-	if commonsModel.UserEmail != model.email {
+func securityClearance(model *RequestModel) error {
+	if model.commonModel.UserEmail != model.email {
 		return errors.New("Email id doesn't match")
 	}
 	return nil

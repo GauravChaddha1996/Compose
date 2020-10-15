@@ -2,15 +2,14 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/dbModels"
 	"errors"
 	"github.com/asaskevich/govalidator"
 	"net/http"
 )
 
 type RequestModel struct {
-	email string
-	user  *dbModels.User
+	email       string
+	commonModel *commons.CommonModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -21,7 +20,8 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		email: r.FormValue("email"),
+		email:       r.FormValue("email"),
+		commonModel: commons.GetCommonModel(r),
 	}
 
 	err = model.isInvalid()
