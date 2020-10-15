@@ -64,3 +64,8 @@ func (dao LikeDao) UnlikeArticle(likeEntry *dbModels.LikeEntry) error {
 	var entry dbModels.LikeEntry
 	return dao.db.Where("id = ?", likeEntry.Id).Unscoped().Delete(&entry).Error
 }
+
+func (dao LikeDao) DeleteAllLikesOfArticle(articleId string) error {
+	var entries []dbModels.LikeEntry
+	return dao.db.Where("article_id = ?", articleId).Unscoped().Delete(&entries).Error
+}

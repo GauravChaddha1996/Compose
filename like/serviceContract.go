@@ -3,6 +3,7 @@ package like
 import (
 	"compose/dbModels"
 	"compose/like/daos"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -16,4 +17,7 @@ func GetServiceContractImpl() ServiceContractImpl {
 
 func (impl ServiceContractImpl) GetAllLikeEntriesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.LikeEntry, error) {
 	return impl.dao.GetUserLikes(userId, maxCreatedAtTime, limit)
+}
+func (impl ServiceContractImpl) DeleteAllLikeEntriesOfArticle(articleId string, transaction *gorm.DB) error {
+	return daos.GetLikeDaoDuringTransaction(transaction).DeleteAllLikesOfArticle(articleId)
 }

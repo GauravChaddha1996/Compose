@@ -16,9 +16,12 @@ func Init(db *gorm.DB) {
 	articleCommons.Database = db
 }
 
-func SetServiceContractImpl(userContract serviceContracts.UserServiceContract, commentServiceContract serviceContracts.CommentServiceContract) {
+func SetServiceContractImpl(userContract serviceContracts.UserServiceContract,
+	commentServiceContract serviceContracts.CommentServiceContract,
+	likeServiceContract serviceContracts.LikeServiceContract) {
 	articleCommons.UserServiceContract = userContract
 	articleCommons.CommentServiceContract = commentServiceContract
+	articleCommons.LikeServiceContract = likeServiceContract
 }
 
 func AddSubRoutes(subRouter *mux.Router) {

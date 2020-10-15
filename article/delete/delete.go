@@ -31,6 +31,11 @@ func deleteArticle(article *dbModels.Article) error {
 		tx.Rollback()
 		return errors.New("Cannot delete associated comments and replies")
 	}
+	err = articleCommons.LikeServiceContract.DeleteAllLikeEntriesOfArticle(article.Id, tx)
+	if commons.InError(err) {
+		tx.Rollback()
+		return errors.New("Cannot delete associated like entries")
+	}
 
 	err = articleDao.DeleteArticle(article)
 	if commons.InError(err) {
