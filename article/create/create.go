@@ -16,27 +16,19 @@ func createArticle(model *RequestModel) (*string, error) {
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)
 
-	markdownUuid, err := uuid.NewV4()
-	if commons.InError(err) {
-		transaction.Rollback()
-		return nil, errors.New("ArticleMarkdown UUID can't be generated")
-	}
+	markdownUuid := uuid.NewV4()
 
 	markdownEntry := dbModels.ArticleMarkdown{
 		Id:       markdownUuid.String(),
 		Markdown: model.markdown,
 	}
 
-	err = markdownDao.CreateArticleMarkdown(markdownEntry)
+	err := markdownDao.CreateArticleMarkdown(markdownEntry)
 	if commons.InError(err) {
 		return nil, errors.New("ArticleMarkdown entry can't be created")
 	}
 
-	articleUuid, err := uuid.NewV4()
-	if commons.InError(err) {
-		transaction.Rollback()
-		return nil, errors.New("Article UUID can't be generated")
-	}
+	articleUuid := uuid.NewV4()
 
 	articleEntry := dbModels.Article{
 		Id:          articleUuid.String(),

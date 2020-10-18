@@ -37,11 +37,7 @@ func createReply(model *RequestModel) (*ResponseModel, error) {
 		}
 	}
 
-	replyUUId, err := uuid.NewV4()
-	if commons.InError(err) {
-		tx.Rollback()
-		return nil, errors.New("Error in generating reply uuid")
-	}
+	replyUUId := uuid.NewV4()
 	reply := dbModels.Reply{
 		ReplyId:   replyUUId.String(),
 		ParentId:  model.ParentId,

@@ -44,17 +44,14 @@ func login(model *RequestModel) (string, error) {
 }
 
 func createAccessTokenEntry(user *dbModels.User, accessTokenDao daos.AccessTokenDao) (*dbModels.AccessToken, error) {
-	accessToken, err := uuid.NewV4()
-	if commons.InError(err) {
-		return nil, nil
-	}
+	accessToken := uuid.NewV4()
 	accessTokenEntry := dbModels.AccessToken{
 		UserId:      user.UserId,
 		AccessToken: accessToken.String(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	err = accessTokenDao.CreateAccessTokenEntry(accessTokenEntry)
+	err := accessTokenDao.CreateAccessTokenEntry(accessTokenEntry)
 	if commons.InError(err) {
 		return nil, errors.New("Access token can't be saved")
 	}

@@ -20,11 +20,8 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 		return nil, errors.New("Error in increasing comment count of article")
 	}
 
-	commentUUId, err := uuid.NewV4()
-	if commons.InError(err) {
-		tx.Rollback()
-		return nil, errors.New("Error in generating comment uuid")
-	}
+	commentUUId := uuid.NewV4()
+
 	comment := dbModels.Comment{
 		CommentId: commentUUId.String(),
 		ArticleId: model.ArticleId,

@@ -28,11 +28,7 @@ func signup(requestModel *RequestModel) (string, error) {
 
 	// Creating user
 
-	userId, err := uuid.NewV4()
-	if commons.InError(err) {
-		transaction.Rollback()
-		return "", errors.New("UUID can't be generated")
-	}
+	userId := uuid.NewV4()
 
 	user := dbModels.User{
 		UserId:    userId.String(),
@@ -69,11 +65,7 @@ func signup(requestModel *RequestModel) (string, error) {
 
 	// Access token entry
 
-	accessToken, err := uuid.NewV4()
-	if commons.InError(err) {
-		transaction.Rollback()
-		return "", errors.New("Access token can't be generated")
-	}
+	accessToken := uuid.NewV4()
 	accessTokenEntry := dbModels.AccessToken{
 		UserId:      user.UserId,
 		AccessToken: accessToken.String(),
