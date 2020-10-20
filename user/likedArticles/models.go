@@ -11,7 +11,7 @@ import (
 type RequestModel struct {
 	UserId            string
 	MaxLikedAt        *time.Time
-	CommonModel       *commons.CommonModel
+	CommonModel       *commons.CommonRequestModel
 	DefaultMaxLikedAt time.Time
 }
 
@@ -34,7 +34,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		UserId:            queryMap.Get("user_id"),
-		CommonModel:       commons.GetCommonModel(r),
+		CommonModel:       commons.GetCommonRequestModel(r),
 		MaxLikedAt:        &DefaultMaxLikedAt,
 		DefaultMaxLikedAt: DefaultMaxLikedAt,
 	}

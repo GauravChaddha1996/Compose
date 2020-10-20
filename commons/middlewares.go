@@ -66,7 +66,7 @@ func RequestLoggingMiddleware(next http.Handler) http.Handler {
 
 func ExtractCommonModelMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		commonHeaders := makeCommonModel(r)
+		commonHeaders := makeCommonRequestModel(r)
 		parentContext := r.Context()
 		newContext := context.WithValue(parentContext, CommonModelKey, commonHeaders)
 		next.ServeHTTP(w, r.WithContext(newContext))
@@ -75,7 +75,7 @@ func ExtractCommonModelMiddleware(next http.Handler) http.Handler {
 
 func GeneralSecurityMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		commonModel := r.Context().Value(CommonModelKey).(*CommonModel)
+		commonModel := r.Context().Value(CommonModelKey).(*CommonRequestModel)
 		securityError := ensureSecurity(commonModel, securityMiddlewarePathConfigMap[r.URL.Path])
 		if securityError != nil {
 			w.WriteHeader(http.StatusForbidden)
@@ -88,7 +88,7 @@ func GeneralSecurityMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func ensureSecurity(commonHeaders *CommonModel, config *SecurityMiddlewarePathConfig) error {
+func ensureSecurity(commonHeaders *CommonRequestModel, config *SecurityMiddlewarePathConfig) error {
 	if config == nil {
 		config = getDefaultSecurityMiddlewarePathConfig()
 	}

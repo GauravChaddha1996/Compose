@@ -13,7 +13,7 @@ import (
 type RequestModel struct {
 	ArticleId      string
 	PostbackParams *PostbackParams
-	CommonModel    *commons.CommonModel
+	CommonModel    *commons.CommonRequestModel
 }
 
 type ResponseModel struct {
@@ -34,7 +34,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	model := RequestModel{
 		ArticleId:      queryMap.Get("article_id"),
 		PostbackParams: nil,
-		CommonModel:    commons.GetCommonModel(r),
+		CommonModel:    commons.GetCommonRequestModel(r),
 	}
 	postbackParamsStr := queryMap.Get("postback_params")
 	if len(postbackParamsStr) != 0 {

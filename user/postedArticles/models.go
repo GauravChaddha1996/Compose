@@ -11,7 +11,7 @@ import (
 type RequestModel struct {
 	UserId              string
 	MaxCreatedAt        *time.Time
-	CommonModel         *commons.CommonModel
+	CommonModel         *commons.CommonRequestModel
 	DefaultMaxCreatedAt time.Time
 }
 
@@ -34,7 +34,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		UserId:              queryMap.Get("user_id"),
-		CommonModel:         commons.GetCommonModel(r),
+		CommonModel:         commons.GetCommonRequestModel(r),
 		MaxCreatedAt:        &DefaultMaxCreatedAt,
 		DefaultMaxCreatedAt: DefaultMaxCreatedAt,
 	}

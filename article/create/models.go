@@ -28,7 +28,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 
-	commonModel := commons.GetCommonModel(r)
+	commonModel := commons.GetCommonRequestModel(r)
 	model := RequestModel{
 		userId:   commonModel.UserId,
 		title:    r.FormValue("title"),

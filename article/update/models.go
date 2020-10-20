@@ -13,7 +13,7 @@ type RequestModel struct {
 	Title       *string
 	Description *string
 	Markdown    *string
-	CommonModel *commons.CommonModel
+	CommonModel *commons.CommonRequestModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -25,7 +25,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 
 	model := RequestModel{
 		ArticleId:   r.FormValue("article_id"),
-		CommonModel: commons.GetCommonModel(r),
+		CommonModel: commons.GetCommonRequestModel(r),
 	}
 
 	for key, values := range r.Form {

@@ -30,7 +30,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		LikeCount:    user.LikeCount,
 		MemberSince:  fmt.Sprint("Member since: ", createdAtTime.Day(), createdAtTime.Month(), createdAtTime.Year()),
 		// Only make editable if details requested of userId = user requesting the details
-		Editable: user.UserId == commons.GetCommonModel(request).UserId,
+		Editable: user.UserId == commons.GetCommonRequestModel(request).UserId,
 	}
 
 	commons.WriteSuccessResponse(response, writer)

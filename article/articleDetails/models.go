@@ -9,14 +9,14 @@ import (
 
 type RequestModel struct {
 	id          string
-	commonModel *commons.CommonModel
+	commonModel *commons.CommonRequestModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	vars := mux.Vars(r)
 	model := RequestModel{
 		id:          vars["article_id"],
-		commonModel: commons.GetCommonModel(r),
+		commonModel: commons.GetCommonRequestModel(r),
 	}
 
 	err := model.isInvalid()

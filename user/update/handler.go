@@ -34,7 +34,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func securityClearance(model *RequestModel, request *http.Request) error {
-	commonsModel := commons.GetCommonModel(request)
+	commonsModel := commons.GetCommonRequestModel(request)
 	if commonsModel.UserId != model.UserId {
 		return errors.New("User id doesn't match")
 	}

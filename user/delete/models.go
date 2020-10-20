@@ -9,7 +9,7 @@ import (
 
 type RequestModel struct {
 	email       string
-	commonModel *commons.CommonModel
+	commonModel *commons.CommonRequestModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -21,7 +21,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 
 	model := RequestModel{
 		email:       r.FormValue("email"),
-		commonModel: commons.GetCommonModel(r),
+		commonModel: commons.GetCommonRequestModel(r),
 	}
 
 	err = model.isInvalid()

@@ -8,7 +8,7 @@ import (
 )
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
-	commonModel := commons.GetCommonModel(request)
+	commonModel := commons.GetCommonRequestModel(request)
 	accessTokenDao := daos.GetAccessTokenDao()
 	err := accessTokenDao.DeleteAccessTokenEntry(commonModel.AccessToken)
 	if commons.InError(err) {

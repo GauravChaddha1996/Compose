@@ -18,7 +18,7 @@ type RequestModel struct {
 	CreatedAt      *time.Time
 	ReplyCount     int
 	PostbackParams map[string]string
-	CommonModel    *commons.CommonModel
+	CommonModel    *commons.CommonRequestModel
 }
 
 type ResponseModel struct {
@@ -34,7 +34,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		ArticleId:      "",
 		ParentId:       "",
 		PostbackParams: nil,
-		CommonModel:    commons.GetCommonModel(r),
+		CommonModel:    commons.GetCommonRequestModel(r),
 	}
 	postbackParamsStr := queryMap.Get("postback_params")
 	if len(postbackParamsStr) != 0 {

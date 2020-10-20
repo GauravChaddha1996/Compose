@@ -11,7 +11,7 @@ type RequestModel struct {
 	ArticleId       string
 	ParentId        string
 	Markdown        string
-	CommonModel     *commons.CommonModel
+	CommonModel     *commons.CommonRequestModel
 	ParentIsComment bool
 	ParentIsReply   bool
 }
@@ -31,7 +31,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		ArticleId:       r.FormValue("article_id"),
 		ParentId:        r.FormValue("parent_id"),
 		Markdown:        r.FormValue("markdown"),
-		CommonModel:     commons.GetCommonModel(r),
+		CommonModel:     commons.GetCommonRequestModel(r),
 		ParentIsComment: false,
 		ParentIsReply:   false,
 	}

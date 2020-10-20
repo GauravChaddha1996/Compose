@@ -21,22 +21,22 @@ func NewResponseStatus() ResponseStatusWrapper {
 	}
 }
 
-type CommonModel struct {
+type CommonRequestModel struct {
 	AccessToken string
 	UserId      string
 	UserEmail   string
 }
 
-func GetCommonModel(r *http.Request) *CommonModel {
-	return r.Context().Value(CommonModelKey).(*CommonModel)
+func GetCommonRequestModel(r *http.Request) *CommonRequestModel {
+	return r.Context().Value(CommonModelKey).(*CommonRequestModel)
 }
 
-func makeCommonModel(r *http.Request) *CommonModel {
+func makeCommonRequestModel(r *http.Request) *CommonRequestModel {
 	headers := r.Header
 	accessToken := headers.Get("access_token")
 	userId := getUserId(accessToken)
 	userEmail := getUserEmail(userId)
-	return &CommonModel{
+	return &CommonRequestModel{
 		AccessToken: accessToken,
 		UserId:      userId,
 		UserEmail:   userEmail,

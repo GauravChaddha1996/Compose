@@ -10,7 +10,7 @@ import (
 type RequestModel struct {
 	ArticleId   string
 	MarkdownId  string
-	CommonModel *commons.CommonModel
+	CommonModel *commons.CommonRequestModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -23,7 +23,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	model := RequestModel{
 		ArticleId:   r.FormValue("article_id"),
 		MarkdownId:  "",
-		CommonModel: commons.GetCommonModel(r),
+		CommonModel: commons.GetCommonRequestModel(r),
 	}
 
 	err = model.isInvalid()
