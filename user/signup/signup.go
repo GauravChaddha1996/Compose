@@ -4,7 +4,6 @@ import (
 	"compose/commons"
 	"compose/daos/user"
 	"compose/dbModels"
-	"compose/user/userCommons"
 	"errors"
 	"github.com/raja/argon2pw"
 	uuid "github.com/satori/go.uuid"
@@ -12,8 +11,7 @@ import (
 )
 
 func signup(requestModel *RequestModel) (string, error) {
-	db := userCommons.Database
-	transaction := db.Begin()
+	transaction := commons.GetDB().Begin()
 	userDao := daos.GetUserDaoUnderTransaction(transaction)
 	passwordDao := daos.GetPasswordDaoUnderTransaction(transaction)
 	accessTokenDao := daos.GetAccessTokenDaoUnderTransaction(transaction)

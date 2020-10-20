@@ -3,13 +3,12 @@ package delete
 import (
 	"compose/commons"
 	"compose/daos/user"
-	"compose/user/userCommons"
 	"errors"
 )
 
 func deleteUser(model *RequestModel) error {
 	var err error
-	transaction := userCommons.Database.Begin()
+	transaction := commons.GetDB().Begin()
 	err = daos.GetPasswordDaoUnderTransaction(transaction).DeletePasswordEntryViaUserId(model.commonModel.UserId)
 	if commons.InError(err) {
 		transaction.Rollback()

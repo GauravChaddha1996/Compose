@@ -17,8 +17,7 @@ import (
 	"net/http"
 )
 
-func Init(db *gorm.DB) {
-	userCommons.Database = db
+func Init(*gorm.DB) {
 	for path, config := range getSecurityMiddlewareConfigMap() {
 		commons.AddSecurityMiddlewarePathConfig("/user"+path, config)
 	}
