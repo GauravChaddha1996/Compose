@@ -8,14 +8,14 @@ import (
 )
 
 type RequestModel struct {
-	ReplyId   string
+	ReplyId     string
 	Markdown    string
 	CommonModel *commons.CommonRequestModel
 }
 
 type ResponseModel struct {
-	Status    commons.ResponseStatus `json:"status,omitempty"`
-	Message   string                 `json:"message,omitempty"`
+	Status  commons.ResponseStatus `json:"status,omitempty"`
+	Message string                 `json:"message,omitempty"`
 	ReplyId string                 `json:"reply_id,omitempty"`
 }
 
@@ -25,7 +25,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 	model := RequestModel{
-		ReplyId:   r.FormValue("reply_id"),
+		ReplyId:     r.FormValue("reply_id"),
 		Markdown:    r.FormValue("markdown"),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}

@@ -1,7 +1,6 @@
-package daos
+package commentAndReply
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
 	"compose/dbModels"
 	"errors"
@@ -9,24 +8,16 @@ import (
 )
 
 type ReplyDao struct {
-	db *gorm.DB
-}
-
-func GetReplyDao() *ReplyDao {
-	return &ReplyDao{commentCommons.Database}
-}
-
-func GetReplyDaoDuringTransaction(db *gorm.DB) *ReplyDao {
-	return &ReplyDao{db}
+	DB *gorm.DB
 }
 
 func (dao ReplyDao) CreateReply(reply dbModels.Reply) error {
-	return dao.db.Create(&reply).Error
+	return dao.DB.Create(&reply).Error
 }
 
 func (dao ReplyDao) DoesParentExist(parentId string) bool {
 	var reply dbModels.Reply
-	queryResult := dao.db.Select("reply_id").Where("reply_id = ?", parentId).Limit(1).Find(&reply)
+	queryResult := dao.DB.Select("reply_id").Where("reply_id = ?", parentId).Limit(1).Find(&reply)
 	if commons.InError(queryResult.Error) {
 		return false
 	}
@@ -48,7 +39,7 @@ func (dao ReplyDao) GetRepliesInParentIds(parentIds []string) ([]*dbModels.Reply
 	whereQuery := "parent_id IN (" + parentIdQuery + ")"
 
 	var dbReplies []*dbModels.Reply
-	queryResult := dao.db.Where(whereQuery).Find(&dbReplies)
+	queryResult := dao.DB.Where(whereQuery).Find(&dbReplies)
 	if commons.InError(queryResult.Error) {
 		return nil, queryResult.Error
 	}
@@ -57,7 +48,7 @@ func (dao ReplyDao) GetRepliesInParentIds(parentIds []string) ([]*dbModels.Reply
 
 func (dao ReplyDao) FindReply(replyId string) (*dbModels.Reply, error) {
 	var reply dbModels.Reply
-	queryResult := dao.db.Where("reply_id = ?", replyId).Limit(1).Find(&reply)
+	queryResult := dao.DB.Where("reply_id = ?", replyId).Limit(1).Find(&reply)
 	if commons.InError(queryResult.Error) {
 		return nil, queryResult.Error
 	}
@@ -76,15 +67,15 @@ func (dao ReplyDao) IncreaseReplyCount(replyId string) error {
 
 func (dao ReplyDao) UpdateReply(replyId string, changeMap map[string]interface{}) error {
 	var reply dbModels.Reply
-	return dao.db.Model(reply).Where("reply_id = ?", replyId).UpdateColumns(changeMap).Error
+	return dao.DB.Model(reply).Where("reply_id = ?", replyId).UpdateColumns(changeMap).Error
 }
 
 func (dao ReplyDao) DeleteReply(replyId string) error {
 	var reply dbModels.Reply
-	return dao.db.Where("reply_id = ?", replyId).Find(&reply).Unscoped().Delete(reply).Error
+	return dao.DB.Where("reply_id = ?", replyId).Find(&reply).Unscoped().Delete(reply).Error
 }
 
 func (dao ReplyDao) DeleteRepliesForArticle(articleId string) error {
 	var replies []dbModels.Reply
-	return dao.db.Where("article_id = ?", articleId).Find(&replies).Unscoped().Delete(replies).Error
+	return dao.DB.Where("article_id = ?", articleId).Find(&replies).Unscoped().Delete(replies).Error
 }

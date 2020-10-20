@@ -2,7 +2,7 @@ package userDetails
 
 import (
 	"compose/commons"
-	"compose/daos/user"
+	"compose/daos"
 	"compose/dbModels"
 	"errors"
 )

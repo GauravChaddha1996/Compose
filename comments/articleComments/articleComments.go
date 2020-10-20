@@ -4,7 +4,8 @@ import (
 	"compose/comments/commentCommons"
 	"compose/comments/replyThreadCommon"
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
+	userDaos "compose/daos/user"
 	"encoding/json"
 	"errors"
 )
@@ -14,7 +15,9 @@ const MaxRepliesCount = 1000
 const MaxCommentReplyLevel = 2
 
 func getArticleComments(model *RequestModel) (*ResponseModel, error) {
-	commentEntityArr, err := getCommentEntityArr(model)
+	replyDao := daos.GetReplyDao()
+	userDao := daos.GetUserDao()
+	commentEntityArr, err := getCommentEntityArr(model, userDao)
 	if commons.InError(err) {
 		return nil, err
 	}
@@ -27,7 +30,7 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 	}
 
 	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
-	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, daos.GetReplyDao())
+	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, replyDao, userDao)
 
 	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{
@@ -39,7 +42,7 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 	}, nil
 }
 
-func getCommentEntityArr(model *RequestModel) ([]*commentCommons.CommentEntity, error) {
+func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*commentCommons.CommentEntity, error) {
 	commentDao := daos.GetCommentDao()
 	createdAtTime, err := commons.MaxTime()
 	if commons.InError(err) {
@@ -58,7 +61,7 @@ func getCommentEntityArr(model *RequestModel) ([]*commentCommons.CommentEntity, 
 	}
 
 	commentEntityArr := make([]*commentCommons.CommentEntity, len(*commentDbModels))
-	PostedByUserArr, err := commentCommons.GetUsersForComments(commentDbModels)
+	PostedByUserArr, err := commentCommons.GetUsersForComments(commentDbModels, userDao)
 	if commons.InError(err) {
 		return nil, errors.New("Error in fetching users for comments")
 	}
@@ -69,7 +72,8 @@ func getCommentEntityArr(model *RequestModel) ([]*commentCommons.CommentEntity, 
 }
 
 func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons.CommentEntity) (string, bool) {
-	totalTopCommentCount := commentCommons.ArticleServiceContract.GetArticleTopCommentCount(model.ArticleId)
+	articleDao := daos.GetArticleDao()
+	totalTopCommentCount := articleDao.GetArticleTopCommentCount(model.ArticleId)
 	commentEntityArrLen := len(commentEntityArr)
 
 	commentsServedTillNowCount := commentEntityArrLen

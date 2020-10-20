@@ -1,9 +1,8 @@
 package createComment
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
 	"compose/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"
@@ -11,10 +10,11 @@ import (
 )
 
 func createComment(model *RequestModel) (*ResponseModel, error) {
-	tx := commentCommons.Database.Begin()
+	tx := commons.GetDB().Begin()
 	commentDao := daos.GetCommentDaoDuringTransaction(tx)
+	articleDao := daos.GetArticleDaoDuringTransaction(tx)
 
-	err := commentCommons.ArticleServiceContract.ChangeArticleTopCommentCount(model.ArticleId, true, tx)
+	err := articleDao.ChangeArticleTopCommentCount(model.ArticleId, true, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return nil, errors.New("Error in increasing comment count of article")

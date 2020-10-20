@@ -2,37 +2,32 @@ package commentCommons
 
 import (
 	"compose/commons"
+	"compose/daos/user"
 	"compose/dbModels"
-	"compose/serviceContracts"
 	"errors"
-	"gorm.io/gorm"
 )
 
-var Database *gorm.DB
-var ArticleServiceContract serviceContracts.ArticleServiceContract
-var UserServiceContract serviceContracts.UserServiceContract
-
-func GetUsersForComments(comments *[]dbModels.Comment) (*[]PostedByUser, error) {
+func GetUsersForComments(comments *[]dbModels.Comment, userDao *user.UserDao) (*[]PostedByUser, error) {
 	commentsLen := len(*comments)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range *comments {
 		userIdList[index] = entry.UserId
 	}
-	return getUserArr(&userIdList)
+	return getUserArr(&userIdList, userDao)
 }
 
-func GetUsersForReplies(replies []*dbModels.Reply) (*[]PostedByUser, error) {
+func GetUsersForReplies(replies []*dbModels.Reply, userDao *user.UserDao) (*[]PostedByUser, error) {
 	commentsLen := len(replies)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range replies {
 		userIdList[index] = entry.UserId
 	}
-	return getUserArr(&userIdList)
+	return getUserArr(&userIdList, userDao)
 }
 
-func getUserArr(userIdList *[]string) (*[]PostedByUser, error) {
+func getUserArr(userIdList *[]string, userDao *user.UserDao) (*[]PostedByUser, error) {
 	userLen := len(*userIdList)
-	users, err := UserServiceContract.GetUsers(*userIdList)
+	users, err := userDao.FindUserViaIds(*userIdList)
 	if commons.InError(err) {
 		return nil, errors.New("Cannot fetch details via userId")
 	}

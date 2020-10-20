@@ -1,30 +1,23 @@
-package daos
+package user
 
 import (
 	"compose/commons"
 	"compose/dbModels"
+	"errors"
 	"gorm.io/gorm"
 )
 
-func GetUserDao() *UserDao {
-	return &UserDao{commons.GetDB()}
-}
-
-func GetUserDaoUnderTransaction(db *gorm.DB) *UserDao {
-	return &UserDao{db}
-}
-
 type UserDao struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 func (dao UserDao) CreateUser(user dbModels.User) error {
-	return dao.db.Create(user).Error
+	return dao.DB.Create(user).Error
 }
 
 func (dao UserDao) FindUserViaEmail(email string) (*dbModels.User, error) {
 	var user dbModels.User
-	userDeletionResult := dao.db.Where("email = ?", email).Find(&user)
+	userDeletionResult := dao.DB.Where("email = ?", email).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return nil, userDeletionResult.Error
 	}
@@ -33,7 +26,7 @@ func (dao UserDao) FindUserViaEmail(email string) (*dbModels.User, error) {
 
 func (dao UserDao) FindUserViaId(userId string) (*dbModels.User, error) {
 	var user dbModels.User
-	userDeletionResult := dao.db.Where("user_id = ?", userId).Find(&user)
+	userDeletionResult := dao.DB.Where("user_id = ?", userId).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return nil, userDeletionResult.Error
 	}
@@ -55,7 +48,7 @@ func (dao UserDao) FindUserViaIds(userIds []string) ([]*dbModels.User, error) {
 	whereQuery := "user_id IN (" + parentIdQuery + ")"
 
 	var users []*dbModels.User
-	queryResult := dao.db.Where(whereQuery).Find(&users)
+	queryResult := dao.DB.Where(whereQuery).Find(&users)
 	if commons.InError(queryResult.Error) {
 		return nil, queryResult.Error
 	}
@@ -73,10 +66,54 @@ func (dao UserDao) DoesUserIdExist(userId string) (bool, error) {
 
 func (dao UserDao) UpdateUser(changeMap map[string]interface{}, userId string) error {
 	var user dbModels.User
-	return dao.db.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error
+	return dao.DB.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error
 }
 
 func (dao UserDao) DeleteUser(email string) error {
 	var user dbModels.User
-	return dao.db.Where("email = ?", email).Unscoped().Delete(&user).Error
+	return dao.DB.Where("email = ?", email).Unscoped().Delete(&user).Error
+}
+
+/* Helper f()s */
+
+func (dao UserDao) ChangeArticleCount(userId string, change bool) error {
+	user, err := dao.FindUserViaId(userId)
+	if commons.InError(err) {
+		return errors.New("Can't find any such user")
+	}
+	if change {
+		user.ArticleCount += 1
+	} else {
+		user.ArticleCount -= 1
+	}
+
+	var changeMap = make(map[string]interface{})
+	changeMap["article_count"] = user.ArticleCount
+
+	err = dao.UpdateUser(changeMap, userId)
+	if commons.InError(err) {
+		return errors.New("User article count can't be updated")
+	}
+	return nil
+}
+
+func (dao UserDao) ChangeLikeCount(userId string, change bool) error {
+	user, err := dao.FindUserViaId(userId)
+	if commons.InError(err) {
+		return errors.New("Can't find any such user")
+	}
+	if change {
+		user.LikeCount += 1
+	} else {
+		user.LikeCount -= 1
+	}
+
+	var changeMap = make(map[string]interface{})
+	changeMap["like_count"] = user.LikeCount
+
+	err = dao.UpdateUser(changeMap, userId)
+	if commons.InError(err) {
+		return errors.New("User like count can't be updated")
+	}
+	return nil
 }

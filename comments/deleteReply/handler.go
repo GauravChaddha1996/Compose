@@ -2,7 +2,7 @@ package deleteReply
 
 import (
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
 	"errors"
 	"net/http"
 )

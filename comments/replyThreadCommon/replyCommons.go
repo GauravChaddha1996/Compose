@@ -3,7 +3,8 @@ package replyThreadCommon
 import (
 	"compose/comments/commentCommons"
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	commentAndReplyDaos "compose/daos/commentAndReply"
+	userDaos "compose/daos/user"
 	"compose/dbModels"
 	"encoding/json"
 	"errors"
@@ -72,14 +73,15 @@ func FillReplyTreeInParentIdArr(
 	maxRepliesCount int,
 	parentEntityArr []*ReplyThreadParentModel,
 	parentEntryMap *map[string]int,
-	replyDao *daos.ReplyDao,
+	replyDao *commentAndReplyDaos.ReplyDao,
+	userDao *userDaos.UserDao,
 ) {
 	currentReplyLevel := 0
 	repliesCount := 0
 	repliesFinishReached := false
 	breakDueToError := false
 	for currentReplyLevel < maxCommentReplyLevel && repliesCount < maxRepliesCount && repliesFinishReached == false {
-		replyDbModels, replyEntityArr, err := GetReplyEntityArr(parentEntityArr, replyDao)
+		replyDbModels, replyEntityArr, err := GetReplyEntityArr(parentEntityArr, replyDao, userDao)
 		if len(replyDbModels) == 0 {
 			repliesFinishReached = true
 		}
@@ -109,7 +111,7 @@ func FillReplyTreeInParentIdArr(
 	CheckForContinueThread(repliesFinishReached, breakDueToError, articleId, parentEntityArr)
 }
 
-func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *daos.ReplyDao) ([]*dbModels.Reply, []*commentCommons.ReplyEntity, error) {
+func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*dbModels.Reply, []*commentCommons.ReplyEntity, error) {
 	parentEntityArrLen := len(parentEntityArr)
 	parentIds := make([]string, parentEntityArrLen)
 	for index, parentEntity := range parentEntityArr {
@@ -120,7 +122,7 @@ func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *daos
 		return nil, nil, errors.New("Error in fetching replies for parent entity arr")
 	}
 
-	PostedByUserArr, err := commentCommons.GetUsersForReplies(replyDbModels)
+	PostedByUserArr, err := commentCommons.GetUsersForReplies(replyDbModels, userDao)
 	if commons.InError(err) {
 		return nil, nil, errors.New("Error in fetching users for comments")
 	}

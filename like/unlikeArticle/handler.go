@@ -2,7 +2,7 @@ package unlikeArticle
 
 import (
 	"compose/commons"
-	"compose/like/likeCommons"
+	"compose/daos"
 	"errors"
 	"net/http"
 )
@@ -14,12 +14,13 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	articleUserId := likeCommons.ArticleServiceContract.GetArticleAuthorId(requestModel.ArticleId)
-	if articleUserId == nil {
+	articleDao := daos.GetArticleDao()
+	article, err := articleDao.GetArticle(requestModel.ArticleId)
+	if commons.InError(err) {
 		commons.WriteFailedResponse(errors.New("No such article id exists"), writer)
 		return
 	}
-	err = securityClearance(requestModel, articleUserId)
+	err = securityClearance(requestModel, &article.UserId)
 	if commons.InError(err) {
 		commons.WriteForbiddenResponse(err, writer)
 		return

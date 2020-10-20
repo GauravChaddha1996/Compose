@@ -1,8 +1,8 @@
 package replyThread
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
+	"compose/daos"
 	"errors"
 	"net/http"
 )
@@ -29,7 +29,8 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func securityClearance(model *RequestModel) error {
-	articleExists, err := commentCommons.ArticleServiceContract.DoesArticleExist(model.ArticleId)
+	articleDao := daos.GetArticleDao()
+	articleExists, err := articleDao.DoesArticleExist(model.ArticleId)
 	if commons.InError(err) {
 		return errors.New("Security problem. Can't confirm if article id exists")
 	}
@@ -38,4 +39,3 @@ func securityClearance(model *RequestModel) error {
 	}
 	return nil
 }
-

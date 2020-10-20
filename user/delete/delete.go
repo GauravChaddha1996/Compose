@@ -2,7 +2,7 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/daos/user"
+	"compose/daos"
 	"errors"
 )
 

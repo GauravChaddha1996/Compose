@@ -1,15 +1,14 @@
 package update
 
 import (
-	"compose/article/articleCommons"
 	"compose/commons"
-	"compose/daos/article"
+	"compose/daos"
 	"compose/dbModels"
 	"errors"
 )
 
 func updateArticle(model *RequestModel, article *dbModels.Article) error {
-	transaction := articleCommons.Database.Begin()
+	transaction := commons.GetDB().Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)
 

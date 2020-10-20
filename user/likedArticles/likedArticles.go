@@ -2,13 +2,16 @@ package likedArticles
 
 import (
 	"compose/commons"
-	"compose/user/userCommons"
+	"compose/daos"
 	"errors"
 )
 
 func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 	likedArticleLimit := 3
-	likeEntriesOfUser, err := userCommons.LikeService.GetAllLikeEntriesOfUser(model.UserId, *model.MaxLikedAt, likedArticleLimit)
+	likeDao := daos.GetLikeDao()
+	articleDao := daos.GetArticleDao()
+
+	likeEntriesOfUser, err := likeDao.GetUserLikes(model.UserId, *model.MaxLikedAt, likedArticleLimit)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch posted articles")
 	}
@@ -32,7 +35,7 @@ func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 		articleIdsArr[index] = likeEntry.ArticleId
 	}
 
-	articleArr, err := userCommons.ArticleService.GetAllArticles(articleIdsArr)
+	articleArr, err := articleDao.GetArticles(articleIdsArr)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch article details")
 	}

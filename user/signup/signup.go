@@ -2,7 +2,7 @@ package signup
 
 import (
 	"compose/commons"
-	"compose/daos/user"
+	"compose/daos"
 	"compose/dbModels"
 	"errors"
 	"github.com/raja/argon2pw"

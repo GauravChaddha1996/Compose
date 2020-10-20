@@ -4,7 +4,9 @@ import (
 	"compose/comments/commentCommons"
 	"compose/comments/replyThreadCommon"
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
+	commentAndReplyDaos "compose/daos/commentAndReply"
+	userDaos "compose/daos/user"
 	"compose/dbModels"
 	"errors"
 )
@@ -15,9 +17,10 @@ const ReplyThreadRepliesMaxCount = 2000
 func getReplyThread(model *RequestModel) (*ResponseModel, error) {
 	replyDao := daos.GetReplyDao()
 	commentDao := daos.GetCommentDao()
+	userDao := daos.GetUserDao()
 	parentEntity, parentCommentEntity, parentReplyEntity := getParentEntity(model, replyDao, commentDao)
 
-	replyEntityArr, err := getReplyEntityArr(model, parentCommentEntity, parentReplyEntity, replyDao)
+	replyEntityArr, err := getReplyEntityArr(model, parentCommentEntity, parentReplyEntity, replyDao, userDao)
 	if commons.InError(err) {
 		return nil, err
 	}
@@ -26,7 +29,7 @@ func getReplyThread(model *RequestModel) (*ResponseModel, error) {
 	}
 
 	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
-	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, ReplyThreadMaxLevel, ReplyThreadRepliesMaxCount, parentEntityArr, parentEntryMap, replyDao)
+	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, ReplyThreadMaxLevel, ReplyThreadRepliesMaxCount, parentEntityArr, parentEntryMap, replyDao, userDao)
 
 	return &ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,
@@ -39,7 +42,7 @@ func getReplyEntityArr(
 	model *RequestModel,
 	parentCommentEntity *commentCommons.CommentEntity,
 	parentReplyEntity *commentCommons.ReplyEntity,
-	replyDao *daos.ReplyDao) ([]*commentCommons.ReplyEntity, error) {
+	replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*commentCommons.ReplyEntity, error) {
 
 	replyThreadParentModel := &replyThreadCommon.ReplyThreadParentModel{
 		Id:            model.ParentId,
@@ -48,7 +51,7 @@ func getReplyEntityArr(
 		CommentEntity: parentCommentEntity,
 		ReplyEntity:   parentReplyEntity,
 	}
-	_, replyEntityArr, err := replyThreadCommon.GetReplyEntityArr([]*replyThreadCommon.ReplyThreadParentModel{replyThreadParentModel}, replyDao)
+	_, replyEntityArr, err := replyThreadCommon.GetReplyEntityArr([]*replyThreadCommon.ReplyThreadParentModel{replyThreadParentModel}, replyDao, userDao)
 	if commons.InError(err) {
 		return nil, errors.New("Error in fetching replies to parent")
 	}
@@ -66,7 +69,8 @@ func getNoReplyResponse(parentEntity *commentCommons.ParentEntity) *ResponseMode
 	}
 }
 
-func getParentEntity(model *RequestModel, replyDao *daos.ReplyDao, commentDao *daos.CommentDao) (*commentCommons.ParentEntity, *commentCommons.CommentEntity, *commentCommons.ReplyEntity) {
+func getParentEntity(model *RequestModel, replyDao *commentAndReplyDaos.ReplyDao, commentDao *commentAndReplyDaos.CommentDao) (*commentCommons.ParentEntity, *commentCommons.CommentEntity, *commentCommons.ReplyEntity) {
+	userDao := daos.GetUserDao()
 	markdown := ""
 	replyCount := uint64(0)
 	user := &dbModels.User{}
@@ -86,7 +90,7 @@ func getParentEntity(model *RequestModel, replyDao *daos.ReplyDao, commentDao *d
 		return nil, nil, nil
 	}
 
-	user, err = commentCommons.UserServiceContract.GetUser(userId)
+	user, err = userDao.FindUserViaId(userId)
 	if commons.InError(err) {
 		return nil, nil, nil
 	}

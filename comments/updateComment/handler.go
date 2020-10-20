@@ -2,7 +2,7 @@ package updateComment
 
 import (
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
 	"errors"
 	"net/http"
 )
@@ -37,7 +37,7 @@ func securityClearance(model *RequestModel) error {
 	if commons.InError(err) {
 		return errors.New("Unable to find this comment")
 	}
-	if comment.IsDeleted==1 {
+	if comment.IsDeleted == 1 {
 		return errors.New("Cannot update a deleted comment")
 	}
 	if model.CommonModel.UserId != comment.UserId {

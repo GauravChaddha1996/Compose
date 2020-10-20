@@ -2,7 +2,7 @@ package logout
 
 import (
 	"compose/commons"
-	"compose/daos/user"
+	"compose/daos"
 	"errors"
 	"net/http"
 )

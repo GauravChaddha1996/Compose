@@ -2,7 +2,7 @@ package postedArticles
 
 import (
 	"compose/commons"
-	"compose/daos/user"
+	"compose/daos"
 	"errors"
 	"net/http"
 )

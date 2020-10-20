@@ -2,7 +2,8 @@ package login
 
 import (
 	"compose/commons"
-	"compose/daos/user"
+	"compose/daos"
+	userDaos "compose/daos/user"
 	"compose/dbModels"
 	"errors"
 	"github.com/raja/argon2pw"
@@ -43,7 +44,7 @@ func login(model *RequestModel) (string, error) {
 	return accessTokenEntry.AccessToken, nil
 }
 
-func createAccessTokenEntry(user *dbModels.User, accessTokenDao daos.AccessTokenDao) (*dbModels.AccessToken, error) {
+func createAccessTokenEntry(user *dbModels.User, accessTokenDao userDaos.AccessTokenDao) (*dbModels.AccessToken, error) {
 	accessToken := uuid.NewV4()
 	accessTokenEntry := dbModels.AccessToken{
 		UserId:      user.UserId,

@@ -2,13 +2,14 @@ package postedArticles
 
 import (
 	"compose/commons"
-	"compose/user/userCommons"
+	"compose/daos"
 	"errors"
 )
 
 func getPostedArticles(model *RequestModel) (*ResponseModel, error) {
 	postedArticleLimit := 3
-	articleArr, err := userCommons.ArticleService.GetAllArticlesOfUser(model.UserId, *model.MaxCreatedAt, postedArticleLimit)
+	articleDao := daos.GetArticleDao()
+	articleArr, err := articleDao.GetArticlesOfUser(model.UserId, *model.MaxCreatedAt, postedArticleLimit)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch posted articles")
 	}

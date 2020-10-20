@@ -6,7 +6,6 @@ import (
 	"compose/commons"
 	"compose/like"
 	"compose/middlewares"
-	"compose/serviceContracts"
 	"compose/user"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
@@ -21,8 +20,7 @@ func main() {
 	println("")
 	log.Println("Starting project compose")
 	loadConfig()
-	db := openDB()
-	initPackages(db)
+	commons.Init(openDB())
 	startServer()
 }
 
@@ -48,24 +46,6 @@ func openDB() *gorm.DB {
 	commons.PanicIfError(err)
 	log.Print("Database connection established")
 	return db
-}
-
-func initPackages(db *gorm.DB) {
-	// Init with common things
-	commons.Init(db)
-	user.Init(db)
-	article.Init(db)
-	like.Init(db)
-	comments.Init(db)
-
-	// Save all service impls
-	serviceContracts.Init(user.GetServiceContractImpl(), article.GetServiceContractImpl(), like.GetServiceContractImpl(), comments.GetCommentServiceContractImpl())
-
-	// Attach all service impls to other services
-	user.SetServiceContractImpls(serviceContracts.GetArticleServiceContract(), serviceContracts.GetLikeServiceContract())
-	article.SetServiceContractImpl(serviceContracts.GetUserServiceContract(), serviceContracts.GetCommentServiceContract(), serviceContracts.GetLikeServiceContract())
-	like.SetServiceContractImpl(serviceContracts.GetArticleServiceContract(), serviceContracts.GetUserServiceContract())
-	comments.SetServiceContractImpl(serviceContracts.GetArticleServiceContract(), serviceContracts.GetUserServiceContract())
 }
 
 func startServer() {

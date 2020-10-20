@@ -2,15 +2,16 @@ package likeArticle
 
 import (
 	"compose/commons"
-	"compose/daos/like"
+	"compose/daos"
 	"compose/dbModels"
-	"compose/like/likeCommons"
 	"errors"
 )
 
 func likeArticle(model *RequestModel) error {
-	tx := likeCommons.Database.Begin()
+	tx := commons.GetDB().Begin()
 	likeDao := daos.GetLikeDaoDuringTransaction(tx)
+	userDao := daos.GetUserDaoUnderTransaction(tx)
+	articleDao := daos.GetArticleDaoDuringTransaction(tx)
 	var likeEntry = dbModels.LikeEntry{
 		UserId:    model.CommonModel.UserId,
 		ArticleId: model.ArticleId,
@@ -22,13 +23,13 @@ func likeArticle(model *RequestModel) error {
 		return errors.New("Article already liked")
 	}
 
-	err := likeCommons.ArticleServiceContract.ChangeArticleLikeCount(model.ArticleId, true, tx)
+	err := articleDao.ChangeArticleLikeCount(model.ArticleId, true)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Article like count can't be increased")
 	}
 
-	err = likeCommons.UserServiceContract.ChangeLikeCount(model.CommonModel.UserId, true, tx)
+	err = userDao.ChangeLikeCount(model.CommonModel.UserId, true)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("User like count can't be increased")

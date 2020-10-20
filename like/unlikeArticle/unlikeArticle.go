@@ -2,14 +2,15 @@ package unlikeArticle
 
 import (
 	"compose/commons"
-	"compose/daos/like"
-	"compose/like/likeCommons"
+	"compose/daos"
 	"errors"
 )
 
 func unlikeArticle(model *RequestModel) error {
-	tx := likeCommons.Database.Begin()
+	tx := commons.GetDB().Begin()
 	likeDao := daos.GetLikeDaoDuringTransaction(tx)
+	userDao := daos.GetUserDaoUnderTransaction(tx)
+	articleDao := daos.GetArticleDaoDuringTransaction(tx)
 
 	previousLikeEntry, _ := likeDao.FindLikeEntry(model.ArticleId, model.CommonModel.UserId)
 	if previousLikeEntry == nil {
@@ -17,13 +18,13 @@ func unlikeArticle(model *RequestModel) error {
 		return errors.New("Article not liked")
 	}
 
-	err := likeCommons.ArticleServiceContract.ChangeArticleLikeCount(model.ArticleId, false, tx)
+	err := articleDao.ChangeArticleLikeCount(model.ArticleId, false)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Article like count can't be decreased")
 	}
 
-	err = likeCommons.UserServiceContract.ChangeLikeCount(model.CommonModel.UserId, false, tx)
+	err = userDao.ChangeLikeCount(model.CommonModel.UserId, false)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("User like count can't be decreased")

@@ -2,13 +2,13 @@ package articleLikes
 
 import (
 	"compose/commons"
-	"compose/daos/like"
-	"compose/like/likeCommons"
+	"compose/daos"
 	"errors"
 )
 
 func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 	likeDao := daos.GetLikeDao()
+	userDao := daos.GetUserDao()
 
 	var articleLikeEntryLimit = 3
 	likeEntries, err := likeDao.GetArticleLikes(model.ArticleId, model.MaxLikedAt, articleLikeEntryLimit)
@@ -34,7 +34,7 @@ func getArticleLikesResponse(model *RequestModel) (*ResponseModel, error) {
 	for index, entry := range *likeEntries {
 		userIdList[index] = entry.UserId
 	}
-	users, err := likeCommons.UserServiceContract.GetUsers(userIdList)
+	users, err := userDao.FindUserViaIds(userIdList)
 	if commons.InError(err) {
 		return nil, errors.New("Cannot fetch details via userId")
 	}

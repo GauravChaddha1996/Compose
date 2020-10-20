@@ -8,7 +8,7 @@ import (
 )
 
 type RequestModel struct {
-	ReplyId   string
+	ReplyId     string
 	CommonModel *commons.CommonRequestModel
 }
 
@@ -24,7 +24,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 	model := RequestModel{
-		ReplyId:   r.FormValue("reply_id"),
+		ReplyId:     r.FormValue("reply_id"),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 	err = model.isInvalid()

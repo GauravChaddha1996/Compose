@@ -1,6 +1,5 @@
 package commons
 
-
 var EndpointSecurityConfigMap = make(map[string]*EndpointSecurityConfig)
 
 func GetDefaultEndpointSecurityConfig() *EndpointSecurityConfig {

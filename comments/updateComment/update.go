@@ -1,14 +1,13 @@
 package updateComment
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
 	"errors"
 )
 
 func updateComment(model *RequestModel) error {
-	transaction := commentCommons.Database.Begin()
+	transaction := commons.GetDB().Begin()
 	commentDao := daos.GetCommentDaoDuringTransaction(transaction)
 
 	var markdownChangeMap = make(map[string]interface{})

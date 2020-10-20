@@ -1,9 +1,8 @@
 package create
 
 import (
-	"compose/article/articleCommons"
 	"compose/commons"
-	daos "compose/daos/article"
+	daos "compose/daos"
 	"compose/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"
@@ -11,8 +10,8 @@ import (
 )
 
 func createArticle(model *RequestModel) (*string, error) {
-	database := articleCommons.Database
-	transaction := database.Begin()
+	transaction := commons.GetDB().Begin()
+	userDao := daos.GetUserDaoUnderTransaction(transaction)
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)
 
@@ -40,7 +39,7 @@ func createArticle(model *RequestModel) (*string, error) {
 		UpdatedAt:   time.Now(),
 	}
 
-	err = articleCommons.UserServiceContract.ChangeArticleCount(model.userId, true, transaction) // change = true to increase
+	err = userDao.ChangeArticleCount(model.userId, true) // change = true to increase
 	if commons.InError(err) {
 		transaction.Rollback()
 		return nil, errors.New("User article count can't be increased")

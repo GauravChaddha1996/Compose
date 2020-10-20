@@ -1,9 +1,8 @@
 package articleDetails
 
 import (
-	"compose/article/articleCommons"
 	"compose/commons"
-	"compose/daos/article"
+	"compose/daos"
 	"compose/dbModels"
 	"errors"
 )
@@ -54,7 +53,8 @@ func getArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
 }
 
 func getPostedByUser(article *dbModels.Article) (*PostedByUser, error) {
-	user, err := articleCommons.UserServiceContract.GetUser(article.UserId)
+	userDao := daos.GetUserDao()
+	user, err := userDao.FindUserViaId(article.UserId)
 	if commons.InError(err) {
 		return nil, err
 	}

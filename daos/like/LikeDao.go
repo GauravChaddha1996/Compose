@@ -1,4 +1,4 @@
-package daos
+package like
 
 import (
 	"compose/commons"
@@ -9,24 +9,16 @@ import (
 )
 
 type LikeDao struct {
-	db *gorm.DB
-}
-
-func GetLikeDao() LikeDao {
-	return LikeDao{db: commons.GetDB()}
-}
-
-func GetLikeDaoDuringTransaction(db *gorm.DB) LikeDao {
-	return LikeDao{db: db}
+	DB *gorm.DB
 }
 
 func (dao LikeDao) LikeArticle(entry *dbModels.LikeEntry) error {
-	return dao.db.Create(entry).Error
+	return dao.DB.Create(entry).Error
 }
 
 func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*dbModels.LikeEntry, error) {
 	var entry dbModels.LikeEntry
-	queryResult := dao.db.Where("user_id = ? && article_id = ?", userId, articleId).Find(&entry)
+	queryResult := dao.DB.Where("user_id = ? && article_id = ?", userId, articleId).Find(&entry)
 	if commons.InError(queryResult.Error) {
 		return nil, queryResult.Error
 	}
@@ -35,7 +27,7 @@ func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*dbModels.Lik
 
 func (dao LikeDao) GetArticleLikes(articleId string, maxLikedAt *time.Time, limit int) (*[]dbModels.LikeEntry, error) {
 	var likeEntries []dbModels.LikeEntry
-	queryResult := dao.db.
+	queryResult := dao.DB.
 		Where("article_id = ? && created_at < ?", articleId, maxLikedAt).
 		Order("created_at desc").
 		Limit(limit).
@@ -48,7 +40,7 @@ func (dao LikeDao) GetArticleLikes(articleId string, maxLikedAt *time.Time, limi
 
 func (dao LikeDao) GetUserLikes(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.LikeEntry, error) {
 	var likeEntries []dbModels.LikeEntry
-	queryResult := dao.db.
+	queryResult := dao.DB.
 		Where("user_id = ? && created_at < ?", userId, maxCreatedAtTime).
 		Order("created_at desc").
 		Limit(limit).
@@ -61,10 +53,10 @@ func (dao LikeDao) GetUserLikes(userId string, maxCreatedAtTime time.Time, limit
 
 func (dao LikeDao) UnlikeArticle(likeEntry *dbModels.LikeEntry) error {
 	var entry dbModels.LikeEntry
-	return dao.db.Where("id = ?", likeEntry.Id).Unscoped().Delete(&entry).Error
+	return dao.DB.Where("id = ?", likeEntry.Id).Unscoped().Delete(&entry).Error
 }
 
 func (dao LikeDao) DeleteAllLikesOfArticle(articleId string) error {
 	var entries []dbModels.LikeEntry
-	return dao.db.Where("article_id = ?", articleId).Unscoped().Delete(&entries).Error
+	return dao.DB.Where("article_id = ?", articleId).Unscoped().Delete(&entries).Error
 }

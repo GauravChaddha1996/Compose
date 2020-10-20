@@ -2,7 +2,7 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/daos/article"
+	"compose/daos"
 	"compose/dbModels"
 	"errors"
 	"net/http"

@@ -2,7 +2,7 @@ package deleteComment
 
 import (
 	"compose/commons"
-	"compose/daos/commentAndReply"
+	"compose/daos"
 	"errors"
 )
 

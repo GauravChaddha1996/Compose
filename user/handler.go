@@ -2,7 +2,6 @@ package user
 
 import (
 	"compose/commons"
-	"compose/serviceContracts"
 	"compose/user/delete"
 	"compose/user/likedArticles"
 	"compose/user/login"
@@ -10,7 +9,6 @@ import (
 	"compose/user/postedArticles"
 	"compose/user/signup"
 	"compose/user/update"
-	"compose/user/userCommons"
 	"compose/user/userDetails"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -21,11 +19,6 @@ func Init(*gorm.DB) {
 	for path, config := range getEndpointSecurityConfigMap() {
 		commons.AddEndpointSecurityConfig("/user"+path, config)
 	}
-}
-
-func SetServiceContractImpls(articleContract serviceContracts.ArticleServiceContract, likeContract serviceContracts.LikeServiceContract) {
-	userCommons.ArticleService = articleContract
-	userCommons.LikeService = likeContract
 }
 
 func AddSubRoutes(subRouter *mux.Router) {
