@@ -5,6 +5,7 @@ import (
 	"compose/comments"
 	"compose/commons"
 	"compose/like"
+	"compose/middlewares"
 	"compose/serviceContracts"
 	"compose/user"
 	"github.com/gorilla/mux"
@@ -83,11 +84,11 @@ func getMainRouter() *mux.Router {
 }
 
 func addMiddlewares(router *mux.Router) {
-	router.Use(commons.RequestLoggingMiddleware)
-	router.Use(commons.ExtractCommonModelMiddleware)
-	router.Use(commons.GeneralSecurityMiddleware)
-	router.Use(commons.CommonResponseHeadersMiddleware)
-	router.Use(commons.ResponseLoggingMiddleware)
+	router.Use(middlewares.RequestLoggingMiddleware)
+	router.Use(middlewares.ExtractCommonModelMiddleware)
+	router.Use(middlewares.GeneralSecurityMiddleware)
+	router.Use(middlewares.CommonResponseHeadersMiddleware)
+	router.Use(middlewares.ResponseLoggingMiddleware)
 }
 
 func addApiRoutes(router *mux.Router) {

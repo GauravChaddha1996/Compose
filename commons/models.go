@@ -1,7 +1,6 @@
 package commons
 
 import (
-	"compose/dbModels"
 	"net/http"
 )
 
@@ -31,32 +30,22 @@ func GetCommonRequestModel(r *http.Request) *CommonRequestModel {
 	return r.Context().Value(CommonModelKey).(*CommonRequestModel)
 }
 
-func makeCommonRequestModel(r *http.Request) *CommonRequestModel {
-	headers := r.Header
-	accessToken := headers.Get("access_token")
-	userId := getUserId(accessToken)
-	userEmail := getUserEmail(userId)
-	return &CommonRequestModel{
-		AccessToken: accessToken,
-		UserId:      userId,
-		UserEmail:   userEmail,
+var SecurityMiddlewarePathConfigMap = make(map[string]*SecurityMiddlewarePathConfig)
+
+type SecurityMiddlewarePathConfig struct {
+	CheckAccessToken bool
+	CheckUserId      bool
+	CheckUserEmail   bool
+}
+
+func GetDefaultSecurityMiddlewarePathConfig() *SecurityMiddlewarePathConfig {
+	return &SecurityMiddlewarePathConfig{
+		CheckAccessToken: true,
+		CheckUserId:      true,
+		CheckUserEmail:   true,
 	}
 }
 
-func getUserId(accessToken string) string {
-	var accessTokenEntry dbModels.AccessToken
-	accessTokenQuery := GetDB().Where("access_token = ?", accessToken).Find(&accessTokenEntry)
-	if InError(accessTokenQuery.Error) {
-		return ""
-	}
-	return accessTokenEntry.UserId
-}
-
-func getUserEmail(userId string) string {
-	var user dbModels.User
-	userQuery := GetDB().Where("user_id = ?", userId).Find(&user)
-	if InError(userQuery.Error) {
-		return ""
-	}
-	return user.Email
+func AddSecurityMiddlewarePathConfig(path string, config *SecurityMiddlewarePathConfig) {
+	SecurityMiddlewarePathConfigMap[path] = config
 }
