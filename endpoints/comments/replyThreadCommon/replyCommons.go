@@ -1,11 +1,11 @@
 package replyThreadCommon
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
 	commentAndReplyDaos "compose/daos/commentAndReply"
 	userDaos "compose/daos/user"
 	"compose/dbModels"
+	commentCommons2 "compose/endpoints/comments/commentCommons"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -15,11 +15,11 @@ type ReplyThreadParentModel struct {
 	Id            string
 	IsComment     bool
 	IsReply       bool
-	CommentEntity *commentCommons.CommentEntity
-	ReplyEntity   *commentCommons.ReplyEntity
+	CommentEntity *commentCommons2.CommentEntity
+	ReplyEntity   *commentCommons2.ReplyEntity
 }
 
-func GetParentEntityArrAndMapFromCommentEntityArr(parentEntityArr []*commentCommons.CommentEntity) ([]*ReplyThreadParentModel, *map[string]int) {
+func GetParentEntityArrAndMapFromCommentEntityArr(parentEntityArr []*commentCommons2.CommentEntity) ([]*ReplyThreadParentModel, *map[string]int) {
 	newParentEntityArrLength := len(parentEntityArr)
 	newParentEntityArr := make([]*ReplyThreadParentModel, newParentEntityArrLength)
 	newParentEntryMap := make(map[string]int)
@@ -35,7 +35,7 @@ func GetParentEntityArrAndMapFromCommentEntityArr(parentEntityArr []*commentComm
 	return newParentEntityArr, &newParentEntryMap
 }
 
-func GetParentEntityArrAndMapFromReplyEntityArr(parentEntityArr []*commentCommons.ReplyEntity) ([]*ReplyThreadParentModel, *map[string]int) {
+func GetParentEntityArrAndMapFromReplyEntityArr(parentEntityArr []*commentCommons2.ReplyEntity) ([]*ReplyThreadParentModel, *map[string]int) {
 	newParentEntityArrLength := len(parentEntityArr)
 	newParentEntityArr := make([]*ReplyThreadParentModel, newParentEntityArrLength)
 	newParentEntryMap := make(map[string]int)
@@ -51,7 +51,7 @@ func GetParentEntityArrAndMapFromReplyEntityArr(parentEntityArr []*commentCommon
 	return newParentEntityArr, &newParentEntryMap
 }
 
-func getParentEntityArrAndMapFromReplyEntityArr(parentEntityArr []*commentCommons.ReplyEntity) ([]*ReplyThreadParentModel, *map[string]int) {
+func getParentEntityArrAndMapFromReplyEntityArr(parentEntityArr []*commentCommons2.ReplyEntity) ([]*ReplyThreadParentModel, *map[string]int) {
 	newParentEntityArrLength := len(parentEntityArr)
 	newParentEntityArr := make([]*ReplyThreadParentModel, newParentEntityArrLength)
 	newParentEntryMap := make(map[string]int)
@@ -111,7 +111,7 @@ func FillReplyTreeInParentIdArr(
 	CheckForContinueThread(repliesFinishReached, breakDueToError, articleId, parentEntityArr)
 }
 
-func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*dbModels.Reply, []*commentCommons.ReplyEntity, error) {
+func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*dbModels.Reply, []*commentCommons2.ReplyEntity, error) {
 	parentEntityArrLen := len(parentEntityArr)
 	parentIds := make([]string, parentEntityArrLen)
 	for index, parentEntity := range parentEntityArr {
@@ -122,15 +122,15 @@ func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *comm
 		return nil, nil, errors.New("Error in fetching replies for parent entity arr")
 	}
 
-	PostedByUserArr, err := commentCommons.GetUsersForReplies(replyDbModels, userDao)
+	PostedByUserArr, err := commentCommons2.GetUsersForReplies(replyDbModels, userDao)
 	if commons.InError(err) {
 		return nil, nil, errors.New("Error in fetching users for comments")
 	}
 
 	replyDbModelsLen := len(replyDbModels)
-	replyEntityArr := make([]*commentCommons.ReplyEntity, replyDbModelsLen)
+	replyEntityArr := make([]*commentCommons2.ReplyEntity, replyDbModelsLen)
 	for index, replyDbModel := range replyDbModels {
-		replyEntityArr[index] = commentCommons.GetReplyEntityFromModel(replyDbModel, &(*PostedByUserArr)[index])
+		replyEntityArr[index] = commentCommons2.GetReplyEntityFromModel(replyDbModel, &(*PostedByUserArr)[index])
 	}
 	return replyDbModels, replyEntityArr, nil
 }
@@ -149,7 +149,7 @@ func CheckForContinueThread(repliesFinishReached bool, breakDueToError bool, art
 						createdAtTime = parentComment.Replies[repliesLen-1].PostedAt
 					}
 					continuePostbackParams := GetContinueThreadPostbackParams(articleId, parentComment.CommentId, createdAtTime, repliesLen)
-					continueReplyEntity := commentCommons.GetContinueReplyEntity(continuePostbackParams)
+					continueReplyEntity := commentCommons2.GetContinueReplyEntity(continuePostbackParams)
 					parentComment.Replies = append(parentComment.Replies, continueReplyEntity)
 				}
 			}
@@ -164,7 +164,7 @@ func CheckForContinueThread(repliesFinishReached bool, breakDueToError bool, art
 						createdAtTime = parentReply.Replies[repliesLen-1].PostedAt
 					}
 					continuePostbackParams := GetContinueThreadPostbackParams(articleId, parentReply.ReplyId, createdAtTime, repliesLen)
-					continueReplyEntity := commentCommons.GetContinueReplyEntity(continuePostbackParams)
+					continueReplyEntity := commentCommons2.GetContinueReplyEntity(continuePostbackParams)
 					parentReply.Replies = append(parentReply.Replies, continueReplyEntity)
 				}
 			}

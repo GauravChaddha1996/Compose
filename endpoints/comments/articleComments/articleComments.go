@@ -1,11 +1,11 @@
 package articleComments
 
 import (
-	"compose/comments/commentCommons"
-	"compose/comments/replyThreadCommon"
 	"compose/commons"
 	"compose/daos"
 	userDaos "compose/daos/user"
+	commentCommons2 "compose/endpoints/comments/commentCommons"
+	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
 	"encoding/json"
 	"errors"
 )
@@ -29,8 +29,8 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 		return getNoCommentsResponse(createdAtTime), nil
 	}
 
-	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
-	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, replyDao, userDao)
+	parentEntityArr, parentEntryMap := replyThreadCommon2.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
+	replyThreadCommon2.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, replyDao, userDao)
 
 	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{
@@ -42,7 +42,7 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 	}, nil
 }
 
-func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*commentCommons.CommentEntity, error) {
+func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*commentCommons2.CommentEntity, error) {
 	commentDao := daos.GetCommentDao()
 	createdAtTime, err := commons.MaxTime()
 	if commons.InError(err) {
@@ -60,18 +60,18 @@ func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*com
 		return nil, errors.New("Error is fetching comments")
 	}
 
-	commentEntityArr := make([]*commentCommons.CommentEntity, len(*commentDbModels))
-	PostedByUserArr, err := commentCommons.GetUsersForComments(commentDbModels, userDao)
+	commentEntityArr := make([]*commentCommons2.CommentEntity, len(*commentDbModels))
+	PostedByUserArr, err := commentCommons2.GetUsersForComments(commentDbModels, userDao)
 	if commons.InError(err) {
 		return nil, errors.New("Error in fetching users for comments")
 	}
 	for index, commentDbModel := range *commentDbModels {
-		commentEntityArr[index] = commentCommons.GetCommentEntityFromModel(&commentDbModel, &(*PostedByUserArr)[index])
+		commentEntityArr[index] = commentCommons2.GetCommentEntityFromModel(&commentDbModel, &(*PostedByUserArr)[index])
 	}
 	return commentEntityArr, nil
 }
 
-func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons.CommentEntity) (string, bool) {
+func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons2.CommentEntity) (string, bool) {
 	articleDao := daos.GetArticleDao()
 	totalTopCommentCount := articleDao.GetArticleTopCommentCount(model.ArticleId)
 	commentEntityArrLen := len(commentEntityArr)
@@ -102,11 +102,11 @@ func getNoCommentsResponse(createdAt string) *ResponseModel {
 	} else {
 		message = "No more comments to show"
 	}
-	entity := commentCommons.GetNoMoreCommentEntity(message)
+	entity := commentCommons2.GetNoMoreCommentEntity(message)
 	return &ResponseModel{
 		Status:         commons.NewResponseStatus().SUCCESS,
 		Message:        "",
-		Comments:       []*commentCommons.CommentEntity{&entity},
+		Comments:       []*commentCommons2.CommentEntity{&entity},
 		PostbackParams: "",
 		HasMore:        false,
 	}

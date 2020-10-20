@@ -1,13 +1,13 @@
 package replyThread
 
 import (
-	"compose/comments/commentCommons"
-	"compose/comments/replyThreadCommon"
 	"compose/commons"
 	"compose/daos"
 	commentAndReplyDaos "compose/daos/commentAndReply"
 	userDaos "compose/daos/user"
 	"compose/dbModels"
+	commentCommons2 "compose/endpoints/comments/commentCommons"
+	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
 	"errors"
 )
 
@@ -28,8 +28,8 @@ func getReplyThread(model *RequestModel) (*ResponseModel, error) {
 		return getNoReplyResponse(parentEntity), nil
 	}
 
-	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
-	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, ReplyThreadMaxLevel, ReplyThreadRepliesMaxCount, parentEntityArr, parentEntryMap, replyDao, userDao)
+	parentEntityArr, parentEntryMap := replyThreadCommon2.GetParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
+	replyThreadCommon2.FillReplyTreeInParentIdArr(model.ArticleId, ReplyThreadMaxLevel, ReplyThreadRepliesMaxCount, parentEntityArr, parentEntryMap, replyDao, userDao)
 
 	return &ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,
@@ -40,36 +40,36 @@ func getReplyThread(model *RequestModel) (*ResponseModel, error) {
 
 func getReplyEntityArr(
 	model *RequestModel,
-	parentCommentEntity *commentCommons.CommentEntity,
-	parentReplyEntity *commentCommons.ReplyEntity,
-	replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*commentCommons.ReplyEntity, error) {
+	parentCommentEntity *commentCommons2.CommentEntity,
+	parentReplyEntity *commentCommons2.ReplyEntity,
+	replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*commentCommons2.ReplyEntity, error) {
 
-	replyThreadParentModel := &replyThreadCommon.ReplyThreadParentModel{
+	replyThreadParentModel := &replyThreadCommon2.ReplyThreadParentModel{
 		Id:            model.ParentId,
 		IsComment:     parentCommentEntity != nil,
 		IsReply:       parentReplyEntity != nil,
 		CommentEntity: parentCommentEntity,
 		ReplyEntity:   parentReplyEntity,
 	}
-	_, replyEntityArr, err := replyThreadCommon.GetReplyEntityArr([]*replyThreadCommon.ReplyThreadParentModel{replyThreadParentModel}, replyDao, userDao)
+	_, replyEntityArr, err := replyThreadCommon2.GetReplyEntityArr([]*replyThreadCommon2.ReplyThreadParentModel{replyThreadParentModel}, replyDao, userDao)
 	if commons.InError(err) {
 		return nil, errors.New("Error in fetching replies to parent")
 	}
 	return replyEntityArr, nil
 }
 
-func getNoReplyResponse(parentEntity *commentCommons.ParentEntity) *ResponseModel {
+func getNoReplyResponse(parentEntity *commentCommons2.ParentEntity) *ResponseModel {
 	message := "No more replies to show"
-	noMoreReplyEntity := commentCommons.GetNoMoreReplyEntity(message)
+	noMoreReplyEntity := commentCommons2.GetNoMoreReplyEntity(message)
 	return &ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,
 		Message: "",
-		Replies: []*commentCommons.ReplyEntity{&noMoreReplyEntity},
+		Replies: []*commentCommons2.ReplyEntity{&noMoreReplyEntity},
 		Parent:  parentEntity,
 	}
 }
 
-func getParentEntity(model *RequestModel, replyDao *commentAndReplyDaos.ReplyDao, commentDao *commentAndReplyDaos.CommentDao) (*commentCommons.ParentEntity, *commentCommons.CommentEntity, *commentCommons.ReplyEntity) {
+func getParentEntity(model *RequestModel, replyDao *commentAndReplyDaos.ReplyDao, commentDao *commentAndReplyDaos.CommentDao) (*commentCommons2.ParentEntity, *commentCommons2.CommentEntity, *commentCommons2.ReplyEntity) {
 	userDao := daos.GetUserDao()
 	markdown := ""
 	replyCount := uint64(0)
@@ -94,16 +94,16 @@ func getParentEntity(model *RequestModel, replyDao *commentAndReplyDaos.ReplyDao
 	if commons.InError(err) {
 		return nil, nil, nil
 	}
-	postedByUser := &commentCommons.PostedByUser{
+	postedByUser := &commentCommons2.PostedByUser{
 		UserId:   user.UserId,
 		PhotoUrl: user.PhotoUrl,
 		Name:     user.Name,
 	}
-	return &commentCommons.ParentEntity{
+	return &commentCommons2.ParentEntity{
 			ParentId:     model.ParentId,
 			Markdown:     markdown,
 			ReplyCount:   replyCount,
 			PostedByUser: postedByUser,
-		}, commentCommons.GetCommentEntityFromModel(parentCommentEntity, postedByUser),
-		commentCommons.GetReplyEntityFromModel(parentReplyEntity, postedByUser)
+		}, commentCommons2.GetCommentEntityFromModel(parentCommentEntity, postedByUser),
+		commentCommons2.GetReplyEntityFromModel(parentReplyEntity, postedByUser)
 }

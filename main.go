@@ -1,12 +1,12 @@
 package main
 
 import (
-	"compose/article"
-	"compose/comments"
 	"compose/commons"
-	"compose/like"
+	"compose/endpoints/article"
+	"compose/endpoints/comments"
+	"compose/endpoints/like"
+	"compose/endpoints/user"
 	"compose/middlewares"
-	"compose/user"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"

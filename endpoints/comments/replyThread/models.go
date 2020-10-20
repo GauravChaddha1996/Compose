@@ -1,8 +1,8 @@
 package replyThread
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
+	commentCommons2 "compose/endpoints/comments/commentCommons"
 	"encoding/json"
 	"errors"
 	"github.com/asaskevich/govalidator"
@@ -22,10 +22,10 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status  commons.ResponseStatus        `json:"status,omitempty"`
-	Message string                        `json:"message,omitempty"`
-	Parent  *commentCommons.ParentEntity  `json:"parent,omitempty"`
-	Replies []*commentCommons.ReplyEntity `json:"replies,omitempty"`
+	Status  commons.ResponseStatus         `json:"status,omitempty"`
+	Message string                         `json:"message,omitempty"`
+	Parent  *commentCommons2.ParentEntity  `json:"parent,omitempty"`
+	Replies []*commentCommons2.ReplyEntity `json:"replies,omitempty"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {

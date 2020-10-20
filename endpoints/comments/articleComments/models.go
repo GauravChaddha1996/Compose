@@ -1,8 +1,8 @@
 package articleComments
 
 import (
-	"compose/comments/commentCommons"
 	"compose/commons"
+	commentCommons2 "compose/endpoints/comments/commentCommons"
 	"encoding/json"
 	"errors"
 	"github.com/asaskevich/govalidator"
@@ -17,11 +17,11 @@ type RequestModel struct {
 }
 
 type ResponseModel struct {
-	Status         commons.ResponseStatus          `json:"status,omitempty"`
-	Message        string                          `json:"message,omitempty"`
-	Comments       []*commentCommons.CommentEntity `json:"comments,omitempty"`
-	PostbackParams string                          `json:"postback_params,omitempty"`
-	HasMore        bool                            `json:"has_more"`
+	Status         commons.ResponseStatus           `json:"status,omitempty"`
+	Message        string                           `json:"message,omitempty"`
+	Comments       []*commentCommons2.CommentEntity `json:"comments,omitempty"`
+	PostbackParams string                           `json:"postback_params,omitempty"`
+	HasMore        bool                             `json:"has_more"`
 }
 
 type PostbackParams struct {
