@@ -1,8 +1,8 @@
 package article
 
 import (
-	"compose/article/daos"
 	"compose/commons"
+	"compose/daos/article"
 	"compose/dbModels"
 	"errors"
 	"gorm.io/gorm"

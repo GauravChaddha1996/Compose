@@ -2,7 +2,7 @@ package unlikeArticle
 
 import (
 	"compose/commons"
-	"compose/like/daos"
+	"compose/daos/like"
 	"compose/like/likeCommons"
 	"errors"
 )

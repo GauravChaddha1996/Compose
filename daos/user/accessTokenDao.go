@@ -3,7 +3,6 @@ package daos
 import (
 	"compose/commons"
 	"compose/dbModels"
-	"compose/user/userCommons"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ type AccessTokenDao struct {
 }
 
 func GetAccessTokenDao() AccessTokenDao {
-	return AccessTokenDao{db: userCommons.Database}
+	return AccessTokenDao{db: commons.GetDB()}
 }
 func GetAccessTokenDaoUnderTransaction(db *gorm.DB) AccessTokenDao {
 	return AccessTokenDao{db}

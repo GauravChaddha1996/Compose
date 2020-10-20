@@ -2,8 +2,8 @@ package updateComment
 
 import (
 	"compose/comments/commentCommons"
-	"compose/comments/daos"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"errors"
 )
 

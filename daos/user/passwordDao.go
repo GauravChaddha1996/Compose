@@ -3,7 +3,6 @@ package daos
 import (
 	"compose/commons"
 	"compose/dbModels"
-	"compose/user/userCommons"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ type PasswordDao struct {
 }
 
 func GetPasswordDao() PasswordDao {
-	return PasswordDao{db: userCommons.Database}
+	return PasswordDao{db: commons.GetDB()}
 }
 func GetPasswordDaoUnderTransaction(db *gorm.DB) PasswordDao {
 	return PasswordDao{db}

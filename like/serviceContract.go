@@ -1,8 +1,8 @@
 package like
 
 import (
+	"compose/daos/like"
 	"compose/dbModels"
-	"compose/like/daos"
 	"gorm.io/gorm"
 	"time"
 )

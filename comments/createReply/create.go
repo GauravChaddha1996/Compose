@@ -2,8 +2,8 @@ package createReply
 
 import (
 	"compose/comments/commentCommons"
-	"compose/comments/daos"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"compose/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"

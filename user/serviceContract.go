@@ -2,8 +2,8 @@ package user
 
 import (
 	"compose/commons"
+	"compose/daos/user"
 	"compose/dbModels"
-	"compose/user/daos"
 	"errors"
 	"gorm.io/gorm"
 )

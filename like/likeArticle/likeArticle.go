@@ -2,8 +2,8 @@ package likeArticle
 
 import (
 	"compose/commons"
+	"compose/daos/like"
 	"compose/dbModels"
-	"compose/like/daos"
 	"compose/like/likeCommons"
 	"errors"
 )

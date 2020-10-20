@@ -2,9 +2,9 @@ package articleComments
 
 import (
 	"compose/comments/commentCommons"
-	"compose/comments/daos"
 	"compose/comments/replyThreadCommon"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"encoding/json"
 	"errors"
 )

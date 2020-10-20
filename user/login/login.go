@@ -2,8 +2,8 @@ package login
 
 import (
 	"compose/commons"
+	"compose/daos/user"
 	"compose/dbModels"
-	"compose/user/daos"
 	"errors"
 	"github.com/raja/argon2pw"
 	uuid "github.com/satori/go.uuid"

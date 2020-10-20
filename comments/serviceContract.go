@@ -1,8 +1,8 @@
 package comments
 
 import (
-	"compose/comments/daos"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"gorm.io/gorm"
 )
 

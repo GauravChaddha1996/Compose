@@ -2,8 +2,8 @@ package create
 
 import (
 	"compose/article/articleCommons"
-	"compose/article/daos"
 	"compose/commons"
+	daos "compose/daos/article"
 	"compose/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"

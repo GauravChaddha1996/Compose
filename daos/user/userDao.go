@@ -3,12 +3,11 @@ package daos
 import (
 	"compose/commons"
 	"compose/dbModels"
-	"compose/user/userCommons"
 	"gorm.io/gorm"
 )
 
 func GetUserDao() *UserDao {
-	return &UserDao{userCommons.Database}
+	return &UserDao{commons.GetDB()}
 }
 
 func GetUserDaoUnderTransaction(db *gorm.DB) *UserDao {

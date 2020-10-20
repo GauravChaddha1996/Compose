@@ -1,8 +1,8 @@
 package updateReply
 
 import (
-	"compose/comments/daos"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"errors"
 	"net/http"
 )

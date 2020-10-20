@@ -2,9 +2,9 @@ package replyThread
 
 import (
 	"compose/comments/commentCommons"
-	"compose/comments/daos"
 	"compose/comments/replyThreadCommon"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"compose/dbModels"
 	"errors"
 )

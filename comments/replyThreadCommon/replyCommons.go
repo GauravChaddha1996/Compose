@@ -2,8 +2,8 @@ package replyThreadCommon
 
 import (
 	"compose/comments/commentCommons"
-	"compose/comments/daos"
 	"compose/commons"
+	"compose/daos/commentAndReply"
 	"compose/dbModels"
 	"encoding/json"
 	"errors"

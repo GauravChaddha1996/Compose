@@ -2,7 +2,7 @@ package update
 
 import (
 	"compose/commons"
-	"compose/user/daos"
+	"compose/daos/user"
 	"errors"
 )
 

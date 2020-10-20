@@ -3,7 +3,6 @@ package daos
 import (
 	"compose/commons"
 	"compose/dbModels"
-	"compose/like/likeCommons"
 	"errors"
 	"gorm.io/gorm"
 	"time"
@@ -14,7 +13,7 @@ type LikeDao struct {
 }
 
 func GetLikeDao() LikeDao {
-	return LikeDao{db: likeCommons.Database}
+	return LikeDao{db: commons.GetDB()}
 }
 
 func GetLikeDaoDuringTransaction(db *gorm.DB) LikeDao {

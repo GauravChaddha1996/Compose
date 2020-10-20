@@ -2,8 +2,8 @@ package delete
 
 import (
 	"compose/article/articleCommons"
-	"compose/article/daos"
 	"compose/commons"
+	"compose/daos/article"
 	"compose/dbModels"
 	"errors"
 )
