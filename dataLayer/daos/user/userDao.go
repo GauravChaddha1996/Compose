@@ -2,7 +2,7 @@ package user
 
 import (
 	"compose/commons"
-	"compose/dbModels"
+	"compose/dataLayer/models"
 	"errors"
 	"gorm.io/gorm"
 )
@@ -11,12 +11,12 @@ type UserDao struct {
 	DB *gorm.DB
 }
 
-func (dao UserDao) CreateUser(user dbModels.User) error {
+func (dao UserDao) CreateUser(user models.User) error {
 	return dao.DB.Create(user).Error
 }
 
-func (dao UserDao) FindUserViaEmail(email string) (*dbModels.User, error) {
-	var user dbModels.User
+func (dao UserDao) FindUserViaEmail(email string) (*models.User, error) {
+	var user models.User
 	userDeletionResult := dao.DB.Where("email = ?", email).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return nil, userDeletionResult.Error
@@ -24,8 +24,8 @@ func (dao UserDao) FindUserViaEmail(email string) (*dbModels.User, error) {
 	return &user, nil
 }
 
-func (dao UserDao) FindUserViaId(userId string) (*dbModels.User, error) {
-	var user dbModels.User
+func (dao UserDao) FindUserViaId(userId string) (*models.User, error) {
+	var user models.User
 	userDeletionResult := dao.DB.Where("user_id = ?", userId).Find(&user)
 	if commons.InError(userDeletionResult.Error) {
 		return nil, userDeletionResult.Error
@@ -33,11 +33,11 @@ func (dao UserDao) FindUserViaId(userId string) (*dbModels.User, error) {
 	return &user, nil
 }
 
-func (dao UserDao) FindUserViaIds(userIds []string) ([]*dbModels.User, error) {
+func (dao UserDao) FindUserViaIds(userIds []string) ([]*models.User, error) {
 	parentIdQuery := ""
 	userIdsLen := len(userIds)
 	if userIdsLen == 0 {
-		return []*dbModels.User{}, nil
+		return []*models.User{}, nil
 	}
 	for index, parentId := range userIds {
 		parentIdQuery += "\"" + parentId + "\""
@@ -47,7 +47,7 @@ func (dao UserDao) FindUserViaIds(userIds []string) ([]*dbModels.User, error) {
 	}
 	whereQuery := "user_id IN (" + parentIdQuery + ")"
 
-	var users []*dbModels.User
+	var users []*models.User
 	queryResult := dao.DB.Where(whereQuery).Find(&users)
 	if commons.InError(queryResult.Error) {
 		return nil, queryResult.Error
@@ -65,12 +65,12 @@ func (dao UserDao) DoesUserIdExist(userId string) (bool, error) {
 }
 
 func (dao UserDao) UpdateUser(changeMap map[string]interface{}, userId string) error {
-	var user dbModels.User
+	var user models.User
 	return dao.DB.Model(user).Where("user_id = ?", userId).UpdateColumns(changeMap).Error
 }
 
 func (dao UserDao) DeleteUser(email string) error {
-	var user dbModels.User
+	var user models.User
 	return dao.DB.Where("email = ?", email).Unscoped().Delete(&user).Error
 }
 

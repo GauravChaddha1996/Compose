@@ -2,8 +2,8 @@ package articleComments
 
 import (
 	"compose/commons"
-	"compose/daos"
-	userDaos "compose/daos/user"
+	"compose/dataLayer/daos"
+	userDaos "compose/dataLayer/daos/user"
 	commentCommons2 "compose/endpoints/comments/commentCommons"
 	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
 	"encoding/json"

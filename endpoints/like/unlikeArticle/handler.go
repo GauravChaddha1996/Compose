@@ -2,7 +2,7 @@ package unlikeArticle
 
 import (
 	"compose/commons"
-	"compose/daos"
+	"compose/dataLayer/daos"
 	"errors"
 	"net/http"
 )

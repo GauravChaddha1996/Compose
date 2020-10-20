@@ -2,12 +2,12 @@ package update
 
 import (
 	"compose/commons"
-	"compose/daos"
-	"compose/dbModels"
+	"compose/dataLayer/daos"
+	"compose/dataLayer/models"
 	"errors"
 )
 
-func updateArticle(model *RequestModel, article *dbModels.Article) error {
+func updateArticle(model *RequestModel, article *models.Article) error {
 	transaction := commons.GetDB().Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)

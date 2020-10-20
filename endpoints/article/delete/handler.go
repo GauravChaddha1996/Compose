@@ -2,8 +2,8 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/daos"
-	"compose/dbModels"
+	"compose/dataLayer/daos"
+	"compose/dataLayer/models"
 	"errors"
 	"net/http"
 )
@@ -41,7 +41,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-func securityClearance(model *RequestModel, article *dbModels.Article) error {
+func securityClearance(model *RequestModel, article *models.Article) error {
 	if model.CommonModel.UserId != article.UserId {
 		return errors.New("Article not posted by this user")
 	}

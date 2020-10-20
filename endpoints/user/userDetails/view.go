@@ -2,12 +2,12 @@ package userDetails
 
 import (
 	"compose/commons"
-	"compose/daos"
-	"compose/dbModels"
+	"compose/dataLayer/daos"
+	"compose/dataLayer/models"
 	"errors"
 )
 
-func getUserDetails(model *RequestModel) (*dbModels.User, error) {
+func getUserDetails(model *RequestModel) (*models.User, error) {
 	dao := daos.GetUserDao()
 	user, err := dao.FindUserViaId(model.userId)
 	if commons.InError(err) {

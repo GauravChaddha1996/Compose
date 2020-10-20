@@ -2,7 +2,7 @@ package likedArticles
 
 import (
 	"compose/commons"
-	"compose/daos"
+	"compose/dataLayer/daos"
 	"errors"
 )
 

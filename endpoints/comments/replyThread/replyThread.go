@@ -2,10 +2,10 @@ package replyThread
 
 import (
 	"compose/commons"
-	"compose/daos"
-	commentAndReplyDaos "compose/daos/commentAndReply"
-	userDaos "compose/daos/user"
-	"compose/dbModels"
+	"compose/dataLayer/daos"
+	commentAndReplyDaos "compose/dataLayer/daos/commentAndReply"
+	userDaos "compose/dataLayer/daos/user"
+	"compose/dataLayer/models"
 	commentCommons2 "compose/endpoints/comments/commentCommons"
 	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
 	"errors"
@@ -73,7 +73,7 @@ func getParentEntity(model *RequestModel, replyDao *commentAndReplyDaos.ReplyDao
 	userDao := daos.GetUserDao()
 	markdown := ""
 	replyCount := uint64(0)
-	user := &dbModels.User{}
+	user := &models.User{}
 	userId := ""
 
 	parentReplyEntity, err := replyDao.FindReply(model.ParentId)

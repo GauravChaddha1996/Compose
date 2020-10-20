@@ -2,12 +2,12 @@ package commentCommons
 
 import (
 	"compose/commons"
-	"compose/daos/user"
-	"compose/dbModels"
+	"compose/dataLayer/daos/user"
+	"compose/dataLayer/models"
 	"errors"
 )
 
-func GetUsersForComments(comments *[]dbModels.Comment, userDao *user.UserDao) (*[]PostedByUser, error) {
+func GetUsersForComments(comments *[]models.Comment, userDao *user.UserDao) (*[]PostedByUser, error) {
 	commentsLen := len(*comments)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range *comments {
@@ -16,7 +16,7 @@ func GetUsersForComments(comments *[]dbModels.Comment, userDao *user.UserDao) (*
 	return getUserArr(&userIdList, userDao)
 }
 
-func GetUsersForReplies(replies []*dbModels.Reply, userDao *user.UserDao) (*[]PostedByUser, error) {
+func GetUsersForReplies(replies []*models.Reply, userDao *user.UserDao) (*[]PostedByUser, error) {
 	commentsLen := len(replies)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range replies {
@@ -31,7 +31,7 @@ func getUserArr(userIdList *[]string, userDao *user.UserDao) (*[]PostedByUser, e
 	if commons.InError(err) {
 		return nil, errors.New("Cannot fetch details via userId")
 	}
-	userMap := make(map[string]*dbModels.User)
+	userMap := make(map[string]*models.User)
 	for _, user := range users {
 		userMap[user.UserId] = user
 	}

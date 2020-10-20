@@ -2,13 +2,13 @@ package delete
 
 import (
 	"compose/commons"
-	"compose/daos"
-	"compose/dbModels"
+	"compose/dataLayer/daos"
+	"compose/dataLayer/models"
 	"errors"
 	"gorm.io/gorm"
 )
 
-func deleteArticle(article *dbModels.Article) error {
+func deleteArticle(article *models.Article) error {
 	tx := commons.GetDB().Begin()
 
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(tx)

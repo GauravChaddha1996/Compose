@@ -2,8 +2,8 @@ package articleDetails
 
 import (
 	"compose/commons"
-	"compose/daos"
-	"compose/dbModels"
+	"compose/dataLayer/daos"
+	"compose/dataLayer/models"
 	"errors"
 )
 
@@ -34,7 +34,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 	}, nil
 }
 
-func getArticleDetails(model *RequestModel) (*dbModels.Article, error) {
+func getArticleDetails(model *RequestModel) (*models.Article, error) {
 	articleDao := daos.GetArticleDao()
 	article, err := articleDao.GetArticle(model.id)
 	if commons.InError(err) {
@@ -43,7 +43,7 @@ func getArticleDetails(model *RequestModel) (*dbModels.Article, error) {
 	return article, nil
 }
 
-func getArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
+func getArticleMarkdown(markdownId string) (*models.ArticleMarkdown, error) {
 	dao := daos.GetArticleMarkdownDao()
 	markdown, err := dao.GetArticleMarkdown(markdownId)
 	if commons.InError(err) {
@@ -52,7 +52,7 @@ func getArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
 	return markdown, nil
 }
 
-func getPostedByUser(article *dbModels.Article) (*PostedByUser, error) {
+func getPostedByUser(article *models.Article) (*PostedByUser, error) {
 	userDao := daos.GetUserDao()
 	user, err := userDao.FindUserViaId(article.UserId)
 	if commons.InError(err) {
