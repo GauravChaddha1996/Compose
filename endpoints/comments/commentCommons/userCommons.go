@@ -2,12 +2,13 @@ package commentCommons
 
 import (
 	"compose/commons"
-	"compose/dataLayer/daos/user"
+	"compose/dataLayer/apiEntity"
+	userDaos "compose/dataLayer/daos/user"
 	"compose/dataLayer/dbModels"
 	"errors"
 )
 
-func GetUsersForComments(comments *[]dbModels.Comment, userDao *user.UserDao) (*[]PostedByUser, error) {
+func GetUsersForComments(comments *[]dbModels.Comment, userDao *userDaos .UserDao) (*[]apiEntity.PostedByUser, error) {
 	commentsLen := len(*comments)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range *comments {
@@ -16,7 +17,7 @@ func GetUsersForComments(comments *[]dbModels.Comment, userDao *user.UserDao) (*
 	return getUserArr(&userIdList, userDao)
 }
 
-func GetUsersForReplies(replies []*dbModels.Reply, userDao *user.UserDao) (*[]PostedByUser, error) {
+func GetUsersForReplies(replies []*dbModels.Reply, userDao *userDaos.UserDao) (*[]apiEntity.PostedByUser, error) {
 	commentsLen := len(replies)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range replies {
@@ -25,7 +26,7 @@ func GetUsersForReplies(replies []*dbModels.Reply, userDao *user.UserDao) (*[]Po
 	return getUserArr(&userIdList, userDao)
 }
 
-func getUserArr(userIdList *[]string, userDao *user.UserDao) (*[]PostedByUser, error) {
+func getUserArr(userIdList *[]string, userDao *userDaos .UserDao) (*[]apiEntity.PostedByUser, error) {
 	userLen := len(*userIdList)
 	users, err := userDao.FindUserViaIds(*userIdList)
 	if commons.InError(err) {
@@ -36,10 +37,10 @@ func getUserArr(userIdList *[]string, userDao *user.UserDao) (*[]PostedByUser, e
 		userMap[user.UserId] = user
 	}
 
-	PostedByUserArr := make([]PostedByUser, userLen)
+	PostedByUserArr := make([]apiEntity.PostedByUser, userLen)
 	for index, userId := range *userIdList {
 		user := userMap[userId]
-		PostedByUserArr[index] = PostedByUser{
+		PostedByUserArr[index] = apiEntity.PostedByUser{
 			UserId:   user.UserId,
 			PhotoUrl: user.PhotoUrl,
 			Name:     user.Name,

@@ -2,6 +2,7 @@ package articleDetails
 
 import (
 	"compose/commons"
+	"compose/dataLayer/apiEntity"
 	"compose/dataLayer/daos"
 	"compose/dataLayer/dbModels"
 	"errors"
@@ -52,15 +53,11 @@ func getArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
 	return markdown, nil
 }
 
-func getPostedByUser(article *dbModels.Article) (*PostedByUser, error) {
+func getPostedByUser(article *dbModels.Article) (*apiEntity.PostedByUser, error) {
 	userDao := daos.GetUserDao()
 	user, err := userDao.FindUserViaId(article.UserId)
 	if commons.InError(err) {
 		return nil, err
 	}
-	return &PostedByUser{
-		UserId:   article.UserId,
-		Name:     user.Name,
-		PhotoUrl: user.PhotoUrl,
-	}, nil
+	return apiEntity.GetPostedByUser(user), nil
 }

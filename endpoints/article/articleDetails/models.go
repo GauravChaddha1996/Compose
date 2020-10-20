@@ -2,6 +2,7 @@ package articleDetails
 
 import (
 	"compose/commons"
+	"compose/dataLayer/apiEntity"
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -43,12 +44,6 @@ type ResponseModel struct {
 	CreatedAt    string                 `json:"created_at,omitempty"`
 	LikeCount    uint64                 `json:"like_count"`
 	CommentCount uint64                 `json:"comment_count"`
-	PostedBy     PostedByUser           `json:"posted_by,omitempty"`
+	PostedBy     apiEntity.PostedByUser `json:"posted_by,omitempty"`
 	Editable     bool                   `json:"editable"`
-}
-
-type PostedByUser struct {
-	UserId   string `json:"user_id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	PhotoUrl string `json:"photo_url,omitempty"`
 }

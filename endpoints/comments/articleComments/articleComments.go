@@ -2,6 +2,7 @@ package articleComments
 
 import (
 	"compose/commons"
+	"compose/dataLayer/apiEntity"
 	"compose/dataLayer/daos"
 	userDaos "compose/dataLayer/daos/user"
 	commentCommons2 "compose/endpoints/comments/commentCommons"
@@ -42,7 +43,7 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 	}, nil
 }
 
-func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*commentCommons2.CommentEntity, error) {
+func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*apiEntity.CommentEntity, error) {
 	commentDao := daos.GetCommentDao()
 	createdAtTime, err := commons.MaxTime()
 	if commons.InError(err) {
@@ -60,18 +61,18 @@ func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*com
 		return nil, errors.New("Error is fetching comments")
 	}
 
-	commentEntityArr := make([]*commentCommons2.CommentEntity, len(*commentDbModels))
+	commentEntityArr := make([]*apiEntity.CommentEntity, len(*commentDbModels))
 	PostedByUserArr, err := commentCommons2.GetUsersForComments(commentDbModels, userDao)
 	if commons.InError(err) {
 		return nil, errors.New("Error in fetching users for comments")
 	}
 	for index, commentDbModel := range *commentDbModels {
-		commentEntityArr[index] = commentCommons2.GetCommentEntityFromModel(&commentDbModel, &(*PostedByUserArr)[index])
+		commentEntityArr[index] = apiEntity.GetCommentEntityFromModel(&commentDbModel, &(*PostedByUserArr)[index])
 	}
 	return commentEntityArr, nil
 }
 
-func getPaginationData(model *RequestModel, commentEntityArr []*commentCommons2.CommentEntity) (string, bool) {
+func getPaginationData(model *RequestModel, commentEntityArr []*apiEntity.CommentEntity) (string, bool) {
 	articleDao := daos.GetArticleDao()
 	totalTopCommentCount := articleDao.GetArticleTopCommentCount(model.ArticleId)
 	commentEntityArrLen := len(commentEntityArr)
@@ -102,11 +103,11 @@ func getNoCommentsResponse(createdAt string) *ResponseModel {
 	} else {
 		message = "No more comments to show"
 	}
-	entity := commentCommons2.GetNoMoreCommentEntity(message)
+	entity := apiEntity.GetNoMoreCommentEntity(message)
 	return &ResponseModel{
 		Status:         commons.NewResponseStatus().SUCCESS,
 		Message:        "",
-		Comments:       []*commentCommons2.CommentEntity{&entity},
+		Comments:       []*apiEntity.CommentEntity{&entity},
 		PostbackParams: "",
 		HasMore:        false,
 	}
