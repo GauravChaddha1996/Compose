@@ -3,7 +3,7 @@ package create
 import (
 	"compose/commons"
 	daos "compose/dataLayer/daos"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"
 	"time"
@@ -17,7 +17,7 @@ func createArticle(model *RequestModel) (*string, error) {
 
 	markdownUuid := uuid.NewV4()
 
-	markdownEntry := models.ArticleMarkdown{
+	markdownEntry := dbModels.ArticleMarkdown{
 		Id:       markdownUuid.String(),
 		Markdown: model.markdown,
 	}
@@ -29,7 +29,7 @@ func createArticle(model *RequestModel) (*string, error) {
 
 	articleUuid := uuid.NewV4()
 
-	articleEntry := models.Article{
+	articleEntry := dbModels.Article{
 		Id:          articleUuid.String(),
 		UserId:      model.userId,
 		Title:       model.title,

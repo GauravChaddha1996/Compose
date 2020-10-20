@@ -5,7 +5,7 @@ import (
 	"compose/dataLayer/daos"
 	commentAndReplyDaos "compose/dataLayer/daos/commentAndReply"
 	userDaos "compose/dataLayer/daos/user"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	commentCommons2 "compose/endpoints/comments/commentCommons"
 	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
 	"errors"
@@ -73,7 +73,7 @@ func getParentEntity(model *RequestModel, replyDao *commentAndReplyDaos.ReplyDao
 	userDao := daos.GetUserDao()
 	markdown := ""
 	replyCount := uint64(0)
-	user := &models.User{}
+	user := &dbModels.User{}
 	userId := ""
 
 	parentReplyEntity, err := replyDao.FindReply(model.ParentId)

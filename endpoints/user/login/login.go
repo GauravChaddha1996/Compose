@@ -4,7 +4,7 @@ import (
 	"compose/commons"
 	"compose/dataLayer/daos"
 	userDaos "compose/dataLayer/daos/user"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	"github.com/raja/argon2pw"
 	uuid "github.com/satori/go.uuid"
@@ -44,9 +44,9 @@ func login(model *RequestModel) (string, error) {
 	return accessTokenEntry.AccessToken, nil
 }
 
-func createAccessTokenEntry(user *models.User, accessTokenDao userDaos.AccessTokenDao) (*models.AccessToken, error) {
+func createAccessTokenEntry(user *dbModels.User, accessTokenDao userDaos.AccessTokenDao) (*dbModels.AccessToken, error) {
 	accessToken := uuid.NewV4()
-	accessTokenEntry := models.AccessToken{
+	accessTokenEntry := dbModels.AccessToken{
 		UserId:      user.UserId,
 		AccessToken: accessToken.String(),
 		CreatedAt:   time.Now(),

@@ -3,7 +3,7 @@ package likeArticle
 import (
 	"compose/commons"
 	"compose/dataLayer/daos"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 )
 
@@ -12,7 +12,7 @@ func likeArticle(model *RequestModel) error {
 	likeDao := daos.GetLikeDaoDuringTransaction(tx)
 	userDao := daos.GetUserDaoUnderTransaction(tx)
 	articleDao := daos.GetArticleDaoDuringTransaction(tx)
-	var likeEntry = models.LikeEntry{
+	var likeEntry = dbModels.LikeEntry{
 		UserId:    model.CommonModel.UserId,
 		ArticleId: model.ArticleId,
 	}

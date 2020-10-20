@@ -2,7 +2,7 @@ package commentCommons
 
 import (
 	"compose/commons"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 )
 
 type CommentEntityType int
@@ -75,7 +75,7 @@ type ParentEntity struct {
 	ReplyCount   uint64        `json:"total_replies,omitempty"`
 }
 
-func GetCommentEntityFromModel(comment *models.Comment, user *PostedByUser) *CommentEntity {
+func GetCommentEntityFromModel(comment *dbModels.Comment, user *PostedByUser) *CommentEntity {
 	if comment == nil {
 		return nil
 	}
@@ -93,7 +93,7 @@ func GetCommentEntityFromModel(comment *models.Comment, user *PostedByUser) *Com
 	}
 }
 
-func GetDeletedCommentEntity(comment *models.Comment, user *PostedByUser) *CommentEntity {
+func GetDeletedCommentEntity(comment *dbModels.Comment, user *PostedByUser) *CommentEntity {
 	return &CommentEntity{
 		CommentType:  NewCommentEntityTypeWrapper().CommentTypeDeleted,
 		CommentId:    comment.CommentId,
@@ -114,7 +114,7 @@ func GetNoMoreCommentEntity(msg string) CommentEntity {
 	}
 }
 
-func GetReplyEntityFromModel(reply *models.Reply, user *PostedByUser) *ReplyEntity {
+func GetReplyEntityFromModel(reply *dbModels.Reply, user *PostedByUser) *ReplyEntity {
 	if reply == nil {
 		return nil
 	}
@@ -132,7 +132,7 @@ func GetReplyEntityFromModel(reply *models.Reply, user *PostedByUser) *ReplyEnti
 	}
 }
 
-func GetDeletedReplyEntity(reply *models.Reply, user *PostedByUser) *ReplyEntity {
+func GetDeletedReplyEntity(reply *dbModels.Reply, user *PostedByUser) *ReplyEntity {
 	return &ReplyEntity{
 		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeDeleted,
 		ReplyId:      reply.ReplyId,

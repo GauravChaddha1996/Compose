@@ -3,7 +3,7 @@ package signup
 import (
 	"compose/commons"
 	"compose/dataLayer/daos"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	"github.com/raja/argon2pw"
 	uuid "github.com/satori/go.uuid"
@@ -28,7 +28,7 @@ func signup(requestModel *RequestModel) (string, error) {
 
 	userId := uuid.NewV4()
 
-	user := models.User{
+	user := dbModels.User{
 		UserId:    userId.String(),
 		Email:     requestModel.Email,
 		Name:      requestModel.Name,
@@ -49,7 +49,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		return "", errors.New("Password hash can't be generated")
 	}
 
-	passwordEntry := models.Password{
+	passwordEntry := dbModels.Password{
 		UserId:       user.UserId,
 		PasswordHash: passwordHash,
 		CreatedAt:    time.Now(),
@@ -64,7 +64,7 @@ func signup(requestModel *RequestModel) (string, error) {
 	// Access token entry
 
 	accessToken := uuid.NewV4()
-	accessTokenEntry := models.AccessToken{
+	accessTokenEntry := dbModels.AccessToken{
 		UserId:      user.UserId,
 		AccessToken: accessToken.String(),
 		CreatedAt:   time.Now(),

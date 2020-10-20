@@ -2,7 +2,7 @@ package article
 
 import (
 	"compose/commons"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -14,12 +14,12 @@ type ArticleDao struct {
 	DB *gorm.DB
 }
 
-func (dao ArticleDao) CreateArticle(article models.Article) error {
+func (dao ArticleDao) CreateArticle(article dbModels.Article) error {
 	return dao.DB.Create(article).Error
 }
 
 func (dao ArticleDao) DoesArticleExist(articleId string) (bool, error) {
-	var article models.Article
+	var article dbModels.Article
 	queryResult := dao.DB.
 		Select("id").
 		Where("id = ?", articleId).
@@ -32,8 +32,8 @@ func (dao ArticleDao) DoesArticleExist(articleId string) (bool, error) {
 	}
 }
 
-func (dao ArticleDao) GetArticle(articleId string) (*models.Article, error) {
-	var article models.Article
+func (dao ArticleDao) GetArticle(articleId string) (*dbModels.Article, error) {
+	var article dbModels.Article
 	articleQuery := dao.DB.Where("id = ?", articleId).Find(&article)
 	if commons.InError(articleQuery.Error) {
 		return nil, articleQuery.Error
@@ -41,8 +41,8 @@ func (dao ArticleDao) GetArticle(articleId string) (*models.Article, error) {
 	return &article, nil
 }
 
-func (dao ArticleDao) GetArticles(articleIds []string) (*[]models.Article, error) {
-	var articles []models.Article
+func (dao ArticleDao) GetArticles(articleIds []string) (*[]dbModels.Article, error) {
+	var articles []dbModels.Article
 	orderByExpr := fmt.Sprintf("FIELD(id, '%s') asc", strings.Join(articleIds, "','"))
 	articleQuery := dao.DB.
 		Where("id IN (?)", articleIds).
@@ -54,8 +54,8 @@ func (dao ArticleDao) GetArticles(articleIds []string) (*[]models.Article, error
 	return &articles, nil
 }
 
-func (dao ArticleDao) GetArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]models.Article, error) {
-	var articles []models.Article
+func (dao ArticleDao) GetArticlesOfUser(userId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Article, error) {
+	var articles []dbModels.Article
 	articleQuery := dao.DB.
 		Where("user_id = ? && created_at < ?", userId, maxCreatedAtTime).
 		Order("created_at desc").
@@ -68,11 +68,11 @@ func (dao ArticleDao) GetArticlesOfUser(userId string, maxCreatedAtTime time.Tim
 }
 
 func (dao ArticleDao) UpdateArticle(articleId string, changeMap map[string]interface{}) error {
-	var article models.Article
+	var article dbModels.Article
 	return dao.DB.Model(article).Where("id = ?", articleId).UpdateColumns(changeMap).Error
 }
 
-func (dao ArticleDao) DeleteArticle(article *models.Article) error {
+func (dao ArticleDao) DeleteArticle(article *dbModels.Article) error {
 	return dao.DB.Unscoped().Delete(&article).Error
 }
 

@@ -2,7 +2,7 @@ package commentAndReply
 
 import (
 	"compose/commons"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	"gorm.io/gorm"
 	"time"
@@ -12,12 +12,12 @@ type CommentDao struct {
 	DB *gorm.DB
 }
 
-func (dao CommentDao) CreateComment(comment models.Comment) error {
+func (dao CommentDao) CreateComment(comment dbModels.Comment) error {
 	return dao.DB.Create(&comment).Error
 }
 
-func (dao CommentDao) ReadComments(articleId string, maxCreatedAtTime time.Time, limit int) (*[]models.Comment, error) {
-	var comments []models.Comment
+func (dao CommentDao) ReadComments(articleId string, maxCreatedAtTime time.Time, limit int) (*[]dbModels.Comment, error) {
+	var comments []dbModels.Comment
 	commentsQuery := dao.DB.
 		Where("article_id = ? && created_at < ?", articleId, maxCreatedAtTime).
 		Order("created_at desc").
@@ -30,7 +30,7 @@ func (dao CommentDao) ReadComments(articleId string, maxCreatedAtTime time.Time,
 }
 
 func (dao CommentDao) DoesCommentExist(commentId string) bool {
-	var comment models.Comment
+	var comment dbModels.Comment
 	queryResult := dao.DB.Select("comment_id").Where("comment_id = ?", commentId).Limit(1).Find(&comment)
 	if commons.InError(queryResult.Error) {
 		return false
@@ -38,8 +38,8 @@ func (dao CommentDao) DoesCommentExist(commentId string) bool {
 	return true
 }
 
-func (dao CommentDao) FindComment(commentId string) (*models.Comment, error) {
-	var comment models.Comment
+func (dao CommentDao) FindComment(commentId string) (*dbModels.Comment, error) {
+	var comment dbModels.Comment
 	queryResult := dao.DB.Where("comment_id = ?", commentId).Limit(1).Find(&comment)
 	if commons.InError(queryResult.Error) {
 		return nil, queryResult.Error
@@ -58,11 +58,11 @@ func (dao CommentDao) IncreaseReplyCount(commentId string) error {
 }
 
 func (dao CommentDao) UpdateComment(commentId string, changeMap map[string]interface{}) error {
-	var comment models.Comment
+	var comment dbModels.Comment
 	return dao.DB.Model(comment).Where("comment_id = ?", commentId).UpdateColumns(changeMap).Error
 }
 
 func (dao CommentDao) DeleteCommentsForArticle(articleId string) error {
-	var comments []models.Comment
+	var comments []dbModels.Comment
 	return dao.DB.Where("article_id = ?", articleId).Find(&comments).Unscoped().Delete(comments).Error
 }

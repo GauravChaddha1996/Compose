@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"compose/commons"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"context"
 	"net/http"
 )
@@ -29,7 +29,7 @@ func MakeCommonRequestModel(r *http.Request) *commons.CommonRequestModel {
 }
 
 func getUserId(accessToken string) string {
-	var accessTokenEntry models.AccessToken
+	var accessTokenEntry dbModels.AccessToken
 	accessTokenQuery := commons.GetDB().Where("access_token = ?", accessToken).Find(&accessTokenEntry)
 	if commons.InError(accessTokenQuery.Error) {
 		return ""
@@ -38,7 +38,7 @@ func getUserId(accessToken string) string {
 }
 
 func getUserEmail(userId string) string {
-	var user models.User
+	var user dbModels.User
 	userQuery := commons.GetDB().Where("user_id = ?", userId).Find(&user)
 	if commons.InError(userQuery.Error) {
 		return ""

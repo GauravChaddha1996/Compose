@@ -3,7 +3,7 @@ package createReply
 import (
 	"compose/commons"
 	"compose/dataLayer/daos"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"
 	"time"
@@ -38,7 +38,7 @@ func createReply(model *RequestModel) (*ResponseModel, error) {
 	}
 
 	replyUUId := uuid.NewV4()
-	reply := models.Reply{
+	reply := dbModels.Reply{
 		ReplyId:   replyUUId.String(),
 		ParentId:  model.ParentId,
 		ArticleId: model.ArticleId,

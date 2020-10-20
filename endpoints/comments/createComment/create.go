@@ -3,7 +3,7 @@ package createComment
 import (
 	"compose/commons"
 	"compose/dataLayer/daos"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	uuid "github.com/satori/go.uuid"
 	"time"
@@ -22,7 +22,7 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 
 	commentUUId := uuid.NewV4()
 
-	comment := models.Comment{
+	comment := dbModels.Comment{
 		CommentId: commentUUId.String(),
 		ArticleId: model.ArticleId,
 		UserId:    model.CommonModel.UserId,

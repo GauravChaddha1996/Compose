@@ -3,7 +3,7 @@ package update
 import (
 	"compose/commons"
 	"compose/dataLayer/daos"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	"errors"
 	"net/http"
 )
@@ -40,7 +40,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	commons.WriteSuccessResponse(response, writer)
 }
 
-func securityClearance(model *RequestModel, article *models.Article) error {
+func securityClearance(model *RequestModel, article *dbModels.Article) error {
 	if model.CommonModel.UserId != article.UserId {
 		return errors.New("Article not posted by this user")
 	}

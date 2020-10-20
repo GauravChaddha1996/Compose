@@ -4,7 +4,7 @@ import (
 	"compose/commons"
 	commentAndReplyDaos "compose/dataLayer/daos/commentAndReply"
 	userDaos "compose/dataLayer/daos/user"
-	"compose/dataLayer/models"
+	"compose/dataLayer/dbModels"
 	commentCommons2 "compose/endpoints/comments/commentCommons"
 	"encoding/json"
 	"errors"
@@ -111,7 +111,7 @@ func FillReplyTreeInParentIdArr(
 	CheckForContinueThread(repliesFinishReached, breakDueToError, articleId, parentEntityArr)
 }
 
-func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*models.Reply, []*commentCommons2.ReplyEntity, error) {
+func GetReplyEntityArr(parentEntityArr []*ReplyThreadParentModel, replyDao *commentAndReplyDaos.ReplyDao, userDao *userDaos.UserDao) ([]*dbModels.Reply, []*commentCommons2.ReplyEntity, error) {
 	parentEntityArrLen := len(parentEntityArr)
 	parentIds := make([]string, parentEntityArrLen)
 	for index, parentEntity := range parentEntityArr {
