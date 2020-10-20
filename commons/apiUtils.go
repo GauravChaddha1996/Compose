@@ -5,6 +5,17 @@ import (
 	"net/http"
 )
 
+func NewResponseStatus() ResponseStatusWrapper {
+	return ResponseStatusWrapper{
+		SUCCESS: "success",
+		FAILED:  "failed",
+	}
+}
+
+func GetCommonRequestModel(r *http.Request) *CommonRequestModel {
+	return r.Context().Value(CommonModelKey).(*CommonRequestModel)
+}
+
 func WriteSuccessResponse(response interface{}, writer http.ResponseWriter) {
 	jsonResponse, err := json.Marshal(response)
 	PanicIfError(err)
@@ -13,7 +24,7 @@ func WriteSuccessResponse(response interface{}, writer http.ResponseWriter) {
 }
 
 func WriteFailedResponse(err error, writer http.ResponseWriter) {
-	failedResponse := genericErrorResponseModel{
+	failedResponse := GenericErrorResponseModel{
 		Status:  NewResponseStatus().FAILED,
 		Message: err.Error(),
 	}
@@ -26,9 +37,4 @@ func WriteFailedResponse(err error, writer http.ResponseWriter) {
 func WriteForbiddenResponse(err error, writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusForbidden)
 	WriteFailedResponse(err, writer)
-}
-
-type genericErrorResponseModel struct {
-	Status  ResponseStatus `json:"status,omitempty"`
-	Message string         `json:"message,omitempty"`
 }

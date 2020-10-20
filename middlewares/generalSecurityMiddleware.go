@@ -9,7 +9,7 @@ import (
 func GeneralSecurityMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		commonModel := r.Context().Value(commons.CommonModelKey).(*commons.CommonRequestModel)
-		securityError := ensureSecurity(commonModel, commons.SecurityMiddlewarePathConfigMap[r.URL.Path])
+		securityError := ensureSecurity(commonModel, commons.EndpointSecurityConfigMap[r.URL.Path])
 		if securityError != nil {
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Set("Content-Type", "application/json")
@@ -21,9 +21,9 @@ func GeneralSecurityMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func ensureSecurity(commonHeaders *commons.CommonRequestModel, config *commons.SecurityMiddlewarePathConfig) error {
+func ensureSecurity(commonHeaders *commons.CommonRequestModel, config *commons.EndpointSecurityConfig) error {
 	if config == nil {
-		config = commons.GetDefaultSecurityMiddlewarePathConfig()
+		config = commons.GetDefaultEndpointSecurityConfig()
 	}
 	if config.CheckAccessToken && len(commonHeaders.AccessToken) == 0 {
 		return errors.New("Access token isn't present")

@@ -18,8 +18,8 @@ import (
 )
 
 func Init(*gorm.DB) {
-	for path, config := range getSecurityMiddlewareConfigMap() {
-		commons.AddSecurityMiddlewarePathConfig("/user"+path, config)
+	for path, config := range getEndpointSecurityConfigMap() {
+		commons.AddEndpointSecurityConfig("/user"+path, config)
 	}
 }
 
@@ -39,8 +39,8 @@ func AddSubRoutes(subRouter *mux.Router) {
 	subRouter.HandleFunc("/{user_id}", userDetails.Handler).Methods(http.MethodGet)
 }
 
-func getSecurityMiddlewareConfigMap() map[string]*commons.SecurityMiddlewarePathConfig {
-	return map[string]*commons.SecurityMiddlewarePathConfig{
+func getEndpointSecurityConfigMap() map[string]*commons.EndpointSecurityConfig {
+	return map[string]*commons.EndpointSecurityConfig{
 		"/signup": {
 			CheckAccessToken: false,
 			CheckUserId:      false,
