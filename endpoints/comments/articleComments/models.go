@@ -5,7 +5,6 @@ import (
 	"compose/dataLayer/apiEntity"
 	"encoding/json"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 	"strings"
 )
@@ -54,10 +53,10 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if len(model.ArticleId) == 0 {
+	if commons.IsEmpty(model.ArticleId) {
 		return errors.New("ArticleId can't be empty")
 	}
-	if govalidator.StringLength(model.ArticleId, "1", "255") == false {
+	if commons.IsInvalidId(model.ArticleId) {
 		return errors.New("ArticleId should be between 1 and 255")
 	}
 	return nil

@@ -29,8 +29,8 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if len(model.id) == 0 {
-		return errors.New("Article id can't be empty")
+	if commons.IsEmpty(model.id) {
+		return errors.New("ArticleId can't be empty")
 	}
 	return nil
 }

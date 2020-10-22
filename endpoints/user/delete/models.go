@@ -3,7 +3,6 @@ package delete
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 )
 
@@ -33,7 +32,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if govalidator.IsEmail(model.email) == false {
+	if commons.IsInvalidEmail(model.email) {
 		return errors.New("Email isn't valid")
 	}
 	return nil

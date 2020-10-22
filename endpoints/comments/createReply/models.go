@@ -3,7 +3,6 @@ package createReply
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 )
 
@@ -43,22 +42,22 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if len(model.ArticleId) == 0 {
+	if commons.IsEmpty(model.ArticleId) {
 		return errors.New("ArticleId can't be empty")
 	}
-	if govalidator.StringLength(model.ArticleId, "1", "255") == false {
+	if commons.IsInvalidId(model.ArticleId) {
 		return errors.New("ArticleId should be between 1 and 255")
 	}
-	if len(model.ParentId) == 0 {
+	if commons.IsEmpty(model.ParentId) {
 		return errors.New("ParentId can't be empty")
 	}
-	if govalidator.StringLength(model.ParentId, "1", "255") == false {
+	if commons.IsInvalidId(model.ParentId) {
 		return errors.New("ParentId should be between 1 and 255")
 	}
-	if len(model.Markdown) == 0 {
+	if commons.IsEmpty(model.Markdown) {
 		return errors.New("Markdown can't be empty")
 	}
-	if govalidator.StringLength(model.Markdown, "1", "65536") == false {
+	if commons.IsInvalidDataPoint(model.Markdown) {
 		return errors.New("Markdown should be between 1 and 65536")
 	}
 	return nil

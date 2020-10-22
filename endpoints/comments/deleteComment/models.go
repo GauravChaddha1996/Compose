@@ -3,7 +3,6 @@ package deleteComment
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 )
 
@@ -36,7 +35,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if govalidator.StringLength(model.CommentId, "1", "255") == false {
+	if commons.IsInvalidId(model.CommentId) {
 		return errors.New("Comment id can't be empty")
 	}
 	return nil

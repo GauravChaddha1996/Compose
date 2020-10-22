@@ -3,7 +3,6 @@ package create
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 	"strings"
 )
@@ -50,13 +49,13 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if govalidator.StringLength(model.title, "1", "255") == false {
+	if commons.IsInvalidId(model.title) {
 		return errors.New("Title length should be between 1 and 255")
 	}
-	if govalidator.StringLength(model.markdown, "1", "65536") == false {
+	if commons.IsInvalidDataPoint(model.markdown) {
 		return errors.New("Article markdown should be between 1 and 65536")
 	}
-	if govalidator.StringLength(model.description, "0", "255") == false {
+	if commons.IsInvalidId(model.description) {
 		return errors.New("Description should less than 255 characters")
 	}
 

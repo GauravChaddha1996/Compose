@@ -3,7 +3,6 @@ package updateComment
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 )
 
@@ -37,10 +36,10 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if govalidator.StringLength(model.CommentId, "1", "255") == false {
+	if commons.IsInvalidId(model.CommentId) {
 		return errors.New("CommentId should be between 1 and 255 characters")
 	}
-	if govalidator.StringLength(model.Markdown, "1", "65536") == false {
+	if commons.IsInvalidDataPoint(model.Markdown) == false {
 		return errors.New("Comment markdown should be between 1 and 65536 characters")
 	}
 	return nil

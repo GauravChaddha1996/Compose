@@ -8,6 +8,7 @@ require (
 	github.com/raja/argon2pw v1.0.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.7.1
+	github.com/stretchr/testify v1.4.0 // indirect
 	gorm.io/driver/mysql v1.0.2
 	gorm.io/gorm v1.20.2
 )

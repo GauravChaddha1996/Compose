@@ -3,7 +3,6 @@ package userDetails
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -28,7 +27,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if govalidator.StringLength(model.userId, "1", "255") == false {
+	if commons.IsInvalidId(model.userId) {
 		return errors.New("User id isn't valid")
 	}
 	return nil

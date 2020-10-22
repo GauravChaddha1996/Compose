@@ -3,7 +3,6 @@ package signup
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 	"unicode"
 )
@@ -37,10 +36,10 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 
 func (requestModel RequestModel) isInvalid() error {
 
-	if govalidator.StringLength(requestModel.Name, "1", "255") == false {
+	if commons.IsInvalidId(requestModel.Name) {
 		return errors.New("Name should be between 1 and 255 characters")
 	}
-	if govalidator.IsEmail(requestModel.Email) == false {
+	if commons.IsInvalidEmail(requestModel.Email) {
 		return errors.New("Email isn't valid")
 	}
 

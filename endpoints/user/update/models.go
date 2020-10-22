@@ -3,7 +3,6 @@ package update
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 	"strings"
 )
@@ -53,42 +52,36 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 func (model RequestModel) isInvalid() error {
 
 	if model.NewUserId != nil {
-		if *model.NewUserId == "" {
+		if commons.IsEmpty(*model.NewUserId) {
 			return errors.New("New user Id can't be empty")
 		}
-		if govalidator.StringLength(*model.NewUserId, "1", "255") == false {
+		if commons.IsInvalidId(*model.NewUserId) {
 			return errors.New("User id should be between 1 and 255 characters")
 		}
 	}
 
 	if model.Name != nil {
-		if *model.Name == "" {
+		if commons.IsEmpty(*model.Name) {
 			return errors.New("Name can't be empty")
 		}
-		if govalidator.StringLength(*model.Name, "1", "255") == false {
+		if commons.IsInvalidId(*model.Name) {
 			return errors.New("Name should be not greater than 255 characters")
 		}
 	}
 
 	if model.Email != nil {
-		if *model.Email == "" {
+		if commons.IsEmpty(*model.Email) {
 			return errors.New("Email can't be empty")
 		}
 
-		if govalidator.IsEmail(*model.Email) == false {
+		if commons.IsInvalidEmail(*model.Email) {
 			return errors.New("Email isn't valid")
 		}
 	}
 
 	if model.Description != nil {
-		if govalidator.StringLength(*model.Description, "0", "255") == false {
+		if commons.IsInvalidDataLength(*model.Description, 0, 255) {
 			return errors.New("Description should be not greater than 255 characters")
-		}
-	}
-
-	if model.PhotoUrl != nil {
-		if govalidator.StringLength(*model.PhotoUrl, "0", "255") == false {
-			return errors.New("Photo url should be not greater than 255 characters")
 		}
 	}
 

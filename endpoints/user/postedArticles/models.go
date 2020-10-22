@@ -59,7 +59,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func (model RequestModel) isInvalid() error {
-	if len(model.UserId) == 0 {
+	if commons.IsEmpty(model.UserId) {
 		return errors.New("User id can't be empty")
 	}
 	if model.MaxCreatedAt == nil {

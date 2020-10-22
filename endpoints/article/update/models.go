@@ -3,7 +3,6 @@ package update
 import (
 	"compose/commons"
 	"errors"
-	"github.com/asaskevich/govalidator"
 	"net/http"
 	"strings"
 )
@@ -49,28 +48,28 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 func (model RequestModel) isInvalid() error {
 
 	if model.Title != nil {
-		if *model.Title == "" {
+		if commons.IsEmpty(*model.Title) {
 			return errors.New("Title can't be empty")
 		}
-		if govalidator.StringLength(*model.Title, "1", "255") == false {
+		if commons.IsInvalidId(*model.Title) {
 			return errors.New("Title should be between 1 and 255 characters")
 		}
 	}
 
 	if model.Description != nil {
-		if *model.Description == "" {
+		if commons.IsEmpty(*model.Description) {
 			return errors.New("Description can't be empty")
 		}
-		if govalidator.StringLength(*model.Description, "1", "255") == false {
+		if commons.IsInvalidId(*model.Description) {
 			return errors.New("Description cannot be greater than 255 characters")
 		}
 	}
 
 	if model.Markdown != nil {
-		if *model.Markdown == "" {
+		if commons.IsEmpty(*model.Markdown) {
 			return errors.New("Markdown can't be empty")
 		}
-		if govalidator.StringLength(*model.Markdown, "1", "65536") == false {
+		if commons.IsInvalidDataPoint(*model.Markdown) {
 			return errors.New("Markdown cannot be greater than 65536 characters")
 		}
 	}
