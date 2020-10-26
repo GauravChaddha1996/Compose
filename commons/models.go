@@ -1,5 +1,7 @@
 package commons
 
+import "time"
+
 const CommonModelKey = "common_model"
 
 type ResponseStatus string
@@ -24,4 +26,8 @@ type EndpointSecurityConfig struct {
 	CheckAccessToken bool
 	CheckUserId      bool
 	CheckUserEmail   bool
+}
+
+type RequestTimeoutConfig struct {
+	TimeoutInSeconds time.Duration
 }
