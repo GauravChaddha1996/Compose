@@ -30,7 +30,7 @@ type LikedByUser struct {
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
-	var DefaultMaxLikedAt, _ = commons.MaxTime()
+	var DefaultMaxLikedAt = commons.MaxTime
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		ArticleId:         queryMap.Get("article_id"),

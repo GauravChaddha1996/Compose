@@ -60,11 +60,10 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 }
 
 func getCreatedAtTimeFromPostbackParams(model *RequestModel) *time.Time {
-	maxTime, _ := commons.MaxTime()
 	createdAt := model.PostbackParams["created_at"]
 	createdAtTime, err := commons.ParseTime(createdAt)
 	if commons.InError(err) {
-		return &maxTime
+		return &commons.MaxTime
 	} else {
 		return &createdAtTime
 	}

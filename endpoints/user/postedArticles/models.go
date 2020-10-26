@@ -30,7 +30,7 @@ type PostedArticle struct {
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
-	var DefaultMaxCreatedAt, _ = commons.MaxTime()
+	var DefaultMaxCreatedAt = commons.MaxTime
 	queryMap := r.URL.Query()
 	model := RequestModel{
 		UserId:              queryMap.Get("user_id"),

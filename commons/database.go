@@ -6,10 +6,6 @@ import (
 
 var database *gorm.DB
 
-func Init(db *gorm.DB) {
-	setDB(db)
-}
-
 func setDB(db *gorm.DB) {
 	database = db
 }

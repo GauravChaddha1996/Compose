@@ -45,10 +45,8 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 
 func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*apiEntity.CommentEntity, error) {
 	commentDao := daos.GetCommentDao()
-	createdAtTime, err := commons.MaxTime()
-	if commons.InError(err) {
-		return nil, errors.New("Error in parsing max time")
-	}
+	createdAtTime := commons.MaxTime
+	var err error
 	if model.PostbackParams != nil {
 		createdAtTime, err = commons.ParseTime(model.PostbackParams.CreatedAt)
 		if commons.InError(err) {
