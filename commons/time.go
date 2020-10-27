@@ -1,6 +1,8 @@
 package commons
 
-import "time"
+import (
+	"time"
+)
 
 const MAX_TIME = "2 Jan 3000 15:04:05"
 const TimeFormat = "2 Jan 2006 15:04:05"
