@@ -2,6 +2,7 @@ package main
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"compose/endpoints/article"
 	"compose/endpoints/comments"
 	"compose/endpoints/like"
@@ -12,31 +13,31 @@ import (
 	"gorm.io/driver/mysql"
 	_ "gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 	"net/http"
 )
 
 func main() {
-	println("")
-	log.Println("Starting project compose")
+	logger.InitLogger()
+	logger.InfoPreNewLine("Starting project compose")
 	loadConfig()
-	commons.Init(openDB())
+	db := openDB()
+	commons.Init(db)
 	startServer()
 }
 
 func loadConfig() {
-	log.Println("Loading config")
+	logger.Info("Loading config")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	commons.PanicIfError(err)
-	log.Println("Config loaded")
+	logger.Info("Config loaded")
 }
 
 func openDB() *gorm.DB {
-	log.Print("Starting database connection")
+	logger.Info("Starting database connection")
 	dbName := viper.GetString("db.name")
 	dbParams := viper.GetString("db.params")
 	dbConnectionConfig := viper.GetString("db.username") + ":" + viper.GetString("db.password") +
@@ -44,13 +45,12 @@ func openDB() *gorm.DB {
 	dbArgs := dbConnectionConfig + "/" + dbName + "?" + dbParams
 	db, err := gorm.Open(mysql.Open(dbArgs), &gorm.Config{})
 	commons.PanicIfError(err)
-	log.Print("Database connection established")
+	logger.Info("Database connection established")
 	return db
 }
 
 func startServer() {
-	log.Println("Starting server at http://localhost:8000")
-	println("")
+	logger.InfoPostNewLine("Starting server at http://localhost:8000")
 	serverPort := ":" + viper.GetString("server.port")
 	err := http.ListenAndServe(serverPort, getMainRouter())
 	commons.PanicIfError(err)

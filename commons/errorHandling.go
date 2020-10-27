@@ -1,12 +1,12 @@
 package commons
 
 import (
-	"log"
+	"compose/commons/logger"
 )
 
 func InError(err error) bool {
 	if err != nil {
-		log.Println("Error: " + err.Error())
+		logger.Logger.Error().Msg(err.Error())
 		return true
 	}
 	return false

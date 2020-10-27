@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"compose/commons"
-	"log"
+	"compose/commons/logger"
 	"net/http"
 	"net/http/httptest"
 )
@@ -15,12 +15,10 @@ func ResponseLoggingMiddleware(next http.Handler) http.Handler {
 		_, err := w.Write(newWriter.Body.Bytes())
 		commons.PanicIfError(err)
 
-		println("")
-		log.Println("----------------------RESPONSE RECORDED-------------------------")
-		log.Println(r.Method + " " + r.URL.String())
-		println("")
-		log.Println(newWriter.Body.String())
-		println("")
-
+		event := logger.RequestResponseLogger.Debug()
+		event.Str("Endpoint", r.Method+" "+r.URL.Path)
+		event.Str("Response", newWriter.Body.String())
+		event.Msg("RESPONSE RECORDED")
+		println()
 	})
 }
