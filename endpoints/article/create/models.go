@@ -2,16 +2,15 @@ package create
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 	"strings"
 )
 
 type RequestModel struct {
-	userId      string
-	title       string
-	description string
-	markdown    string
+	UserId      string `validate:"required,id"`
+	Title       string `validate:"required,max=255"`
+	Description string `validate:"max=255"`
+	Markdown    string `validate:"required,max=65536"`
 }
 
 type ResponseModel struct {
@@ -29,35 +28,21 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 
 	commonModel := commons.GetCommonRequestModel(r)
 	model := RequestModel{
-		userId:   commonModel.UserId,
-		title:    r.FormValue("title"),
-		markdown: r.FormValue("markdown"),
+		UserId:   commonModel.UserId,
+		Title:    r.FormValue("title"),
+		Markdown: r.FormValue("markdown"),
 	}
-
 	for key, values := range r.Form {
 		value := strings.Join(values, "")
 		if key == "description" {
-			model.description = value
+			model.Description = value
 		}
 	}
-	err = model.isInvalid()
+
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
 
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsInvalidId(model.title) {
-		return errors.New("Title length should be between 1 and 255")
-	}
-	if commons.IsInvalidDataPoint(model.markdown) {
-		return errors.New("Article markdown should be between 1 and 65536")
-	}
-	if commons.IsInvalidId(model.description) {
-		return errors.New("Description should less than 255 characters")
-	}
-
-	return nil
 }

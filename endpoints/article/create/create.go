@@ -19,7 +19,7 @@ func createArticle(model *RequestModel) (*string, error) {
 
 	markdownEntry := dbModels.ArticleMarkdown{
 		Id:       markdownUuid.String(),
-		Markdown: model.markdown,
+		Markdown: model.Markdown,
 	}
 
 	err := markdownDao.CreateArticleMarkdown(markdownEntry)
@@ -31,15 +31,15 @@ func createArticle(model *RequestModel) (*string, error) {
 
 	articleEntry := dbModels.Article{
 		Id:          articleUuid.String(),
-		UserId:      model.userId,
-		Title:       model.title,
-		Description: model.description,
+		UserId:      model.UserId,
+		Title:       model.Title,
+		Description: model.Description,
 		MarkdownId:  markdownEntry.Id,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
 
-	err = userDao.ChangeArticleCount(model.userId, true) // change = true to increase
+	err = userDao.ChangeArticleCount(model.UserId, true) // change = true to increase
 	if commons.InError(err) {
 		transaction.Rollback()
 		return nil, errors.New("User article count can't be increased")

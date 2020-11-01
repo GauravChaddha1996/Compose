@@ -7,4 +7,5 @@ import (
 func Init(db *gorm.DB) {
 	setDB(db)
 	initTimeCoommons()
+	initValidator()
 }
