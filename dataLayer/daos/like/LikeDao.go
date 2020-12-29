@@ -19,7 +19,7 @@ func (dao LikeDao) LikeArticle(entry *dbModels.LikeEntry) error {
 func (dao LikeDao) FindLikeEntry(articleId string, userId string) (*dbModels.LikeEntry, error) {
 	var entry dbModels.LikeEntry
 	queryResult := dao.DB.Where("user_id = ? && article_id = ?", userId, articleId).Find(&entry)
-	if commons.InError(queryResult.Error) {
+	if commons.InError(queryResult.Error) || queryResult.RowsAffected==0 {
 		return nil, queryResult.Error
 	}
 	return &entry, nil

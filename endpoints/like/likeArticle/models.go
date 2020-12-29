@@ -2,12 +2,11 @@ package likeArticle
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 )
 
 type RequestModel struct {
-	ArticleId   string
+	ArticleId   string `validate:"required,id"`
 	CommonModel *commons.CommonRequestModel
 }
 
@@ -28,19 +27,10 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-	return &model, nil
-}
 
-func (model RequestModel) isInvalid() error {
-	if commons.IsEmpty(model.ArticleId) {
-		return errors.New("ArticleId can't be empty")
-	}
-	if commons.IsInvalidId(model.ArticleId) {
-		return errors.New("ArticleId should be between 1 and 255")
-	}
-	return nil
+	return &model, nil
 }
