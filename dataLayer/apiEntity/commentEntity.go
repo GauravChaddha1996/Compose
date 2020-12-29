@@ -27,13 +27,13 @@ type CommentEntity struct {
 	CommentType  CommentEntityType `json:"comment_type,omitempty"`
 	CommentId    string            `json:"comment_id,omitempty"`
 	Markdown     string            `json:"markdown,omitempty"`
-	PostedByUser *PostedByUser     `json:"user,omitempty"`
+	PostedByUser *SmallUserEntity  `json:"user,omitempty"`
 	PostedAt     string            `json:"posted_at,omitempty"`
 	Replies      []*ReplyEntity    `json:"replies,omitempty"`
 	ReplyCount   uint64            `json:"-"`
 }
 
-func GetCommentEntityFromModel(comment *dbModels.Comment, user *PostedByUser) *CommentEntity {
+func GetCommentEntityFromModel(comment *dbModels.Comment, user *SmallUserEntity) *CommentEntity {
 	if comment == nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func GetCommentEntityFromModel(comment *dbModels.Comment, user *PostedByUser) *C
 	}
 }
 
-func GetDeletedCommentEntity(comment *dbModels.Comment, user *PostedByUser) *CommentEntity {
+func GetDeletedCommentEntity(comment *dbModels.Comment, user *SmallUserEntity) *CommentEntity {
 	return &CommentEntity{
 		CommentType:  NewCommentEntityTypeWrapper().CommentTypeDeleted,
 		CommentId:    comment.CommentId,

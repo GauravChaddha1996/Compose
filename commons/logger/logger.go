@@ -7,6 +7,7 @@ import (
 var Logger *zerolog.Logger
 var RequestResponseLogger *zerolog.Logger
 
+var FETCH = "fetch"
 var ACTION = "action"
 var USER_ID = "user_id"
 var ARTICLE_ID = "article_id"

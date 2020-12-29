@@ -5,6 +5,7 @@ import (
 	"compose/commons/logger"
 	"compose/dataLayer/daos"
 	"errors"
+	"github.com/rs/zerolog"
 	"net/http"
 )
 
@@ -21,7 +22,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		Logger()
 	subLogger := &subLoggerValue
 
-	err = securityClearance(requestModel)
+	err = securityClearance(requestModel, subLogger)
 	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
@@ -40,10 +41,10 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 	commons.WriteSuccessResponse(response, writer)
 }
 
-func securityClearance(model *RequestModel) error {
+func securityClearance(model *RequestModel, subLogger *zerolog.Logger) error {
 	articleDao := daos.GetArticleDao()
 	article, err := articleDao.GetArticle(model.ArticleId)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		return errors.New("No such article id exists")
 	}
 	if model.CommonModel.UserId == article.UserId {

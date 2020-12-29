@@ -25,7 +25,7 @@ func (dao ArticleDao) DoesArticleExist(articleId string) (bool, error) {
 		Where("id = ?", articleId).
 		Limit(1).
 		Find(&article)
-	if commons.InError(queryResult.Error) {
+	if commons.InError(queryResult.Error) || queryResult.RowsAffected == 0 {
 		return false, queryResult.Error
 	} else {
 		return true, nil

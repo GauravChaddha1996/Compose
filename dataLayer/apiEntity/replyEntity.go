@@ -27,17 +27,17 @@ func NewReplyEntityTypeWrapper() ReplyEntityTypeWrapper {
 }
 
 type ReplyEntity struct {
-	ReplyType              ReplyEntityType `json:"reply_type,omitempty"`
-	ReplyId                string          `json:"reply_id,omitempty"`
-	Markdown               string          `json:"markdown,omitempty"`
-	PostedByUser           *PostedByUser   `json:"user,omitempty"`
-	PostedAt               string          `json:"posted_at,omitempty"`
-	ContinuePostbackParams string          `json:"continue_postback_params,omitempty"`
-	Replies                []*ReplyEntity  `json:"replies,omitempty"`
-	ReplyCount             uint64          `json:"-"`
+	ReplyType              ReplyEntityType  `json:"reply_type,omitempty"`
+	ReplyId                string           `json:"reply_id,omitempty"`
+	Markdown               string           `json:"markdown,omitempty"`
+	PostedByUser           *SmallUserEntity `json:"user,omitempty"`
+	PostedAt               string           `json:"posted_at,omitempty"`
+	ContinuePostbackParams string           `json:"continue_postback_params,omitempty"`
+	Replies                []*ReplyEntity   `json:"replies,omitempty"`
+	ReplyCount             uint64           `json:"-"`
 }
 
-func GetReplyEntityFromModel(reply *dbModels.Reply, user *PostedByUser) *ReplyEntity {
+func GetReplyEntityFromModel(reply *dbModels.Reply, user *SmallUserEntity) *ReplyEntity {
 	if reply == nil {
 		return nil
 	}
@@ -55,7 +55,7 @@ func GetReplyEntityFromModel(reply *dbModels.Reply, user *PostedByUser) *ReplyEn
 	}
 }
 
-func GetDeletedReplyEntity(reply *dbModels.Reply, user *PostedByUser) *ReplyEntity {
+func GetDeletedReplyEntity(reply *dbModels.Reply, user *SmallUserEntity) *ReplyEntity {
 	return &ReplyEntity{
 		ReplyType:    NewReplyEntityTypeWrapper().ReplyTypeDeleted,
 		ReplyId:      reply.ReplyId,

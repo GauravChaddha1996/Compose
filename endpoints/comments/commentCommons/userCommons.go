@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-func GetUsersForComments(comments *[]dbModels.Comment, userDao *userDaos .UserDao) (*[]apiEntity.PostedByUser, error) {
+func GetUsersForComments(comments *[]dbModels.Comment, userDao *userDaos .UserDao) (*[]apiEntity.SmallUserEntity, error) {
 	commentsLen := len(*comments)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range *comments {
@@ -17,7 +17,7 @@ func GetUsersForComments(comments *[]dbModels.Comment, userDao *userDaos .UserDa
 	return getUserArr(&userIdList, userDao)
 }
 
-func GetUsersForReplies(replies []*dbModels.Reply, userDao *userDaos.UserDao) (*[]apiEntity.PostedByUser, error) {
+func GetUsersForReplies(replies []*dbModels.Reply, userDao *userDaos.UserDao) (*[]apiEntity.SmallUserEntity, error) {
 	commentsLen := len(replies)
 	userIdList := make([]string, commentsLen)
 	for index, entry := range replies {
@@ -26,7 +26,7 @@ func GetUsersForReplies(replies []*dbModels.Reply, userDao *userDaos.UserDao) (*
 	return getUserArr(&userIdList, userDao)
 }
 
-func getUserArr(userIdList *[]string, userDao *userDaos .UserDao) (*[]apiEntity.PostedByUser, error) {
+func getUserArr(userIdList *[]string, userDao *userDaos .UserDao) (*[]apiEntity.SmallUserEntity, error) {
 	userLen := len(*userIdList)
 	users, err := userDao.FindUserViaIds(*userIdList)
 	if commons.InError(err) {
@@ -37,10 +37,10 @@ func getUserArr(userIdList *[]string, userDao *userDaos .UserDao) (*[]apiEntity.
 		userMap[user.UserId] = user
 	}
 
-	PostedByUserArr := make([]apiEntity.PostedByUser, userLen)
+	PostedByUserArr := make([]apiEntity.SmallUserEntity, userLen)
 	for index, userId := range *userIdList {
 		user := userMap[userId]
-		PostedByUserArr[index] = apiEntity.PostedByUser{
+		PostedByUserArr[index] = apiEntity.SmallUserEntity{
 			UserId:   user.UserId,
 			PhotoUrl: user.PhotoUrl,
 			Name:     user.Name,

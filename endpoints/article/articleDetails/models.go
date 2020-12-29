@@ -36,14 +36,14 @@ func (model RequestModel) isInvalid() error {
 }
 
 type ResponseModel struct {
-	Status       commons.ResponseStatus `json:"status,omitempty"`
-	Message      string                 `json:"message,omitempty"`
-	Title        string                 `json:"title,omitempty"`
-	Description  string                 `json:"description,omitempty"`
-	Markdown     string                 `json:"markdown,omitempty"`
-	CreatedAt    string                 `json:"created_at,omitempty"`
-	LikeCount    uint64                 `json:"like_count"`
-	CommentCount uint64                 `json:"comment_count"`
-	PostedBy     apiEntity.PostedByUser `json:"posted_by,omitempty"`
-	Editable     bool                   `json:"editable"`
+	Status       commons.ResponseStatus    `json:"status,omitempty"`
+	Message      string                    `json:"message,omitempty"`
+	Title        string                    `json:"title,omitempty"`
+	Description  string                    `json:"description,omitempty"`
+	Markdown     string                    `json:"markdown,omitempty"`
+	CreatedAt    string                    `json:"created_at,omitempty"`
+	LikeCount    uint64                    `json:"like_count"`
+	CommentCount uint64                    `json:"comment_count"`
+	PostedBy     apiEntity.SmallUserEntity `json:"posted_by,omitempty"`
+	Editable     bool                      `json:"editable"`
 }

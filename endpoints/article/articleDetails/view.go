@@ -53,11 +53,11 @@ func getArticleMarkdown(markdownId string) (*dbModels.ArticleMarkdown, error) {
 	return markdown, nil
 }
 
-func getPostedByUser(article *dbModels.Article) (*apiEntity.PostedByUser, error) {
+func getPostedByUser(article *dbModels.Article) (*apiEntity.SmallUserEntity, error) {
 	userDao := daos.GetUserDao()
 	user, err := userDao.FindUserViaId(article.UserId)
 	if commons.InError(err) {
 		return nil, err
 	}
-	return apiEntity.GetPostedByUser(user), nil
+	return apiEntity.GetSmallUserEntity(user), nil
 }

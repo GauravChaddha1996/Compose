@@ -8,10 +8,10 @@ import (
 )
 
 type CommentReplyParentEntity struct {
-	ParentId     string        `json:"parent_id,omitempty"`
-	Markdown     string        `json:"markdown,omitempty"`
-	PostedByUser *PostedByUser `json:"user,omitempty"`
-	ReplyCount   uint64        `json:"total_replies,omitempty"`
+	ParentId     string           `json:"parent_id,omitempty"`
+	Markdown     string           `json:"markdown,omitempty"`
+	PostedByUser *SmallUserEntity `json:"user,omitempty"`
+	ReplyCount   uint64           `json:"total_replies,omitempty"`
 }
 
 func GetCommentReplyParentEntity(parentId string, replyDao *commentAndReplyDaos.ReplyDao, commentDao *commentAndReplyDaos.CommentDao) (*CommentReplyParentEntity, *CommentEntity, *ReplyEntity) {
@@ -40,7 +40,7 @@ func GetCommentReplyParentEntity(parentId string, replyDao *commentAndReplyDaos.
 	if commons.InError(err) {
 		return nil, nil, nil
 	}
-	postedByUser := GetPostedByUser(user)
+	postedByUser := GetSmallUserEntity(user)
 	parentEntity := CommentReplyParentEntity{
 		ParentId:     parentId,
 		Markdown:     markdown,
