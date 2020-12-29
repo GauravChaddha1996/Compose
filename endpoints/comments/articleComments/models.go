@@ -31,7 +31,7 @@ type PostbackParams struct {
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	queryMap := r.URL.Query()
 	model := RequestModel{
-		ArticleId:      queryMap.Get("article_id"),
+		ArticleId:      commons.StrictSanitizeString(queryMap.Get("article_id")),
 		PostbackParams: nil,
 		CommonModel:    commons.GetCommonRequestModel(r),
 	}

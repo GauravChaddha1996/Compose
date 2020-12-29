@@ -22,9 +22,9 @@ func MakeCommonRequestModel(r *http.Request) *commons.CommonRequestModel {
 	userId := getUserId(accessToken)
 	userEmail := getUserEmail(userId)
 	return &commons.CommonRequestModel{
-		AccessToken: accessToken,
-		UserId:      userId,
-		UserEmail:   userEmail,
+		AccessToken: commons.StrictSanitizeString(accessToken),
+		UserId:      commons.StrictSanitizeString(userId),
+		UserEmail:   commons.StrictSanitizeString(userEmail),
 	}
 }
 

@@ -23,7 +23,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 	model := RequestModel{
-		ReplyId:     r.FormValue("reply_id"),
+		ReplyId:     commons.StrictSanitizeString(r.FormValue("reply_id")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 	err = model.isInvalid()

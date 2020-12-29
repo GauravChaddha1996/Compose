@@ -5,8 +5,8 @@ import (
 	"compose/dataLayer/apiEntity"
 	"compose/dataLayer/daos"
 	userDaos "compose/dataLayer/daos/user"
-	commentCommons2 "compose/endpoints/comments/commentCommons"
-	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
+	"compose/endpoints/comments/commentCommons"
+	"compose/endpoints/comments/replyThreadCommon"
 	"encoding/json"
 	"errors"
 )
@@ -30,8 +30,8 @@ func getArticleComments(model *RequestModel) (*ResponseModel, error) {
 		return getNoCommentsResponse(createdAtTime), nil
 	}
 
-	parentEntityArr, parentEntryMap := replyThreadCommon2.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
-	replyThreadCommon2.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, replyDao, userDao)
+	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
+	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, replyDao, userDao)
 
 	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{
@@ -60,7 +60,7 @@ func getCommentEntityArr(model *RequestModel, userDao *userDaos.UserDao) ([]*api
 	}
 
 	commentEntityArr := make([]*apiEntity.CommentEntity, len(*commentDbModels))
-	PostedByUserArr, err := commentCommons2.GetUsersForComments(commentDbModels, userDao)
+	PostedByUserArr, err := commentCommons.GetUsersForComments(commentDbModels, userDao)
 	if commons.InError(err) {
 		return nil, errors.New("Error in fetching users for comments")
 	}

@@ -24,21 +24,23 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		UserId: r.FormValue("user_id"),
+		UserId: commons.StrictSanitizeString(r.FormValue("user_id")),
 	}
 
 	for key, values := range r.Form {
 		value := strings.Join(values, "")
+		strictSanitizedValue := commons.StrictSanitizeString(value)
+		ugcSanitizedValue := commons.UgcSanitizeString(value)
 		if key == "new_user_id" {
-			model.NewUserId = &value
+			model.NewUserId = &strictSanitizedValue
 		} else if key == "email" {
-			model.Email = &value
+			model.Email = &strictSanitizedValue
 		} else if key == "name" {
-			model.Name = &value
+			model.Name = &strictSanitizedValue
 		} else if key == "description" {
-			model.Description = &value
+			model.Description = &ugcSanitizedValue
 		} else if key == "photo_url" {
-			model.PhotoUrl = &value
+			model.PhotoUrl = &ugcSanitizedValue
 		}
 	}
 	err = model.isInvalid()

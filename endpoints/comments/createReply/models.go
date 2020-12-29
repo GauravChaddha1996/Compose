@@ -27,9 +27,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 	model := RequestModel{
-		ArticleId:       r.FormValue("article_id"),
-		ParentId:        r.FormValue("parent_id"),
-		Markdown:        r.FormValue("markdown"),
+		ArticleId:       commons.StrictSanitizeString(r.FormValue("article_id")),
+		ParentId:        commons.StrictSanitizeString(r.FormValue("parent_id")),
+		Markdown:        commons.UgcSanitizeString(r.FormValue("markdown")),
 		CommonModel:     commons.GetCommonRequestModel(r),
 		ParentIsComment: false,
 		ParentIsReply:   false,

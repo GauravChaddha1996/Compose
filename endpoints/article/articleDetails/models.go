@@ -16,7 +16,7 @@ type RequestModel struct {
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	vars := mux.Vars(r)
 	model := RequestModel{
-		id:          vars["article_id"],
+		id:          commons.StrictSanitizeString(vars["article_id"]),
 		commonModel: commons.GetCommonRequestModel(r),
 	}
 

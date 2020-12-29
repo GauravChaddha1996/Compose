@@ -8,7 +8,6 @@ import (
 
 type RequestModel struct {
 	ArticleId   string
-	MarkdownId  string
 	CommonModel *commons.CommonRequestModel
 }
 
@@ -20,8 +19,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		ArticleId:   r.FormValue("article_id"),
-		MarkdownId:  "",
+		ArticleId:   commons.StrictSanitizeString(r.FormValue("article_id")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 

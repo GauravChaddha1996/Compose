@@ -23,16 +23,17 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		ArticleId:   r.FormValue("article_id"),
+		ArticleId:   commons.StrictSanitizeString(r.FormValue("article_id")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 
 	for key, values := range r.Form {
 		value := strings.Join(values, "")
+		strictSanitizedValue := commons.StrictSanitizeString(value)
 		if key == "title" {
-			model.Title = &value
+			model.Title = &strictSanitizedValue
 		} else if key == "description" {
-			model.Description = &value
+			model.Description = &strictSanitizedValue
 		} else if key == "markdown" {
 			model.Markdown = &value
 		}

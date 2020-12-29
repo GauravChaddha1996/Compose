@@ -24,7 +24,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		ArticleId:   r.FormValue("article_id"),
+		ArticleId:   commons.StrictSanitizeString(r.FormValue("article_id")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 

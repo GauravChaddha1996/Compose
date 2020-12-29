@@ -33,7 +33,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	var DefaultMaxLikedAt = commons.MaxTime
 	queryMap := r.URL.Query()
 	model := RequestModel{
-		ArticleId:         queryMap.Get("article_id"),
+		ArticleId:         commons.StrictSanitizeString(queryMap.Get("article_id")),
 		MaxLikedAt:        &DefaultMaxLikedAt,
 		DefaultMaxLikedAt: DefaultMaxLikedAt,
 		CommonModel:       commons.GetCommonRequestModel(r),

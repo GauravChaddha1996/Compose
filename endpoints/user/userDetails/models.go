@@ -15,7 +15,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	var err error
 	vars := mux.Vars(r)
 	model := RequestModel{
-		userId: vars["user_id"],
+		userId: commons.StrictSanitizeString(vars["user_id"]),
 	}
 
 	err = model.isInvalid()

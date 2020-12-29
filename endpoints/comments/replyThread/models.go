@@ -16,7 +16,6 @@ type RequestModel struct {
 	ParentId       string
 	CreatedAt      *time.Time
 	ReplyCount     int
-	PostbackParams map[string]string
 	CommonModel    *commons.CommonRequestModel
 }
 
@@ -32,7 +31,6 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	model := RequestModel{
 		ArticleId:      "",
 		ParentId:       "",
-		PostbackParams: nil,
 		CommonModel:    commons.GetCommonRequestModel(r),
 	}
 	postbackParamsStr := queryMap.Get("postback_params")
@@ -43,10 +41,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		if commons.InError(err) {
 			return nil, errors.New("Postback params are faulty")
 		}
-		model.PostbackParams = postbackParamsMap
-		model.ParentId = postbackParamsMap["parent_id"]
-		model.ArticleId = postbackParamsMap["article_id"]
-		model.CreatedAt = getCreatedAtTimeFromPostbackParams(&model)
+		model.ParentId = commons.StrictSanitizeString(postbackParamsMap["parent_id"])
+		model.ArticleId = commons.StrictSanitizeString(postbackParamsMap["article_id"])
+		model.CreatedAt = getCreatedAtTimeFromPostbackParams(postbackParamsMap)
 		model.ReplyCount, err = strconv.Atoi(postbackParamsMap["reply_count"])
 		if commons.InError(err) {
 			model.ReplyCount = 0
@@ -59,8 +56,8 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	return &model, nil
 }
 
-func getCreatedAtTimeFromPostbackParams(model *RequestModel) *time.Time {
-	createdAt := model.PostbackParams["created_at"]
+func getCreatedAtTimeFromPostbackParams(model map[string]string) *time.Time {
+	createdAt := model["created_at"]
 	createdAtTime, err := commons.ParseTime(createdAt)
 	if commons.InError(err) {
 		return &commons.MaxTime

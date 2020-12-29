@@ -24,8 +24,8 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		return nil, err
 	}
 	model := RequestModel{
-		CommentId:   r.FormValue("comment_id"),
-		Markdown:    r.FormValue("markdown"),
+		CommentId:   commons.StrictSanitizeString(r.FormValue("comment_id")),
+		Markdown:    commons.UgcSanitizeString(r.FormValue("markdown")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 	err = model.isInvalid()

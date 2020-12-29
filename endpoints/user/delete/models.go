@@ -19,7 +19,7 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		email:       r.FormValue("email"),
+		email:       commons.StrictSanitizeString(r.FormValue("email")),
 		commonModel: commons.GetCommonRequestModel(r),
 	}
 

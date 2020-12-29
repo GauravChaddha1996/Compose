@@ -21,9 +21,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		Email:    r.FormValue("email"),
-		Name:     r.FormValue("name"),
-		Password: r.FormValue("password"),
+		Email:    commons.StrictSanitizeString(r.FormValue("email")),
+		Name:     commons.StrictSanitizeString(r.FormValue("name")),
+		Password: commons.StrictSanitizeString(r.FormValue("password")),
 	}
 
 	err = model.isInvalid()

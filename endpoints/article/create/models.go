@@ -29,13 +29,13 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	commonModel := commons.GetCommonRequestModel(r)
 	model := RequestModel{
 		UserId:   commonModel.UserId,
-		Title:    r.FormValue("title"),
+		Title:    commons.StrictSanitizeString(r.FormValue("title")),
 		Markdown: r.FormValue("markdown"),
 	}
 	for key, values := range r.Form {
 		value := strings.Join(values, "")
 		if key == "description" {
-			model.Description = value
+			model.Description = commons.StrictSanitizeString(value)
 		}
 	}
 

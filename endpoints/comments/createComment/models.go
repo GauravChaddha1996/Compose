@@ -25,8 +25,8 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		ArticleId:   r.FormValue("article_id"),
-		Markdown:    r.FormValue("markdown"),
+		ArticleId:   commons.StrictSanitizeString(r.FormValue("article_id")),
+		Markdown:    commons.UgcSanitizeString(r.FormValue("markdown")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
 
