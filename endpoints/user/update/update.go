@@ -4,13 +4,14 @@ import (
 	"compose/commons"
 	"compose/dataLayer/daos"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
-func update(requestModel *RequestModel) error {
+func update(requestModel *RequestModel, subLogger *zerolog.Logger) error {
 	dao := daos.GetUserDao()
 
 	_, err := dao.FindUserViaId(requestModel.UserId)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		return errors.New("User query failed")
 	}
 
@@ -32,7 +33,7 @@ func update(requestModel *RequestModel) error {
 	}
 
 	err = dao.UpdateUser(changesMap, requestModel.UserId)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		return errors.New("User update query failed")
 	}
 	return nil

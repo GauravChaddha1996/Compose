@@ -6,11 +6,12 @@ import (
 	"compose/dataLayer/dbModels"
 	"errors"
 	"github.com/raja/argon2pw"
+	"github.com/rs/zerolog"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
-func signup(requestModel *RequestModel) (string, error) {
+func signup(requestModel *RequestModel, subLogger *zerolog.Logger) (string, error) {
 	transaction := commons.GetDB().Begin()
 	userDao := daos.GetUserDaoUnderTransaction(transaction)
 	passwordDao := daos.GetPasswordDaoUnderTransaction(transaction)
@@ -23,6 +24,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		transaction.Rollback()
 		return "", errors.New("Email already present")
 	}
+	subLogger.Info().Msg("User not present already")
 
 	// Creating user
 
@@ -40,6 +42,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		transaction.Rollback()
 		return "", errors.New("User can't be created")
 	}
+	subLogger.Info().Msg("User entry created")
 
 	// Password entry
 
@@ -60,6 +63,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		transaction.Rollback()
 		return "", errors.New("Password can't be saved")
 	}
+	subLogger.Info().Msg("Password entry created")
 
 	// Access token entry
 
@@ -75,6 +79,7 @@ func signup(requestModel *RequestModel) (string, error) {
 		transaction.Rollback()
 		return "", errors.New("Access token can't be saved")
 	}
+	subLogger.Info().Msg("Access token entry created")
 
 	transaction.Commit()
 	return accessToken.String(), nil

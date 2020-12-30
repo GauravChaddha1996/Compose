@@ -2,18 +2,17 @@ package update
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 	"strings"
 )
 
 type RequestModel struct {
-	UserId      string
-	NewUserId   *string
-	Email       *string
-	Name        *string
-	Description *string
-	PhotoUrl    *string
+	UserId      string  `validate:"required,id"`
+	NewUserId   *string `validate:"id"`
+	Email       *string `validate:"email"`
+	Name        *string `validate:"max=255"`
+	Description *string `validate:"max=255"`
+	PhotoUrl    *string `validate:"url"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -43,51 +42,11 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 			model.PhotoUrl = &ugcSanitizedValue
 		}
 	}
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-
-	if model.NewUserId != nil {
-		if commons.IsEmpty(*model.NewUserId) {
-			return errors.New("New user Id can't be empty")
-		}
-		if commons.IsInvalidId(*model.NewUserId) {
-			return errors.New("User id should be between 1 and 255 characters")
-		}
-	}
-
-	if model.Name != nil {
-		if commons.IsEmpty(*model.Name) {
-			return errors.New("Name can't be empty")
-		}
-		if commons.IsInvalidId(*model.Name) {
-			return errors.New("Name should be not greater than 255 characters")
-		}
-	}
-
-	if model.Email != nil {
-		if commons.IsEmpty(*model.Email) {
-			return errors.New("Email can't be empty")
-		}
-
-		if commons.IsInvalidEmail(*model.Email) {
-			return errors.New("Email isn't valid")
-		}
-	}
-
-	if model.Description != nil {
-		if commons.IsInvalidDataLength(*model.Description, 0, 255) {
-			return errors.New("Description should be not greater than 255 characters")
-		}
-	}
-
-	return nil
 }
 
 type ResponseModel struct {

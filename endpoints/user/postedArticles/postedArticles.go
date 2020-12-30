@@ -4,15 +4,19 @@ import (
 	"compose/commons"
 	"compose/dataLayer/daos"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
-func getPostedArticles(model *RequestModel) (*ResponseModel, error) {
+func getPostedArticles(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	postedArticleLimit := 3
 	articleDao := daos.GetArticleDao()
+
 	articleArr, err := articleDao.GetArticlesOfUser(model.UserId, *model.MaxCreatedAt, postedArticleLimit)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch posted articles")
 	}
+	subLogger.Info().Msg("User posted articles are fetched")
+
 	articleArrLen := len(*articleArr)
 	if articleArrLen == 0 {
 		var message string
@@ -21,6 +25,7 @@ func getPostedArticles(model *RequestModel) (*ResponseModel, error) {
 		} else {
 			message = "No more articles to show"
 		}
+		subLogger.Info().Msg("User posted articles are empty")
 		return &ResponseModel{
 			Status:          commons.NewResponseStatus().SUCCESS,
 			Message:         message,

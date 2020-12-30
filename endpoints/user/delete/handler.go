@@ -2,25 +2,31 @@ package delete
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"errors"
 	"net/http"
 )
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
-	if commons.InError(err) {
+	if commons.InError2(err, nil) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
+	subLoggerValue := logger.Logger.With().
+		Str(logger.ACTION, "Delete user").
+		Str(logger.USER_ID, requestModel.Email).
+		Logger()
+	subLogger := &subLoggerValue
 
 	err = securityClearance(requestModel)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		commons.WriteForbiddenResponse(err, writer)
 		return
 	}
 
-	err = deleteUser(requestModel)
-	if commons.InError(err) {
+	err = deleteUser(requestModel, subLogger)
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
@@ -34,7 +40,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func securityClearance(model *RequestModel) error {
-	if model.commonModel.UserEmail != model.email {
+	if model.CommonModel.UserEmail != model.Email {
 		return errors.New("Email id doesn't match")
 	}
 	return nil

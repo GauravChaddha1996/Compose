@@ -7,31 +7,34 @@ import (
 	"compose/dataLayer/dbModels"
 	"errors"
 	"github.com/raja/argon2pw"
+	"github.com/rs/zerolog"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
-func login(model *RequestModel) (string, error) {
+func login(model *RequestModel, subLogger *zerolog.Logger) (string, error) {
 	userDao := daos.GetUserDao()
 	passwordDao := daos.GetPasswordDao()
 	accessTokenDao := daos.GetAccessTokenDao()
 
-	// Check if email exists
-	user, err := userDao.FindUserViaEmail(model.email)
+	// Check if Email exists
+	user, err := userDao.FindUserViaEmail(model.Email)
 	if commons.InError(err) {
 		return "", errors.New("Email doesn't exist")
 	}
+	subLogger.Info().Msg("User exists")
 
-	// Match password
+	// Match Password
 	passwordEntry, err := passwordDao.FindPasswordEntryViaUserId(user.UserId)
 	if commons.InError(err) {
 		return "", errors.New("Password entry not found ")
 	}
 
-	_, err = argon2pw.CompareHashWithPassword(passwordEntry.PasswordHash, model.password)
+	_, err = argon2pw.CompareHashWithPassword(passwordEntry.PasswordHash, model.Password)
 	if commons.InError(err) {
 		return "", errors.New("Password matching operation failure")
 	}
+	subLogger.Info().Msg("Password matches")
 
 	accessTokenEntry, err := accessTokenDao.FindAccessTokenEntryViaUserId(user.UserId)
 	if commons.InError(err) || accessTokenEntry == nil {
@@ -40,6 +43,7 @@ func login(model *RequestModel) (string, error) {
 			return "", errors.New("Access token generation failed")
 		}
 	}
+	subLogger.Info().Msg("Access token found")
 
 	return accessTokenEntry.AccessToken, nil
 }

@@ -4,9 +4,10 @@ import (
 	"compose/commons"
 	"compose/dataLayer/daos"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
-func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
+func getLikedArticles(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	likedArticleLimit := 3
 	likeDao := daos.GetLikeDao()
 	articleDao := daos.GetArticleDao()
@@ -15,19 +16,12 @@ func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch posted articles")
 	}
+	subLogger.Info().Msg("Like entries of user is fetched")
+
 	likeEntriesLen := len(*likeEntriesOfUser)
 	if likeEntriesLen == 0 {
-		var message string
-		if *model.MaxLikedAt == model.DefaultMaxLikedAt {
-			message = "So empty... No liked articles."
-		} else {
-			message = "No more liked articles to show"
-		}
-		return &ResponseModel{
-			Status:          commons.NewResponseStatus().SUCCESS,
-			Message:         message,
-			HasMoreArticles: false,
-		}, nil
+		subLogger.Info().Msg("Like entries of user is empty")
+		return getEmptyLikeEntriesResponse(model), nil
 	}
 
 	var articleIdsArr = make([]string, likeEntriesLen)
@@ -47,6 +41,7 @@ func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 			Description: article.Description,
 		}
 	}
+	subLogger.Info().Msg("Corresponding article entries are fetched")
 	lastCreatedAt := (*likeEntriesOfUser)[likeEntriesLen-1].CreatedAt.Format(commons.TimeFormat)
 	return &ResponseModel{
 		Status:          commons.NewResponseStatus().SUCCESS,
@@ -54,4 +49,18 @@ func getLikedArticles(model *RequestModel) (*ResponseModel, error) {
 		MaxLikedAt:      lastCreatedAt,
 		HasMoreArticles: !(likeEntriesLen < likedArticleLimit),
 	}, nil
+}
+
+func getEmptyLikeEntriesResponse(model *RequestModel) *ResponseModel {
+	var message string
+	if *model.MaxLikedAt == model.DefaultMaxLikedAt {
+		message = "So empty... No liked articles."
+	} else {
+		message = "No more liked articles to show"
+	}
+	return &ResponseModel{
+		Status:          commons.NewResponseStatus().SUCCESS,
+		Message:         message,
+		HasMoreArticles: false,
+	}
 }

@@ -2,17 +2,15 @@ package likedArticles
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
-	"strings"
 	"time"
 )
 
 type RequestModel struct {
-	UserId            string
-	MaxLikedAt        *time.Time
-	CommonModel       *commons.CommonRequestModel
-	DefaultMaxLikedAt time.Time
+	UserId            string                      `validate:"required,id"`
+	MaxLikedAt        *time.Time                  `validate:"required"`
+	CommonModel       *commons.CommonRequestModel `validate:"required"`
+	DefaultMaxLikedAt time.Time                   `validate:"required"`
 }
 
 type ResponseModel struct {
@@ -32,38 +30,23 @@ type LikedArticle struct {
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	var DefaultMaxLikedAt = commons.MaxTime
 	queryMap := r.URL.Query()
+
+	var maxLikedAtTime *time.Time
+	maxLikedAt, err := commons.ParseTime(queryMap.Get("max_liked_at"))
+	if commons.InError(err) {
+		maxLikedAtTime = &DefaultMaxLikedAt
+	} else {
+		maxLikedAtTime = &maxLikedAt
+	}
 	model := RequestModel{
 		UserId:            commons.StrictSanitizeString(queryMap.Get("user_id")),
 		CommonModel:       commons.GetCommonRequestModel(r),
-		MaxLikedAt:        &DefaultMaxLikedAt,
+		MaxLikedAt:        maxLikedAtTime,
 		DefaultMaxLikedAt: DefaultMaxLikedAt,
 	}
-
-	for key, values := range queryMap {
-		value := strings.Join(values, "")
-		if key == "max_liked_at" {
-			maxLikedAt, err := commons.ParseTime(value)
-			if commons.InError(err) {
-				model.MaxLikedAt = nil
-			} else {
-				model.MaxLikedAt = &maxLikedAt
-			}
-		}
-	}
-
-	err2 := model.isInvalid()
-	if commons.InError(err2) {
-		return nil, err2
+	err = commons.Validator.Struct(model)
+	if commons.InError(err) {
+		return nil, commons.GetValidationError(err)
 	}
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsEmpty(model.UserId) {
-		return errors.New("User id can't be empty")
-	}
-	if model.MaxLikedAt == nil {
-		return errors.New("Liked-at time isn't valid")
-	}
-	return nil
 }

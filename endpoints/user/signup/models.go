@@ -2,15 +2,13 @@ package signup
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
-	"unicode"
 )
 
 type RequestModel struct {
-	Email    string
-	Name     string
-	Password string
+	Email    string `validate:"required,email"`
+	Name     string `validate:"required,max=255"`
+	Password string `validate:"required,password"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -26,45 +24,11 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		Password: commons.StrictSanitizeString(r.FormValue("password")),
 	}
 
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (requestModel RequestModel) isInvalid() error {
-
-	if commons.IsInvalidId(requestModel.Name) {
-		return errors.New("Name should be between 1 and 255 characters")
-	}
-	if commons.IsInvalidEmail(requestModel.Email) {
-		return errors.New("Email isn't valid")
-	}
-
-	hasNumber := false
-	hasLowerChar := false
-	hasUpperChar := false
-	hasSpecialChar := false
-
-	for _, char := range requestModel.Password {
-		switch {
-		case unicode.IsNumber(char) || unicode.IsDigit(char):
-			hasNumber = true
-		case unicode.IsLower(char):
-			hasLowerChar = true
-		case unicode.IsUpper(char):
-			hasUpperChar = true
-		case unicode.IsSymbol(char) || unicode.IsPunct(char) || unicode.IsMark(char):
-			hasSpecialChar = true
-		}
-	}
-
-	if !(hasNumber && hasLowerChar && hasUpperChar && hasSpecialChar) {
-		return errors.New("Password must have at-least one lowercase, one uppercase, one number and one special character")
-	}
-	return nil
 }
 
 type ResponseModel struct {

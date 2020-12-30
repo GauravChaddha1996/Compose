@@ -9,7 +9,7 @@ import (
 
 func getUserDetails(model *RequestModel) (*dbModels.User, error) {
 	dao := daos.GetUserDao()
-	user, err := dao.FindUserViaId(model.userId)
+	user, err := dao.FindUserViaId(model.UserId)
 	if commons.InError(err) {
 		return nil, errors.New("User entry not found ")
 	}

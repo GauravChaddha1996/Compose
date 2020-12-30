@@ -2,35 +2,26 @@ package userDetails
 
 import (
 	"compose/commons"
-	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
 type RequestModel struct {
-	userId string
+	UserId string `validate:"required,id"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	var err error
 	vars := mux.Vars(r)
 	model := RequestModel{
-		userId: commons.StrictSanitizeString(vars["user_id"]),
+		UserId: commons.StrictSanitizeString(vars["user_id"]),
 	}
 
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsInvalidId(model.userId) {
-		return errors.New("User id isn't valid")
-	}
-	return nil
 }
 
 type ResponseModel struct {

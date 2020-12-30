@@ -2,6 +2,7 @@ package postedArticles
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"compose/dataLayer/daos"
 	"errors"
 	"net/http"
@@ -9,19 +10,24 @@ import (
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
-	if commons.InError(err) {
+	if commons.InError2(err, nil) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
+	subLoggerValue := logger.Logger.With().
+		Str(logger.FETCH, "User posted articles").
+		Str(logger.USER_ID, requestModel.UserId).
+		Logger()
+	subLogger := &subLoggerValue
 
 	err = securityClearance(requestModel)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
-	response, err := getPostedArticles(requestModel)
-	if commons.InError(err) {
+	response, err := getPostedArticles(requestModel, subLogger)
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
@@ -30,7 +36,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 func securityClearance(model *RequestModel) error {
 	exist, err := daos.GetUserDao().DoesUserIdExist(model.UserId)
-	if commons.InError(err) {
+	if err != nil {
 		return errors.New("Security validation of user id fails")
 	}
 	if exist == false {

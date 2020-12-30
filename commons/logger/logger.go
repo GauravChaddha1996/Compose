@@ -11,6 +11,7 @@ var FETCH = "fetch"
 var ACTION = "action"
 var USER_ID = "user_id"
 var ARTICLE_ID = "article_id"
+var EMAIL = "email"
 
 func InitLogger() {
 	zerolog.TimeFieldFormat = loggerTimeFormat

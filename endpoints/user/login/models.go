@@ -2,13 +2,12 @@ package login
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 )
 
 type RequestModel struct {
-	email    string
-	password string
+	Email    string `validate:"required,Email"`
+	Password string `validate:"required"`
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -19,26 +18,15 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		email:    commons.StrictSanitizeString(r.FormValue("email")),
-		password: commons.StrictSanitizeString(r.FormValue("password")),
+		Email:    commons.StrictSanitizeString(r.FormValue("email")),
+		Password: commons.StrictSanitizeString(r.FormValue("password")),
 	}
 
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsInvalidEmail(model.email) {
-		return errors.New("Email isn't valid")
-	}
-	if commons.IsEmpty(model.password) {
-		return errors.New("Password can't be empty")
-	}
-	return nil
 }
 
 type ResponseModel struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"unicode"
 )
 
 var Validator *validator.Validate
@@ -28,6 +29,26 @@ func registerValidations() {
 		result := govalidator.StringLength(data, "1", "255")
 		return result
 	})
+	err = Validator.RegisterValidation("password", func(fl validator.FieldLevel) bool {
+		hasNumber := false
+		hasLowerChar := false
+		hasUpperChar := false
+		hasSpecialChar := false
+
+		for _, char := range fl.Field().String() {
+			switch {
+			case unicode.IsNumber(char) || unicode.IsDigit(char):
+				hasNumber = true
+			case unicode.IsLower(char):
+				hasLowerChar = true
+			case unicode.IsUpper(char):
+				hasUpperChar = true
+			case unicode.IsSymbol(char) || unicode.IsPunct(char) || unicode.IsMark(char):
+				hasSpecialChar = true
+			}
+		}
+		return hasNumber && hasLowerChar && hasUpperChar && hasSpecialChar
+	})
 	PanicIfError(err)
 }
 
@@ -36,6 +57,12 @@ func registerTranslations() {
 		return ut.Add("id", "{0} must be a valid id", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("id", fe.Field())
+		return t
+	})
+	err = Validator.RegisterTranslation("password", Translator, func(ut ut.Translator) error {
+		return ut.Add("id", "Password must have at-least one lowercase, one uppercase, one number and one special character", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("password", fe.Field())
 		return t
 	})
 	PanicIfError(err)

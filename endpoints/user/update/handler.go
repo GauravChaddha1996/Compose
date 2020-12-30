@@ -2,28 +2,35 @@ package update
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"errors"
 	"net/http"
 )
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
-	if commons.InError(err) {
+	if commons.InError2(err, nil) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
+	subLoggerValue := logger.Logger.With().
+		Str(logger.ACTION, "User update").
+		Str(logger.USER_ID, requestModel.UserId).
+		Logger()
+	subLogger := &subLoggerValue
 
 	err = securityClearance(requestModel, request)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		commons.WriteForbiddenResponse(err, writer)
 		return
 	}
 
-	err = update(requestModel)
-	if commons.InError(err) {
+	err = update(requestModel, subLogger)
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
+	subLogger.Info().Msg("User is updated")
 
 	response := ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,

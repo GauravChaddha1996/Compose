@@ -2,13 +2,12 @@ package delete
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 )
 
 type RequestModel struct {
-	email       string
-	commonModel *commons.CommonRequestModel
+	Email       string `validate:"required,email"`
+	CommonModel *commons.CommonRequestModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
@@ -19,23 +18,15 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 	}
 
 	model := RequestModel{
-		email:       commons.StrictSanitizeString(r.FormValue("email")),
-		commonModel: commons.GetCommonRequestModel(r),
+		Email:       commons.StrictSanitizeString(r.FormValue("email")),
+		CommonModel: commons.GetCommonRequestModel(r),
 	}
 
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsInvalidEmail(model.email) {
-		return errors.New("Email isn't valid")
-	}
-	return nil
 }
 
 type ResponseModel struct {
