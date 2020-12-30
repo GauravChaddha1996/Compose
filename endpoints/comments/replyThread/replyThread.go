@@ -8,27 +8,32 @@ import (
 	userDaos "compose/dataLayer/daos/user"
 	replyThreadCommon2 "compose/endpoints/comments/replyThreadCommon"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
 const ReplyThreadMaxLevel = 10
 const ReplyThreadRepliesMaxCount = 2000
 
-func getReplyThread(model *RequestModel) (*ResponseModel, error) {
+func getReplyThread(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	replyDao := daos.GetReplyDao()
 	commentDao := daos.GetCommentDao()
 	userDao := daos.GetUserDao()
 	parentEntity, parentCommentEntity, parentReplyEntity := apiEntity.GetCommentReplyParentEntity(model.ParentId, replyDao, commentDao)
+	subLogger.Info().Msg("Parent entity found")
 
 	replyEntityArr, err := getReplyEntityArr(model, parentCommentEntity, parentReplyEntity, replyDao, userDao)
 	if commons.InError(err) {
 		return nil, err
 	}
+	subLogger.Info().Msg("Reply entity arr is found")
 	if len(replyEntityArr) == 0 {
+		subLogger.Info().Msg("No more replies")
 		return getNoReplyResponse(parentEntity), nil
 	}
 
 	parentEntityArr, parentEntryMap := replyThreadCommon2.GetParentEntityArrAndMapFromReplyEntityArr(replyEntityArr)
 	replyThreadCommon2.FillReplyTreeInParentIdArr(model.ArticleId, ReplyThreadMaxLevel, ReplyThreadRepliesMaxCount, parentEntityArr, parentEntryMap, replyDao, userDao)
+	subLogger.Info().Msg("Reply tree is filled")
 
 	return &ResponseModel{
 		Status:  commons.NewResponseStatus().SUCCESS,

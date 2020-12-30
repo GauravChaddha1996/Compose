@@ -2,6 +2,7 @@ package createReply
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"compose/dataLayer/daos"
 	"errors"
 	"net/http"
@@ -9,19 +10,25 @@ import (
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
-	if commons.InError(err) {
+	if commons.InError2(err, nil) {
+		commons.WriteFailedResponse(err, writer)
+		return
+	}
+	subLoggerValue := logger.Logger.With().
+		Str(logger.ACTION, "Create reply").
+		Str(logger.ARTICLE_ID, requestModel.ArticleId).
+		Str(logger.PARENT_ID, requestModel.ParentId).
+		Logger()
+	subLogger := &subLoggerValue
+
+	err = securityClearance(requestModel)
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
 
-	err = securityClearance(requestModel)
-	if commons.InError(err) {
-		commons.WriteForbiddenResponse(err, writer)
-		return
-	}
-
-	response, err := createReply(requestModel)
-	if commons.InError(err) {
+	response, err := createReply(requestModel, subLogger)
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
@@ -32,7 +39,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 func securityClearance(model *RequestModel) error {
 	articleDao := daos.GetArticleDao()
 	articleExists, err := articleDao.DoesArticleExist(model.ArticleId)
-	if commons.InError(err) {
+	if err!=nil {
 		return errors.New("Security problem. Can't confirm if article id exists")
 	}
 	if articleExists == false {

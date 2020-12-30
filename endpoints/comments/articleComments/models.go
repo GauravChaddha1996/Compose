@@ -10,7 +10,7 @@ import (
 )
 
 type RequestModel struct {
-	ArticleId      string
+	ArticleId      string `validate:"required,id"`
 	PostbackParams *PostbackParams
 	CommonModel    *commons.CommonRequestModel
 }
@@ -45,19 +45,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		}
 		model.PostbackParams = &postbackParams
 	}
-	err := model.isInvalid()
+	err := commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsEmpty(model.ArticleId) {
-		return errors.New("ArticleId can't be empty")
-	}
-	if commons.IsInvalidId(model.ArticleId) {
-		return errors.New("ArticleId should be between 1 and 255")
-	}
-	return nil
 }

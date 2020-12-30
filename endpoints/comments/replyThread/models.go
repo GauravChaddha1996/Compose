@@ -12,11 +12,11 @@ import (
 )
 
 type RequestModel struct {
-	ArticleId      string
-	ParentId       string
-	CreatedAt      *time.Time
-	ReplyCount     int
-	CommonModel    *commons.CommonRequestModel
+	ArticleId   string                      `validate:"required,id"`
+	ParentId    string                      `validate:"required,id"`
+	CreatedAt   *time.Time                  `validate:"required"`
+	ReplyCount  int                         `validate:"required"`
+	CommonModel *commons.CommonRequestModel `validate:"required"`
 }
 
 type ResponseModel struct {
@@ -29,9 +29,9 @@ type ResponseModel struct {
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	queryMap := r.URL.Query()
 	model := RequestModel{
-		ArticleId:      "",
-		ParentId:       "",
-		CommonModel:    commons.GetCommonRequestModel(r),
+		ArticleId:   "",
+		ParentId:    "",
+		CommonModel: commons.GetCommonRequestModel(r),
 	}
 	postbackParamsStr := queryMap.Get("postback_params")
 	if len(postbackParamsStr) != 0 {
@@ -49,9 +49,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 			model.ReplyCount = 0
 		}
 	}
-	err := model.isInvalid()
+	err := commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
 	return &model, nil
 }
@@ -64,20 +64,4 @@ func getCreatedAtTimeFromPostbackParams(model map[string]string) *time.Time {
 	} else {
 		return &createdAtTime
 	}
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsEmpty(model.ArticleId) {
-		return errors.New("ArticleId can't be empty")
-	}
-	if commons.IsInvalidId(model.ArticleId) {
-		return errors.New("ArticleId should be between 1 and 255")
-	}
-	if commons.IsEmpty(model.ParentId) {
-		return errors.New("ParentId can't be empty")
-	}
-	if commons.IsInvalidId(model.ParentId) {
-		return errors.New("ParentId should be between 1 and 255")
-	}
-	return nil
 }

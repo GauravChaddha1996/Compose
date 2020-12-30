@@ -2,12 +2,11 @@ package deleteReply
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 )
 
 type RequestModel struct {
-	ReplyId     string
+	ReplyId     string `validate:"required,id"`
 	CommonModel *commons.CommonRequestModel
 }
 
@@ -26,17 +25,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		ReplyId:     commons.StrictSanitizeString(r.FormValue("reply_id")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsInvalidId(model.ReplyId) {
-		return errors.New("Reply id can't be empty")
-	}
-	return nil
 }

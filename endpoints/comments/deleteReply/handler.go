@@ -2,6 +2,7 @@ package deleteReply
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"compose/dataLayer/daos"
 	"errors"
 	"net/http"
@@ -9,19 +10,24 @@ import (
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	requestModel, err := getRequestModel(request)
-	if commons.InError(err) {
+	if commons.InError2(err, nil) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
+	subLoggerValue := logger.Logger.With().
+		Str(logger.ACTION, "Delete reply").
+		Str(logger.REPLY_ID, requestModel.ReplyId).
+		Logger()
+	subLogger := &subLoggerValue
 
 	err = securityClearance(requestModel)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		commons.WriteForbiddenResponse(err, writer)
 		return
 	}
 
 	err = deleteReply(requestModel)
-	if commons.InError(err) {
+	if commons.InError2(err, subLogger) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
@@ -36,7 +42,7 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 
 func securityClearance(model *RequestModel) error {
 	reply, err := daos.GetReplyDao().FindReply(model.ReplyId)
-	if commons.InError(err) {
+	if err != nil {
 		return errors.New("Error finding the reply")
 	}
 	if model.CommonModel.UserId != reply.UserId {

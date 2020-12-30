@@ -5,11 +5,12 @@ import (
 	"compose/dataLayer/daos"
 	"compose/dataLayer/dbModels"
 	"errors"
+	"github.com/rs/zerolog"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
-func createComment(model *RequestModel) (*ResponseModel, error) {
+func createComment(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	tx := commons.GetDB().Begin()
 	commentDao := daos.GetCommentDaoDuringTransaction(tx)
 	articleDao := daos.GetArticleDaoDuringTransaction(tx)
@@ -19,6 +20,7 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 		tx.Rollback()
 		return nil, errors.New("Error in increasing comment count of article")
 	}
+	subLogger.Info().Msg("Article top comment count increased")
 
 	commentUUId := uuid.NewV4()
 
@@ -38,6 +40,7 @@ func createComment(model *RequestModel) (*ResponseModel, error) {
 		tx.Rollback()
 		return nil, errors.New("Error in saving comment")
 	}
+	subLogger.Info().Msg("Comment entry is created")
 
 	tx.Commit()
 	return &ResponseModel{

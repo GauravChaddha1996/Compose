@@ -11,6 +11,9 @@ var FETCH = "fetch"
 var ACTION = "action"
 var USER_ID = "user_id"
 var ARTICLE_ID = "article_id"
+var COMMENT_ID = "comment_id"
+var REPLY_ID = "reply_id"
+var PARENT_ID = "parent_id"
 var EMAIL = "email"
 
 func InitLogger() {

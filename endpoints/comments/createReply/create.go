@@ -5,11 +5,12 @@ import (
 	"compose/dataLayer/daos"
 	"compose/dataLayer/dbModels"
 	"errors"
+	"github.com/rs/zerolog"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
-func createReply(model *RequestModel) (*ResponseModel, error) {
+func createReply(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	tx := commons.GetDB().Begin()
 	replyDao := daos.GetReplyDaoDuringTransaction(tx)
 	commentDao := daos.GetCommentDaoDuringTransaction(tx)
@@ -20,6 +21,7 @@ func createReply(model *RequestModel) (*ResponseModel, error) {
 		tx.Rollback()
 		return nil, errors.New("Error in increasing comment count of article")
 	}
+	subLogger.Info().Msg("Article comment count increased")
 
 	if model.ParentIsComment {
 		// increase parent comment reply count
@@ -28,6 +30,7 @@ func createReply(model *RequestModel) (*ResponseModel, error) {
 			tx.Rollback()
 			return nil, errors.New("Error in increasing reply count of parent comment")
 		}
+		subLogger.Info().Msg("Comment reply count increased")
 	} else if model.ParentIsReply {
 		// increase parent reply - child reply count
 		err := replyDao.IncreaseReplyCount(model.ParentId)
@@ -35,6 +38,7 @@ func createReply(model *RequestModel) (*ResponseModel, error) {
 			tx.Rollback()
 			return nil, errors.New("Error in increasing reply count of parent reply")
 		}
+		subLogger.Info().Msg("Parent Reply's reply count increased")
 	}
 
 	replyUUId := uuid.NewV4()
@@ -55,6 +59,7 @@ func createReply(model *RequestModel) (*ResponseModel, error) {
 		tx.Rollback()
 		return nil, errors.New("Error in saving reply")
 	}
+	subLogger.Info().Msg("Reply entry is created")
 
 	tx.Commit()
 	return &ResponseModel{

@@ -9,29 +9,34 @@ import (
 	"compose/endpoints/comments/replyThreadCommon"
 	"encoding/json"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
 const ArticleCommentLimit = 20
 const MaxRepliesCount = 1000
 const MaxCommentReplyLevel = 2
 
-func getArticleComments(model *RequestModel) (*ResponseModel, error) {
+func getArticleComments(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	replyDao := daos.GetReplyDao()
 	userDao := daos.GetUserDao()
 	commentEntityArr, err := getCommentEntityArr(model, userDao)
 	if commons.InError(err) {
 		return nil, err
 	}
+	subLogger.Info().Msg("Comment entity arr found")
 	if len(commentEntityArr) == 0 {
 		createdAtTime := ""
 		if model.PostbackParams != nil {
 			createdAtTime = model.PostbackParams.CreatedAt
 		}
+		subLogger.Info().Msg("Comment entity arr is empty")
 		return getNoCommentsResponse(createdAtTime), nil
 	}
 
 	parentEntityArr, parentEntryMap := replyThreadCommon.GetParentEntityArrAndMapFromCommentEntityArr(commentEntityArr)
+	subLogger.Info().Msg("Parent entity arr and map is found")
 	replyThreadCommon.FillReplyTreeInParentIdArr(model.ArticleId, MaxCommentReplyLevel, MaxRepliesCount, parentEntityArr, parentEntryMap, replyDao, userDao)
+	subLogger.Info().Msg("Reply tree is filled")
 
 	postbackParams, hasMore := getPaginationData(model, commentEntityArr)
 	return &ResponseModel{

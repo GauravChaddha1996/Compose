@@ -2,12 +2,11 @@ package deleteComment
 
 import (
 	"compose/commons"
-	"errors"
 	"net/http"
 )
 
 type RequestModel struct {
-	CommentId   string
+	CommentId   string `validate:"required,id"`
 	CommonModel *commons.CommonRequestModel
 }
 
@@ -26,17 +25,9 @@ func getRequestModel(r *http.Request) (*RequestModel, error) {
 		CommentId:   commons.StrictSanitizeString(r.FormValue("comment_id")),
 		CommonModel: commons.GetCommonRequestModel(r),
 	}
-	err = model.isInvalid()
+	err = commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsInvalidId(model.CommentId) {
-		return errors.New("Comment id can't be empty")
-	}
-	return nil
 }
