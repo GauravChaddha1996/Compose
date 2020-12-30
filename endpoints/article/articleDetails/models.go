@@ -3,36 +3,27 @@ package articleDetails
 import (
 	"compose/commons"
 	"compose/dataLayer/apiEntity"
-	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
 type RequestModel struct {
-	id          string
+	Id          string `validate:"required,id"`
 	commonModel *commons.CommonRequestModel
 }
 
 func getRequestModel(r *http.Request) (*RequestModel, error) {
 	vars := mux.Vars(r)
 	model := RequestModel{
-		id:          commons.StrictSanitizeString(vars["article_id"]),
+		Id:          commons.StrictSanitizeString(vars["article_id"]),
 		commonModel: commons.GetCommonRequestModel(r),
 	}
 
-	err := model.isInvalid()
+	err := commons.Validator.Struct(model)
 	if commons.InError(err) {
-		return nil, err
+		return nil, commons.GetValidationError(err)
 	}
-
 	return &model, nil
-}
-
-func (model RequestModel) isInvalid() error {
-	if commons.IsEmpty(model.id) {
-		return errors.New("ArticleId can't be empty")
-	}
-	return nil
 }
 
 type ResponseModel struct {

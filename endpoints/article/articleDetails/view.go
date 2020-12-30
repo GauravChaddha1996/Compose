@@ -6,21 +6,26 @@ import (
 	"compose/dataLayer/daos"
 	"compose/dataLayer/dbModels"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
-func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
+func getArticleDetailsResponse(model *RequestModel, subLogger *zerolog.Logger) (*ResponseModel, error) {
 	article, err := getArticleDetails(model)
 	if commons.InError(err) {
 		return nil, errors.New("Can't fetch article details'")
 	}
+	subLogger.Info().Msg("Article details fetched")
 	articleMarkdown, err := getArticleMarkdown(article.MarkdownId)
 	if commons.InError(err) {
 		return nil, errors.New("Cannot fetch articleMarkdown details")
 	}
+	subLogger.Info().Msg("Article markdown fetched")
 	postedByUser, err := getPostedByUser(article)
 	if commons.InError(err) {
 		return nil, errors.New("Cannot fetch user who posted this article")
 	}
+	subLogger.Info().Msg("Article user fetched")
+
 	return &ResponseModel{
 		Status:       commons.NewResponseStatus().SUCCESS,
 		Message:      "",
@@ -37,7 +42,7 @@ func getArticleDetailsResponse(model *RequestModel) (*ResponseModel, error) {
 
 func getArticleDetails(model *RequestModel) (*dbModels.Article, error) {
 	articleDao := daos.GetArticleDao()
-	article, err := articleDao.GetArticle(model.id)
+	article, err := articleDao.GetArticle(model.Id)
 	if commons.InError(err) {
 		return nil, err
 	}

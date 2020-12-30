@@ -2,6 +2,7 @@ package create
 
 import (
 	"compose/commons"
+	"compose/commons/logger"
 	"net/http"
 )
 
@@ -11,8 +12,12 @@ func Handler(writer http.ResponseWriter, request *http.Request) {
 		commons.WriteFailedResponse(err, writer)
 		return
 	}
+	subLoggerValue := logger.Logger.With().
+		Str(logger.ACTION, "Article create").
+		Logger()
+	subLogger := &subLoggerValue
 
-	articleId, err := createArticle(requestModel)
+	articleId, err := createArticle(requestModel, subLogger)
 	if commons.InError(err) {
 		commons.WriteFailedResponse(err, writer)
 		return

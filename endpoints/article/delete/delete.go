@@ -5,10 +5,11 @@ import (
 	"compose/dataLayer/daos"
 	"compose/dataLayer/dbModels"
 	"errors"
+	"github.com/rs/zerolog"
 	"gorm.io/gorm"
 )
 
-func deleteArticle(article *dbModels.Article) error {
+func deleteArticle(article *dbModels.Article, subLogger *zerolog.Logger) error {
 	tx := commons.GetDB().Begin()
 
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(tx)
@@ -21,29 +22,35 @@ func deleteArticle(article *dbModels.Article) error {
 		tx.Rollback()
 		return errors.New("Cannot delete associated markdown")
 	}
+	subLogger.Info().Msg("Article markdown deleted")
 
 	err = userDao.ChangeArticleCount(article.UserId, false) // change = false to decrease
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("User article count can't be decreased")
 	}
+	subLogger.Info().Msg("User article count decreased")
 
 	err = deleteAssociatedCommentsAndReplies(article.Id, tx)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Cannot delete associated comments and replies")
 	}
+	subLogger.Info().Msg("Article comment & replies deleted")
+
 	err = likeDao.DeleteAllLikesOfArticle(article.Id)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Cannot delete associated like entries")
 	}
+	subLogger.Info().Msg("Article like entries deleted")
 
 	err = articleDao.DeleteArticle(article)
 	if commons.InError(err) {
 		tx.Rollback()
 		return errors.New("Error in deleting article")
 	}
+	subLogger.Info().Msg("Article entry deleted")
 
 	tx.Commit()
 	return nil

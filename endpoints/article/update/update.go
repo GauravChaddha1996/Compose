@@ -5,9 +5,10 @@ import (
 	"compose/dataLayer/daos"
 	"compose/dataLayer/dbModels"
 	"errors"
+	"github.com/rs/zerolog"
 )
 
-func updateArticle(model *RequestModel, article *dbModels.Article) error {
+func updateArticle(model *RequestModel, article *dbModels.Article, subLogger *zerolog.Logger) error {
 	transaction := commons.GetDB().Begin()
 	articleDao := daos.GetArticleDaoDuringTransaction(transaction)
 	markdownDao := daos.GetArticleMarkdownDaoDuringTransaction(transaction)
@@ -17,6 +18,7 @@ func updateArticle(model *RequestModel, article *dbModels.Article) error {
 		transaction.Rollback()
 		return errors.New("Associated markdown doesnt' exist")
 	}
+	subLogger.Info().Msg("Associated markdown found")
 
 	var markdownChangeMap = make(map[string]interface{})
 	if model.Markdown != nil {
@@ -28,6 +30,7 @@ func updateArticle(model *RequestModel, article *dbModels.Article) error {
 			transaction.Rollback()
 			return errors.New("ArticleMarkdown update operation failure")
 		}
+		subLogger.Info().Msg("Associated markdown updated")
 	}
 
 	var articleChangeMap = make(map[string]interface{})
@@ -45,7 +48,7 @@ func updateArticle(model *RequestModel, article *dbModels.Article) error {
 			return errors.New("Article update operation failure")
 		}
 	}
-
+	subLogger.Info().Msg("Article details updated")
 	transaction.Commit()
 	return nil
 }
